@@ -31,5 +31,15 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
         {
             return !await _context.Set<User>().AnyAsync(u => u.Username == username);
         }
+
+        public async Task<bool> IsValidUser(string username, string password)
+        {
+            return await _context.Set<User>().AnyAsync(u => u.Username == username && u.Password == password);
+        }
+
+        public async Task<User?> GetUserData(string username)
+        {
+            return await _context.Set<User>().FirstOrDefaultAsync(u => u.Username == username);
+        }
     }
 }
