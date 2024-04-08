@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # Configurations
 Collectioneer.API/appsettings.json
 Collectioneer.API/appsettings.Development.json
+/Collectioneer.API/Properties/launchSettings.json
+/Collectioneer.API/appsettings.json
+/Collectioneer.API/appsettings.Development.json
