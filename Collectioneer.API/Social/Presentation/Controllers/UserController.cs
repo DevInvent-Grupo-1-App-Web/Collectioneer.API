@@ -1,5 +1,7 @@
 ﻿using Collectioneer.API.Social.Domain.Commands;
+using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -35,7 +37,24 @@ namespace Collectioneer.API.Social.Presentation.Controllers
             }
         }
 
+        // POST api/v1/login
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginUser([FromBody] UserLoginQuery request)
+        {
+            try
+            {
+                var response = await _userService.LoginUser(request);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error logging in user.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         // GET api/v1/users
+        [Authorize]
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
