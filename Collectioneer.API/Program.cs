@@ -1,4 +1,9 @@
 
+using Collectioneer.API.Operational.Application.Services.Internal;
+using Collectioneer.API.Operational.Application.Services.Internal.MappingProfiles;
+using Collectioneer.API.Operational.Domain.Repositories;
+using Collectioneer.API.Operational.Domain.Services;
+using Collectioneer.API.Operational.Infrastructure.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
 using Collectioneer.API.Social.Application.Internal.MappingProfiles;
@@ -84,18 +89,23 @@ namespace Collectioneer.API
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
 
+            builder.Services.AddScoped<ICollectibleRepository, CollectibleRepository>();
+            builder.Services.AddScoped<ICollectibleService, CollectibleService>();
 
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+            builder.Services.AddScoped<IArticleService, ArticleService>();
 
 
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(UserProfile).Assembly);
+            builder.Services.AddAutoMapper(typeof(CollectibleProfile).Assembly);
+            builder.Services.AddAutoMapper(typeof(ArticleProfile).Assembly);
 
             builder.Services.AddAuthentication(
                 JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
