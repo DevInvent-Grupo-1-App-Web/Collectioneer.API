@@ -19,7 +19,7 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
         /// <returns></returns>
         public async Task<bool> IsEmailUnique(string email)
         {
-            return !await _context.Set<User>().AnyAsync(u => u.Email == email);
+            return !await _context.Users.AnyAsync(u => u.Email == email);
         }
 
         /// <summary>
@@ -29,17 +29,17 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
         /// <returns></returns>
         public async Task<bool> IsUsernameUnique(string username)
         {
-            return !await _context.Set<User>().AnyAsync(u => u.Username == username);
+            return !await _context.Users.AnyAsync(u => u.Username == username);
         }
 
         public async Task<bool> IsValidUser(string username, string password)
         {
-            return await _context.Set<User>().AnyAsync(u => u.Username == username && u.Password == password);
+            return await _context.Users.AnyAsync(u => u.Username == username && u.Password == password);
         }
 
         public async Task<User?> GetUserData(string username)
         {
-            return await _context.Set<User>().FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
     }
 }

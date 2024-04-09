@@ -14,7 +14,7 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
 
         public async Task<IEnumerable<Bid>> GetBidsByAuctionId(int auctionId)
         {
-            return await _context.Set<Bid>().Where(b => b.AuctionId == auctionId).ToListAsync();
+            return await _context.Bids.Where(b => b.AuctionId == auctionId).ToListAsync();
         }
     }
 }
