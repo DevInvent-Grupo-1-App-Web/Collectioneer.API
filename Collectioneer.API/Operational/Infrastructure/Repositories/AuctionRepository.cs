@@ -1,14 +1,15 @@
-﻿using Collectioneer.API.Operational.Domain.Models.Entities;
+﻿using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
 using Collectioneer.API.Shared.Infrastructure.Repositories;
 
 namespace Collectioneer.API.Operational.Infrastructure.Repositories
 {
-    public class CollectibleRepository : BaseRepository<Collectible>, ICollectibleRepository
+    public class AuctionRepository : BaseRepository<Auction>, IAuctionRepository
     {
-        public CollectibleRepository(AppDbContext context) : base(context)
+        public AuctionRepository(AppDbContext context) : base(context)
         {
+
         }
     }
 }

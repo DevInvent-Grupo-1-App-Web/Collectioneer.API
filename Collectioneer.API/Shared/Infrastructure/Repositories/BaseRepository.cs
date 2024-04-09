@@ -3,7 +3,7 @@ using Collectioneer.API.Shared.Infrastructure.Configuration;
 using Collectioneer.API.Shared.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace PhoneResQ.API.Shared.Infrastructure.Repositories
+namespace Collectioneer.API.Shared.Infrastructure.Repositories
 {
     public class BaseRepository<T> : IBaseRepository<T>
     where T : class

@@ -15,11 +15,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
-using PhoneResQ.API.Shared.Infrastructure.Repositories;
+using Collectioneer.API.Shared.Infrastructure.Repositories;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System;
 using System.Text;
 
 namespace Collectioneer.API
@@ -95,11 +93,18 @@ namespace Collectioneer.API
             builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
             builder.Services.AddScoped<IArticleService, ArticleService>();
 
+            builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
+            builder.Services.AddScoped<IAuctionService, AuctionService>();
+
+            builder.Services.AddScoped<IBidRepository, BidRepository>();
+
 
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(UserProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(CollectibleProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(ArticleProfile).Assembly);
+            builder.Services.AddAutoMapper(typeof(AuctionProfile).Assembly);
+            builder.Services.AddAutoMapper(typeof(BidProfile).Assembly);
 
             builder.Services.AddAuthentication(
                 JwtBearerDefaults.AuthenticationScheme)

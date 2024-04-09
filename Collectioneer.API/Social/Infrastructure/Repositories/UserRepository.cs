@@ -2,7 +2,7 @@
 using Collectioneer.API.Social.Domain.Models.Entities;
 using Collectioneer.API.Social.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using PhoneResQ.API.Shared.Infrastructure.Repositories;
+using Collectioneer.API.Shared.Infrastructure.Repositories;
 
 namespace Collectioneer.API.Social.Infrastructure.Repositories
 {

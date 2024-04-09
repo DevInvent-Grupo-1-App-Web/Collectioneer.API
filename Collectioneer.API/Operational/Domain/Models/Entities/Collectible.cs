@@ -1,4 +1,5 @@
-﻿using Collectioneer.API.Social.Domain.Models.Entities;
+﻿using Collectioneer.API.Operational.Domain.Models.Aggregates;
+using Collectioneer.API.Social.Domain.Models.Entities;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
@@ -12,6 +13,8 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
         public int CommunityId { get; set; }
         public int ArticleId { get; set; }
         public Article Article { get; set; }
+        public int AuctionId { get; set; }
+        public Auction Auction { get; set; }
 
         public Collectible()
         {

@@ -1,7 +1,7 @@
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
 
-namespace PhoneResQ.API.Shared.Infrastructure.Repositories
+namespace Collectioneer.API.Shared.Infrastructure.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
