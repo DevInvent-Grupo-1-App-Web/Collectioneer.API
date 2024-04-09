@@ -6,13 +6,13 @@ name: build
 on:
   push:
     branches:
-    - development
-    - main
+    - 'development'
+    - 'main'
   pull_request:
     branches: 
-      - development
-      - development/**
-      - main
+      - 'development'
+      - 'development/**'
+      - 'main'
 
 jobs:
   build:
