@@ -33,7 +33,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Run
       env:
-          ConnectionString: ${{ secrets.CONNECTION_STRING }}
+          ConnectionString: ${{ secrets.MYSQL_CONNECTION_STRING }}
       run: |
         cd Collectioneer.API
         dotnet run &
