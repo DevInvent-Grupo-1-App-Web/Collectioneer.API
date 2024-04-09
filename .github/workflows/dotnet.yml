@@ -31,3 +31,11 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Run
+      env:
+          ConnectionString: ${{ secrets.CONNECTION_STRING }}
+      run: |
+        cd Collectioneer.API
+        dotnet run &
+        sleep 20
+        kill $!
