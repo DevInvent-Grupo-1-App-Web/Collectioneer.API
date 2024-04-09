@@ -8,11 +8,13 @@ on:
     branches:
     - 'development'
     - 'main'
+    - 'deployment'
   pull_request:
     branches: 
       - 'development'
       - 'development/**'
       - 'main'
+      - 'deployment'
 
 jobs:
   build:
