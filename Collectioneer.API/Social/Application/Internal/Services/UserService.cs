@@ -17,14 +17,14 @@ namespace Collectioneer.API.Social.Application.Internal.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-        private readonly IConfiguration _configuration;
+				private readonly IConfiguration _configuration;
 
         public UserService(IUnitOfWork unitOfWork, IUserRepository userRepository, IMapper mapper, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _userRepository = userRepository;
             _mapper = mapper;
-            _configuration = configuration;
+						_configuration = configuration;
         }
 
         public async Task<int> RegisterNewUser(UserRegisterCommand command)
@@ -63,11 +63,11 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 
             try
             {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_KEY"]));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
-                    _configuration["Jwt:Issuer"],
+                var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
+                    _configuration["JWT_AUDIENCE"],
                     null,
                     expires: DateTime.Now.AddMinutes(120),
                     signingCredentials: credentials);
