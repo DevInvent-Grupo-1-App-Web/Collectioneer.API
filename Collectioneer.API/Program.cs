@@ -16,9 +16,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Collectioneer.API.Shared.Infrastructure.Repositories;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text;
+using Collectioneer.API.Shared.Infrastructure.Repositories;
 
 namespace Collectioneer.API
 {
@@ -93,24 +93,24 @@ namespace Collectioneer.API
 			builder.Services.AddScoped<IUserRepository, UserRepository>();
 			builder.Services.AddScoped<IUserService, UserService>();
 
-            builder.Services.AddScoped<ICollectibleRepository, CollectibleRepository>();
-            builder.Services.AddScoped<ICollectibleService, CollectibleService>();
+			builder.Services.AddScoped<ICollectibleRepository, CollectibleRepository>();
+			builder.Services.AddScoped<ICollectibleService, CollectibleService>();
 
-            builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
-            builder.Services.AddScoped<IArticleService, ArticleService>();
+			builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+			builder.Services.AddScoped<IArticleService, ArticleService>();
 
-            builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
-            builder.Services.AddScoped<IAuctionService, AuctionService>();
+			builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
+			builder.Services.AddScoped<IAuctionService, AuctionService>();
 
-            builder.Services.AddScoped<IBidRepository, BidRepository>();
+			builder.Services.AddScoped<IBidRepository, BidRepository>();
 
 
-            builder.Services.AddAutoMapper(typeof(Program));
-            builder.Services.AddAutoMapper(typeof(UserProfile).Assembly);
-            builder.Services.AddAutoMapper(typeof(CollectibleProfile).Assembly);
-            builder.Services.AddAutoMapper(typeof(ArticleProfile).Assembly);
-            builder.Services.AddAutoMapper(typeof(AuctionProfile).Assembly);
-            builder.Services.AddAutoMapper(typeof(BidProfile).Assembly);
+			builder.Services.AddAutoMapper(typeof(Program));
+			builder.Services.AddAutoMapper(typeof(UserProfile).Assembly);
+			builder.Services.AddAutoMapper(typeof(CollectibleProfile).Assembly);
+			builder.Services.AddAutoMapper(typeof(ArticleProfile).Assembly);
+			builder.Services.AddAutoMapper(typeof(AuctionProfile).Assembly);
+			builder.Services.AddAutoMapper(typeof(BidProfile).Assembly);
 
 			builder.Services.AddAuthentication(
 					JwtBearerDefaults.AuthenticationScheme)
