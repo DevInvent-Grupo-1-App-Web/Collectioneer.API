@@ -33,6 +33,8 @@ namespace Collectioneer.API
                 builder.Configuration.AddUserSecrets<Program>();
             }
 
+						builder.Configuration.AddEnvironmentVariables();
+
             var (issuer, audience, key) = ValidateJwtConfiguration(builder.Configuration);
 
             // Add services to the container.
