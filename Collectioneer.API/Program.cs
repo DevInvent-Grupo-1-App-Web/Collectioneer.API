@@ -33,6 +33,8 @@ namespace Collectioneer.API
 				builder.Configuration.AddUserSecrets<Program>();
 			}
 
+			var (issuer, audience, key) = ValidateJwtConfiguration(builder.Configuration);
+
 			// Add services to the container.
 
 			builder.Services.AddCors(options =>
@@ -122,9 +124,9 @@ namespace Collectioneer.API
 							ValidateAudience = true,
 							ValidateLifetime = true,
 							ValidateIssuerSigningKey = true,
-							ValidIssuer = builder.Configuration["JWT_ISSUER"],
-							ValidAudience = builder.Configuration["JWT_AUDIENCE"],
-							IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT_KEY"]))
+							ValidIssuer = issuer,
+							ValidAudience = audience,
+							IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
 						};
 					});
 
@@ -178,6 +180,23 @@ namespace Collectioneer.API
 
 			app.Run();
 		}
+
+		public static (string, string, string) ValidateJwtConfiguration(IConfiguration configuration)
+		{
+			try
+			{
+				string issuer = configuration["JWT_ISSUER"] ?? throw new NullReferenceException("JWT_ISSUER");
+				string audience = configuration["JWT_AUDIENCE"] ?? throw new NullReferenceException("JWT_AUDIENCE");
+				string key = configuration["JWT_KEY"] ?? throw new NullReferenceException("JWT_KEY");
+
+				return (issuer, audience, key);
+			}
+			catch (NullReferenceException ex)
+			{
+				throw new StartupConfigurationException($"Environment variable not found: {ex.Message}. Please check your configuration. Startup failed. No server started.");
+			}
+		}
+
 	}
 
 	public class AuthorizeCheckOperationFilter : IOperationFilter
@@ -202,4 +221,6 @@ namespace Collectioneer.API
 			}
 		}
 	}
+
+
 }
