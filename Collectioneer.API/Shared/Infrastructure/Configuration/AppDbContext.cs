@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Collectioneer.API.Social.Domain.Models.Entities;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 using Collectioneer.API.Shared.Infrastructure.Configuration.Extensions;
 using Collectioneer.API.Operational.Domain.Models.Entities;
 using Collectioneer.API.Operational.Domain.Models.Aggregates;
@@ -7,17 +7,14 @@ using Collectioneer.API.Operational.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Shared.Infrastructure.Configuration 
 {
-	public class AppDbContext : DbContext {
+	public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options) {
 		public DbSet<User> Users { get; set; }
         public DbSet<Collectible> Collectibles { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Bid> Bids { get; set; }
 
-
-		public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
             base.OnModelCreating(modelBuilder);
 

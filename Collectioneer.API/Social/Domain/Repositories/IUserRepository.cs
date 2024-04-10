@@ -1,5 +1,5 @@
 ﻿using Collectioneer.API.Shared.Domain.Repositories;
-using Collectioneer.API.Social.Domain.Models.Entities;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Social.Domain.Repositories
 {

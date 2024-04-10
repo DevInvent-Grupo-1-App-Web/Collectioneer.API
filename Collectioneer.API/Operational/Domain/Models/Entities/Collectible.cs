@@ -1,5 +1,5 @@
 ﻿using Collectioneer.API.Operational.Domain.Models.Aggregates;
-using Collectioneer.API.Social.Domain.Models.Entities;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
@@ -13,8 +13,8 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
         public int CommunityId { get; set; }
         public int ArticleId { get; set; }
         public Article Article { get; set; }
-        public int AuctionId { get; set; }
-        public Auction Auction { get; set; }
+        public int? AuctionId { get; set; }
+        public Auction? Auction { get; set; }
 
         public Collectible()
         {
@@ -23,6 +23,14 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
                 Title = Name,
                 Content = "This is a new article.\nCustomize it to your liking!"
             };
+        }
+
+        public bool IsLinkedToProcess()
+        {
+            // Verify if in auction
+            return AuctionId != null;
+
+            // TODO: Verify if in other processes when implemented
         }
     }
 }

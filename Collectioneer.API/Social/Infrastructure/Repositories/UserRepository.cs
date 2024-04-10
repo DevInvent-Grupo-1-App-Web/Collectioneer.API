@@ -1,5 +1,5 @@
 ﻿using Collectioneer.API.Shared.Infrastructure.Configuration;
-using Collectioneer.API.Social.Domain.Models.Entities;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 using Collectioneer.API.Social.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Collectioneer.API.Shared.Infrastructure.Repositories;
@@ -32,12 +32,13 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
 			return !await _context.Users.AnyAsync(u => u.Username == username);
 		}
 
-		public async Task<bool> IsValidUser(string username, string password)
-		{
-			return await _context.Users.AnyAsync(u => u.Username == username && u.Password == password);
-		}
+        public async Task<bool> IsValidUser(string username, string hashedPassword)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return user != null && user.CheckPassword(hashedPassword);
+        }
 
-		public async Task<User?> GetUserData(string username)
+        public async Task<User?> GetUserData(string username)
 		{
 			return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
 		}
