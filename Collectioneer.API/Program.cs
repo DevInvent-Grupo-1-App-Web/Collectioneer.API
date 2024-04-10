@@ -22,70 +22,76 @@ using System.Text;
 
 namespace Collectioneer.API
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+			if (builder.Environment.IsDevelopment())
+			{
+				builder.Configuration.AddUserSecrets<Program>();
+			}
 
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                });
-            });
+			// Add services to the container.
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "API",
-                    Version = "v2",
-                    Description = "Your Api Description"
-                });
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer 12345abcdef'",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
-                });
-                options.OperationFilter<AuthorizeCheckOperationFilter>();
-            });
+			builder.Services.AddCors(options =>
+			{
+				options.AddPolicy("AllowAll", builder =>
+							{
+								builder.AllowAnyOrigin()
+													.AllowAnyMethod()
+													.AllowAnyHeader();
+							});
+			});
 
-            // Add Database Connection
+			builder.Services.AddControllers();
+			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+			builder.Services.AddEndpointsApiExplorer();
+			builder.Services.AddSwaggerGen(options =>
+			{
+				options.SwaggerDoc("v1", new OpenApiInfo
+				{
+					Title = "API",
+					Version = "v2",
+					Description = "Your Api Description"
+				});
+				options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+				{
+					Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer 12345abcdef'",
+					Name = "Authorization",
+					In = ParameterLocation.Header,
+					Type = SecuritySchemeType.ApiKey,
+					Scheme = "Bearer"
+				});
+				options.OperationFilter<AuthorizeCheckOperationFilter>();
+			});
+
+			// Add Database Connection
 
 
-            var connectionString = Environment.GetEnvironmentVariable("MYSQL_CONNECTION_STRING");
+			var connectionString = builder.Configuration["MYSQL_CONNECTION_STRING"];
+			Console.WriteLine($"Connection String: {connectionString}");
 
-            builder.Services.AddDbContext<AppDbContext>(
-                options =>
-                {
-                    if (connectionString != null)
-                    {
-                        options.UseMySQL(connectionString)
-                        .LogTo(Console.WriteLine, LogLevel.Information)
-                        .EnableSensitiveDataLogging()
-                        .EnableDetailedErrors();
-                    }
-                }
-            );
+			builder.Services.AddDbContext<AppDbContext>(
+					options =>
+					{
+						if (connectionString != null)
+						{
+							options.UseMySQL(connectionString)
+										.LogTo(Console.WriteLine, LogLevel.Information)
+										.EnableSensitiveDataLogging()
+										.EnableDetailedErrors();
+						}
+					}
+			);
 
-            builder.Services.AddRouting(options => options.LowercaseUrls = true);
+			builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IUserService, UserService>();
+			builder.Services.AddScoped<IUserRepository, UserRepository>();
+			builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddScoped<ICollectibleRepository, CollectibleRepository>();
             builder.Services.AddScoped<ICollectibleService, CollectibleService>();
@@ -106,94 +112,94 @@ namespace Collectioneer.API
             builder.Services.AddAutoMapper(typeof(AuctionProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(BidProfile).Assembly);
 
-            builder.Services.AddAuthentication(
-                JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
-                        ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")))
-                    };
-                });
+			builder.Services.AddAuthentication(
+					JwtBearerDefaults.AuthenticationScheme)
+					.AddJwtBearer(options =>
+					{
+						options.TokenValidationParameters = new TokenValidationParameters
+						{
+							ValidateIssuer = true,
+							ValidateAudience = true,
+							ValidateLifetime = true,
+							ValidateIssuerSigningKey = true,
+							ValidIssuer = builder.Configuration["JWT_ISSUER"],
+							ValidAudience = builder.Configuration["JWT_AUDIENCE"],
+							IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT_KEY"]))
+						};
+					});
 
 
-            var app = builder.Build();
+			var app = builder.Build();
 
-            // Test DB connection
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetService<AppDbContext>();
-                try
-                {
-                    context.Database.OpenConnection();
-                    context.Database.CloseConnection();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al conectar con la base de datos: {ex.Message}");
-                    return;
-                }
-            }
+			// Test DB connection
+			using (var scope = app.Services.CreateScope())
+			{
+				var context = scope.ServiceProvider.GetService<AppDbContext>();
+				try
+				{
+					context.Database.OpenConnection();
+					context.Database.CloseConnection();
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Error al conectar con la base de datos: {ex.Message}");
+					return;
+				}
+			}
 
-            app.UseCors("AllowAll");
+			app.UseCors("AllowAll");
 
-            using (var scope = app.Services.CreateScope())
-            using (var context = scope.ServiceProvider.GetService<AppDbContext>())
-            {
-                context?.Database.EnsureCreated();
-            }
-
-
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-
-                app.UseAuthentication();
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
-                });
-            }
+			using (var scope = app.Services.CreateScope())
+			using (var context = scope.ServiceProvider.GetService<AppDbContext>())
+			{
+				context?.Database.EnsureCreated();
+			}
 
 
-            app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+			// Configure the HTTP request pipeline.
+			if (app.Environment.IsDevelopment())
+			{
+				app.UseSwagger();
 
-            app.MapControllers();
+				app.UseAuthentication();
+				app.UseSwaggerUI(options =>
+				{
+					options.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
+				});
+			}
 
-            app.Run();
-        }
-    }
 
-    public class AuthorizeCheckOperationFilter : IOperationFilter
-    {
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            // Check for Authorize attribute
-            var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any()
-                               || context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+			app.UseHttpsRedirection();
 
-            if (hasAuthorize)
-            {
-                operation.Security = new List<OpenApiSecurityRequirement>
-            {
-                new OpenApiSecurityRequirement
-                {
-                    [
-                        new OpenApiSecurityScheme {Reference = new OpenApiReference {Type = ReferenceType.SecurityScheme, Id = "Bearer"}}
-                    ] = new string[] { }
-                }
-            };
-            }
-        }
-    }
+			app.UseAuthorization();
+
+			app.MapControllers();
+
+			app.Run();
+		}
+	}
+
+	public class AuthorizeCheckOperationFilter : IOperationFilter
+	{
+		public void Apply(OpenApiOperation operation, OperationFilterContext context)
+		{
+			// Check for Authorize attribute
+			var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any()
+												 || context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+
+			if (hasAuthorize)
+			{
+				operation.Security = new List<OpenApiSecurityRequirement>
+						{
+								new OpenApiSecurityRequirement
+								{
+										[
+												new OpenApiSecurityScheme {Reference = new OpenApiReference {Type = ReferenceType.SecurityScheme, Id = "Bearer"}}
+										] = new string[] { }
+								}
+						};
+			}
+		}
+	}
 }

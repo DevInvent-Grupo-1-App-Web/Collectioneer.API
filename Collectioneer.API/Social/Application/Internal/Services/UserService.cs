@@ -61,11 +61,11 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 
             try
             {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")));
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_KEY"]));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                var token = new JwtSecurityToken(Environment.GetEnvironmentVariable("JWT_ISSUER"),
-                    Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
+                var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
+                    _configuration["JWT_AUDIENCE"],
                     null,
                     expires: DateTime.Now.AddMinutes(120),
                     signingCredentials: credentials);
