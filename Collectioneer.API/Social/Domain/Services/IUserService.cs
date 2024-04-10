@@ -11,5 +11,6 @@ namespace Collectioneer.API.Social.Domain.Services
         public Task<IEnumerable<User>> GetUsers();
 
         public Task<string?> LoginUser(UserLoginQuery query);
+				public Task DeleteUser(UserDeleteCommand query);
     }
 }

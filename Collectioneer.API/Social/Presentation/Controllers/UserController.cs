@@ -70,5 +70,22 @@ namespace Collectioneer.API.Social.Presentation.Controllers
             }
         }
 
+				// DELETE api/v1/delete-user
+				[Authorize]
+				[HttpDelete("delete-user")]
+				public async Task<IActionResult> DeleteUser([FromBody] UserDeleteCommand request)
+				{
+					try
+					{
+						await _userService.DeleteUser(request);
+						return Ok();
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Error deleting user.");
+						return StatusCode(500, ex.Message);
+					}
+				}
+
     }
 }

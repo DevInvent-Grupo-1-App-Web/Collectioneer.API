@@ -12,73 +12,85 @@ using System.Text;
 
 namespace Collectioneer.API.Social.Application.Internal.Services
 {
-    public class UserService : IUserService
-    {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
-				private readonly IConfiguration _configuration;
+	public class UserService : IUserService
+	{
+		private readonly IUnitOfWork _unitOfWork;
+		private readonly IUserRepository _userRepository;
+		private readonly IMapper _mapper;
+		private readonly IConfiguration _configuration;
 
-        public UserService(IUnitOfWork unitOfWork, IUserRepository userRepository, IMapper mapper, IConfiguration configuration)
-        {
-            _unitOfWork = unitOfWork;
-            _userRepository = userRepository;
-            _mapper = mapper;
-						_configuration = configuration;
-        }
+		public UserService(IUnitOfWork unitOfWork, IUserRepository userRepository, IMapper mapper, IConfiguration configuration)
+		{
+			_unitOfWork = unitOfWork;
+			_userRepository = userRepository;
+			_mapper = mapper;
+			_configuration = configuration;
+		}
 
-        public async Task<int> RegisterNewUser(UserRegisterCommand command)
-        {
-            if (!await _userRepository.IsEmailUnique(command.Email))
-            {
-                throw new DuplicatedCredentialsException($"Email {command.Email} is already in use.");
-            }
+		public async Task<int> RegisterNewUser(UserRegisterCommand command)
+		{
+			if (!await _userRepository.IsEmailUnique(command.Email))
+			{
+				throw new DuplicatedCredentialsException($"Email {command.Email} is already in use.");
+			}
 
-            if (!await _userRepository.IsUsernameUnique(command.Username))
-            {
-                throw new DuplicatedCredentialsException($"Username {command.Username} is already in use.");
-            }
+			if (!await _userRepository.IsUsernameUnique(command.Username))
+			{
+				throw new DuplicatedCredentialsException($"Username {command.Username} is already in use.");
+			}
 
-            var user = _mapper.Map<User>(command);
+			var user = _mapper.Map<User>(command);
 
-            await _userRepository.Add(user);
-            await _unitOfWork.CompleteAsync();
+			await _userRepository.Add(user);
+			await _unitOfWork.CompleteAsync();
 
-            return user.Id;
-        }
+			return user.Id;
+		}
 
-        public async Task<IEnumerable<User>> GetUsers()
-        {
-            return await _userRepository.GetAll();
-        }
+		public async Task<IEnumerable<User>> GetUsers()
+		{
+			return await _userRepository.GetAll();
+		}
 
-        public async Task<string?> LoginUser(UserLoginQuery query)
-        {
-            if (!await _userRepository.IsValidUser(query.Username, query.Password)) return null;
+		public async Task<string?> LoginUser(UserLoginQuery query)
+		{
+			if (!await _userRepository.IsValidUser(query.Username, query.Password)) return null;
 
-            var user = await _userRepository.GetUserData(query.Username);
+			var user = await _userRepository.GetUserData(query.Username);
 
-            if (user == null) return null;
+			if (user == null) return null;
 
 
-            try
-            {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_KEY"]));
-                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+			try
+			{
+				var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_KEY"]));
+				var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
-                    _configuration["JWT_AUDIENCE"],
-                    null,
-                    expires: DateTime.Now.AddMinutes(120),
-                    signingCredentials: credentials);
+				var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
+						_configuration["JWT_AUDIENCE"],
+						null,
+						expires: DateTime.Now.AddMinutes(120),
+						signingCredentials: credentials);
 
-                return new JwtSecurityTokenHandler().WriteToken(token);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+				return new JwtSecurityTokenHandler().WriteToken(token);
+			}
+			catch (Exception)
+			{
+				throw;
+			}
 
-        }
-    }
+		}
+
+		public async Task DeleteUser(UserDeleteCommand query)
+		{
+			if (!await _userRepository.IsValidUser(query.Username, query.Password)) return;
+
+			var user = await _userRepository.GetUserData(query.Username);
+
+			if (user == null) return;
+
+			await _userRepository.Delete(user.Id);
+			await _unitOfWork.CompleteAsync();
+		}
+	}
 }
