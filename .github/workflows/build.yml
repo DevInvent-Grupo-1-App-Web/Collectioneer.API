@@ -37,6 +37,9 @@ jobs:
       env:
           MYSQL_CONNECTION_STRING: ${{ secrets.MYSQL_CONNECTION_STRING }}
           ASPNETCORE_ENVIRONMENT: ${{ secrets.ASPNETCORE_ENVIRONMENT }}
+          JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
+          JWT_AUDIENCE: ${{ secrets.JWT_AUDIENCE }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
       run: |
         cd Collectioneer.API
         dotnet run &
