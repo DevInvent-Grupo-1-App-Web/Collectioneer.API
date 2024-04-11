@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Collectioneer.API.Social.Domain.Commands;
-using Collectioneer.API.Social.Domain.Models.Entities;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Social.Application.Internal.MappingProfiles
 {

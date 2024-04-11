@@ -1,5 +1,5 @@
 using Collectioneer.API.Operational.Domain.Models.Aggregates;
-using Collectioneer.API.Social.Domain.Models.Entities;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.ValueObjects
 {

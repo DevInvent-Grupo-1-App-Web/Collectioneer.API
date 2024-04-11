@@ -8,67 +8,67 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Social.Presentation.Controllers
 {
-    [Route("api/v1/[controller]")]
-    [ApiController]
-    public class UserController : ControllerBase
-    {
-        private readonly IUserService _userService;
-        private readonly ILogger<UserController> _logger;
+	[Route("api/v1/[controller]")]
+	[ApiController]
+	public class UserController : ControllerBase
+	{
+		private readonly IUserService _userService;
+		private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserService userService, ILogger<UserController> logger)
-        {
-            _userService = userService;
-            _logger = logger;
-        }
+		public UserController(IUserService userService, ILogger<UserController> logger)
+		{
+			_userService = userService;
+			_logger = logger;
+		}
 
-        // POST api/v1/register-user
-        [HttpPost("register-user")]
-        public async Task<IActionResult> RegisterUser([FromBody] UserRegisterCommand request)
-        {
-            try
-            {
-                var response = await _userService.RegisterNewUser(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error registering user.");
-                return StatusCode(500, ex.Message);
-            }
-        }
+		// POST api/v1/register-user
+		[HttpPost("register-user")]
+		public async Task<IActionResult> RegisterUser([FromBody] UserRegisterCommand request)
+		{
+			try
+			{
+				var response = await _userService.RegisterNewUser(request);
+				return Ok(response);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error registering user.");
+				return StatusCode(500, ex.Message);
+			}
+		}
 
-        // POST api/v1/login
-        [HttpPost("login")]
-        public async Task<IActionResult> LoginUser([FromBody] UserLoginQuery request)
-        {
-            try
-            {
-                var response = await _userService.LoginUser(request);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error logging in user.");
-                return StatusCode(500, ex.Message);
-            }
-        }
+		// POST api/v1/login
+		[HttpPost("login")]
+		public async Task<IActionResult> LoginUser([FromBody] UserLoginQuery request)
+		{
+			try
+			{
+				var response = await _userService.LoginUser(request);
+				return Ok(response);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error logging in user.");
+				return StatusCode(500, ex.Message);
+			}
+		}
 
-        // GET api/v1/users
-        [Authorize]
-        [HttpGet("users")]
-        public async Task<IActionResult> GetUsers()
-        {
-            try
-            {
-                var response = await _userService.GetUsers();
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting users.");
-                return StatusCode(500, ex.Message);
-            }
-        }
+		// DELETE api/v1/delete-user
+		[Authorize]
+		[HttpDelete("delete-user")]
+		public async Task<IActionResult> DeleteUser([FromBody] UserDeleteCommand request)
+		{
+			try
+			{
+				await _userService.DeleteUser(request);
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting user.");
+				return StatusCode(500, ex.Message);
+			}
+		}
 
-    }
+	}
 }
