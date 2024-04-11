@@ -34,9 +34,9 @@ namespace Collectioneer.API
             }
 
 						builder.Configuration.AddEnvironmentVariables();
-
-            var (issuer, audience, key) = ValidateJwtConfiguration(builder.Configuration);
-
+												
+						var (issuer, audience, key) = ValidateJwtConfiguration(builder.Configuration);
+            
             // Add services to the container.
 
             builder.Services.AddCors(options =>
