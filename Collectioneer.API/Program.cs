@@ -1,4 +1,3 @@
-
 using Collectioneer.API.Operational.Application.Services.Internal;
 using Collectioneer.API.Operational.Application.Services.Internal.MappingProfiles;
 using Collectioneer.API.Operational.Domain.Repositories;
@@ -6,19 +5,18 @@ using Collectioneer.API.Operational.Domain.Services;
 using Collectioneer.API.Operational.Infrastructure.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
-using Collectioneer.API.Social.Application.Internal.MappingProfiles;
-using Collectioneer.API.Social.Application.Internal.Services;
-using Collectioneer.API.Social.Domain.Repositories;
-using Collectioneer.API.Social.Domain.Services;
-using Collectioneer.API.Social.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Collectioneer.API.Shared.Infrastructure.Repositories;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text;
+using Collectioneer.API.Shared.Infrastructure.Repositories;
+using Collectioneer.API.Shared.Domain.Services;
+using Collectioneer.API.Shared.Application.Internal.Services;
+using Collectioneer.API.Operational.Domain.Services.Intern;
+using Collectioneer.API.Shared.Application.Internal.MappingProfiles;
 
 namespace Collectioneer.API
 {
@@ -28,6 +26,15 @@ namespace Collectioneer.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Configuration.AddUserSecrets<Program>();
+            }
+
+            builder.Configuration.AddEnvironmentVariables();
+
+            var (issuer, audience, key) = ValidateJwtConfiguration(builder.Configuration);
+
             // Add services to the container.
 
             builder.Services.AddCors(options =>
@@ -35,8 +42,8 @@ namespace Collectioneer.API
                 options.AddPolicy("AllowAll", builder =>
                 {
                     builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
                 });
             });
 
@@ -47,8 +54,8 @@ namespace Collectioneer.API
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "API",
-                    Version = "v2",
+                    Title = "Collectioneer.API",
+                    Version = "v1",
                     Description = "Your Api Description"
                 });
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -59,25 +66,41 @@ namespace Collectioneer.API
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer"
                 });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
                 options.OperationFilter<AuthorizeCheckOperationFilter>();
             });
+
 
             // Add Database Connection
 
 
-            var connectionString = Environment.GetEnvironmentVariable("MYSQL_CONNECTION_STRING");
+            var connectionString = builder.Configuration["MYSQL_CONNECTION_STRING"];
+            Console.WriteLine($"Connection String: {connectionString}");
 
             builder.Services.AddDbContext<AppDbContext>(
-                options =>
-                {
-                    if (connectionString != null)
+                    options =>
                     {
-                        options.UseMySQL(connectionString)
-                        .LogTo(Console.WriteLine, LogLevel.Information)
-                        .EnableSensitiveDataLogging()
-                        .EnableDetailedErrors();
+                        if (connectionString != null)
+                        {
+                            options.UseMySQL(connectionString)
+                                        .LogTo(Console.WriteLine, LogLevel.Information)
+                                        .EnableSensitiveDataLogging()
+                                        .EnableDetailedErrors();
+                        }
                     }
-                }
             );
 
             builder.Services.AddRouting(options => options.LowercaseUrls = true);
@@ -107,20 +130,20 @@ namespace Collectioneer.API
             builder.Services.AddAutoMapper(typeof(BidProfile).Assembly);
 
             builder.Services.AddAuthentication(
-                JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
-                        ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")))
-                    };
-                });
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+                };
+            });
 
 
             var app = builder.Build();
@@ -172,6 +195,23 @@ namespace Collectioneer.API
 
             app.Run();
         }
+
+        public static (string, string, string) ValidateJwtConfiguration(IConfiguration configuration)
+        {
+            try
+            {
+                string issuer = configuration["JWT_ISSUER"] ?? throw new NullReferenceException("JWT_ISSUER");
+                string audience = configuration["JWT_AUDIENCE"] ?? throw new NullReferenceException("JWT_AUDIENCE");
+                string key = configuration["JWT_KEY"] ?? throw new NullReferenceException("JWT_KEY");
+
+                return (issuer, audience, key);
+            }
+            catch (NullReferenceException ex)
+            {
+                throw new ArgumentException($"Environment variable not found: {ex.Message}. Please check your configuration. Startup failed. No server started.");
+            }
+        }
+
     }
 
     public class AuthorizeCheckOperationFilter : IOperationFilter
@@ -180,20 +220,37 @@ namespace Collectioneer.API
         {
             // Check for Authorize attribute
             var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any()
-                               || context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+                                                 || context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
 
             if (hasAuthorize)
             {
+                operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
+                operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
+
                 operation.Security = new List<OpenApiSecurityRequirement>
             {
                 new OpenApiSecurityRequirement
                 {
                     [
-                        new OpenApiSecurityScheme {Reference = new OpenApiReference {Type = ReferenceType.SecurityScheme, Id = "Bearer"}}
-                    ] = new string[] { }
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+
+                        }
+                    ] = new List<string>()
                 }
             };
             }
         }
     }
+
+
+
 }

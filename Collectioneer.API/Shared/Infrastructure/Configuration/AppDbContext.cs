@@ -1,21 +1,18 @@
 using Microsoft.EntityFrameworkCore;
-using Collectioneer.API.Social.Domain.Models.Entities;
 using Collectioneer.API.Shared.Infrastructure.Configuration.Extensions;
 using Collectioneer.API.Operational.Domain.Models.Entities;
 using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Models.ValueObjects;
+using Collectioneer.API.Shared.Domain.Models.Aggregates;
 
-namespace Collectioneer.API.Shared.Infrastructure.Configuration 
+namespace Collectioneer.API.Shared.Infrastructure.Configuration
 {
-	public class AppDbContext : DbContext {
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options) {
 		public DbSet<User> Users { get; set; }
         public DbSet<Collectible> Collectibles { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Bid> Bids { get; set; }
-
-
-		public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -51,7 +48,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<User>()
                 .Property(x => x.Password)
                 .IsRequired()
-                .HasMaxLength(50);
+                .HasMaxLength(64);
 
             modelBuilder.Entity<User>()
                 .HasMany(x => x.Collectibles)
@@ -96,10 +93,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 
             modelBuilder.Entity<Collectible>()
                 .Property(x => x.Value);
-
-            modelBuilder.Entity<Collectible>()
-                .Property(x => x.CommunityId)
-                .IsRequired();
 
             modelBuilder.Entity<Collectible>()
                 .Property(x=>x.ArticleId);
@@ -151,7 +144,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 
             modelBuilder.Entity<Article>()
                 .Property(x => x.Content)
-                .IsRequired()
                 .HasMaxLength(500);
 
             modelBuilder.Entity<Article>()

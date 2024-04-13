@@ -4,30 +4,33 @@ using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Models.ValueObjects;
 using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Repositories;
+using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Domain.Repositories;
 
 namespace Collectioneer.API;
 
-public class AuctionService : IAuctionService
+public class AuctionService(
+    IAuctionRepository auctionRepository,
+    ICollectibleService collectibleService,
+    IBidRepository bidRepository,
+    IMapper mapper,
+    IUnitOfWork unitOfWork) : IAuctionService
 {
-    private readonly IAuctionRepository _auctionRepository;
-    private readonly IBidRepository _bidRepository;
-    private readonly IMapper _mapper;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public AuctionService(IAuctionRepository auctionRepository, IBidRepository bidRepository, IMapper mapper, IUnitOfWork unitOfWork)
-    {
-        _auctionRepository = auctionRepository;
-        _bidRepository = bidRepository;
-        _mapper = mapper;
-        _unitOfWork = unitOfWork;
-    }
+    private readonly IAuctionRepository _auctionRepository = auctionRepository;
+    private readonly ICollectibleService _collectibleService = collectibleService;
+    private readonly IBidRepository _bidRepository = bidRepository;
+    private readonly IMapper _mapper = mapper;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<int> CreateAuction(AuctionCreationCommand command)
     {
-        var auction = _mapper.Map<Auction>(command);
+        var auction = new Auction(command.AuctioneerId, command.CollectibleId, command.StartingPrice, command.Deadline);
         await _auctionRepository.Add(auction);
         await _unitOfWork.CompleteAsync();
+
+        await _collectibleService.RegisterAuctionIdInCollectible(new CollectibleAuctionIdRegisterCommand { AuctionId = auction.Id, CollectibleId = command.CollectibleId });
+        await _unitOfWork.CompleteAsync();
+
         return auction.Id;
     }
 
