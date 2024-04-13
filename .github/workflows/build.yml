@@ -44,3 +44,4 @@ jobs:
           dotnet run &
           sleep 20
           kill $!
+
