@@ -1,5 +1,6 @@
 ﻿using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Queries;
+using Collectioneer.API.Operational.Domain.Services.Intern;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

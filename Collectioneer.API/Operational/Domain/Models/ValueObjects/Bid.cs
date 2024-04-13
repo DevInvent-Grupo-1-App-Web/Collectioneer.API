@@ -1,9 +1,9 @@
 using Collectioneer.API.Operational.Domain.Models.Aggregates;
-using Collectioneer.API.Social.Domain.Models.Entities;
+using Collectioneer.API.Shared.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.ValueObjects
 {
-	public record Bid
+    public record Bid
 	{
 		public int Id { get; init; }
 		public int AuctionId { get; init; }

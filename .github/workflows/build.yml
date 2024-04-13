@@ -6,39 +6,42 @@ name: build
 on:
   push:
     branches:
-    - 'development'
-    - 'main'
-    - 'deployment'
+      - "development"
+      - "main"
+      - "deployment"
   pull_request:
-    branches: 
-      - 'development'
-      - 'development/**'
-      - 'main'
-      - 'deployment'
+    branches:
+      - "development"
+      - "development/**"
+      - "main"
+      - "deployment"
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-    - name: Run
-      env:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+      - name: Run
+        env:
           MYSQL_CONNECTION_STRING: ${{ secrets.MYSQL_CONNECTION_STRING }}
-          ASPNETCORE_ENVIRONMENT: ${{ secrets.ASPNETCORE_ENVIRONMENT }}
-      run: |
-        cd Collectioneer.API
-        dotnet run &
-        sleep 20
-        kill $!
+          ASPNETCORE_ENVIRONMENT: Development
+          JWT_ISSUER: localhost
+          JWT_AUDIENCE: localhost
+          JWT_KEY: the_variables_here_are_placeholders_and_dont_have_real_use_XXXXX
+        run: |
+          cd Collectioneer.API
+          dotnet run &
+          sleep 20
+          kill $!
+

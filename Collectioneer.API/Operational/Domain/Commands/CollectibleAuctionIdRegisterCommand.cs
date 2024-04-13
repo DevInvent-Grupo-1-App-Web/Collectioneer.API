@@ -1,8 +1,8 @@
 ﻿namespace Collectioneer.API.Operational.Domain.Commands
 {
-    public record ArticleCreationCommand
+    public record CollectibleAuctionIdRegisterCommand
     {
         public int CollectibleId { get; init; }
-        public string Title { get; init; }
+        public int AuctionId { get; init; }
     }
 }
