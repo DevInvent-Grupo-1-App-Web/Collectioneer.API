@@ -13,8 +13,8 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
         public float? Value { get; set; }
         public int ArticleId { get; set; }
         public Article Article { get; set; }
-        public int AuctionId { get; set; }
-        public Auction Auction { get; set; }
+        public int? AuctionId { get; set; }
+        public Auction? Auction { get; set; }
 
         public Collectible(
                     string name,
