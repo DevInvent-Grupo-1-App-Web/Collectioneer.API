@@ -178,10 +178,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
                 .IsRequired();
 
             modelBuilder.Entity<Auction>()
-                .Property(x => x.CurrentPrice)
-                .IsRequired();
-
-            modelBuilder.Entity<Auction>()
                 .Property(x => x.Deadline)
                 .IsRequired();
 

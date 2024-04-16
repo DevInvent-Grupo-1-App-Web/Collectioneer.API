@@ -3,14 +3,19 @@ using Collectioneer.API.Shared.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.ValueObjects
 {
-    public record Bid
-	{
-		public int Id { get; init; }
-		public int AuctionId { get; init; }
-		public Auction Auction { get; init; }
-		public int BidderId { get; init; }
-		public User Bidder { get; init; }
-		public float Amount { get; init; }
-		public DateTime Time { get; init; }
-	}
+    public class Bid(
+        int AuctionId,
+        int BidderId,
+        float Amount,
+        DateTime Time
+    )
+    {
+        public int Id { get; set; }
+        public int AuctionId { get; set; } = AuctionId;
+        public Auction Auction { get; set; }
+        public int BidderId { get; set; } = BidderId;
+        public User Bidder { get; set; }
+        public float Amount { get; set; } = Amount;
+        public DateTime Time { get; set; } = Time;
+    }
 }
