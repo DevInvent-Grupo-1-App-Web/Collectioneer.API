@@ -1,10 +1,11 @@
 ﻿using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Models.Exceptions;
+using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
-    public class Collectible
+    public class Collectible : ITimestamped
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -15,6 +16,8 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
         public Article Article { get; set; }
         public int? AuctionId { get; set; }
         public Auction? Auction { get; set; }
+				public DateTime CreatedAt { get; set; }
+				public DateTime UpdatedAt { get; set; }
 
         public Collectible(
                     string name,
