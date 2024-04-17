@@ -9,13 +9,15 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 	{
 		public int Id { get; set; }
 		public int CollectibleId { get; set; }
-		public Collectible Collectible { get; set; }
-		public string Title { get; set; }
+		public string Title { get; set; } = string.Empty;
 		public string? Content { get; set; }
 		public DateTime CreatedAt { get; set; }
 		public DateTime UpdatedAt { get; set; }
-		public ICollection<Review?> Reviews { get; set;} = [];
-		public ICollection<MediaElement?> MediaElements { get; set; } = [];
+
+		// Navigation properties
+		public Collectible? Collectible { get; set; }
+		public ICollection<Review> Reviews { get; set;} = [];
+		public ICollection<MediaElement> MediaElements { get; set; } = [];
 
 		public Article(int collectibleId, string title)
 		{

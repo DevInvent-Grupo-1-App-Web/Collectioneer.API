@@ -1,10 +1,8 @@
 namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 {
-	public enum FilterType
+	public class FilterType
 	{
-		Value,
-		Range,
-		Options,
-		OptionsMultiple
+		public int Id { get; set; }
+		public string Name { get; set; }
 	}
 }

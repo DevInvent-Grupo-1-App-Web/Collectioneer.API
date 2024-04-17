@@ -1,8 +1,8 @@
 namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 {
-	public enum ReactionType
+	public class ReactionType
 	{
-		Upvote,
-		Downvote
+		public int Id { get; set; }
+		public string Name { get; set; }
 	}
 }

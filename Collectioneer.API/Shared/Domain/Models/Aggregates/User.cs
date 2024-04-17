@@ -3,6 +3,7 @@ using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Models.Entities;
 using Collectioneer.API.Operational.Domain.Models.ValueObjects;
 using Collectioneer.API.Shared.Domain.Exceptions;
+using Collectioneer.API.Shared.Domain.Models.Entities;
 using Collectioneer.API.Social.Domain.Models.Aggregates;
 using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
@@ -17,10 +18,9 @@ public class User
     public string Email { get; private set; } = string.Empty;
     public string Name { get; private set; } = string.Empty;
     public string Password { get; private set; } = string.Empty;
-		public IEnumerable<int> CommunitiesId { get; set; } = [];
-		public IEnumerable<Role> Roles {get; set; } = [];
-		public ICollection<Community> Communities { get; set; } = []; 
-	// Entity navigation properties
+		
+		// Navigation properties
+		public ICollection<Role> Roles {get; set; } = [];
     public ICollection<Collectible> Collectibles { get; set; } = [];
     public ICollection<Auction> Auctions { get; set; } = [];
     public ICollection<Bid> Bids { get; set; } = [];
@@ -30,7 +30,7 @@ public class User
 		public ICollection<Post> Posts { get; set; } = [];
 		public ICollection<Comment> Comments { get; set; } = [];
 		public ICollection<Review> Reviews { get; set; } = [];
-
+		public ICollection<MediaElement> MediaElements { get; set; } = [];
     public User(
         string username,
         string email,

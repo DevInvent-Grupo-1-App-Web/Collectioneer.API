@@ -5,56 +5,66 @@ using Collectioneer.API.Shared.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
-    public class Collectible : ITimestamped
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public int OwnerId { get; set; }
-        public User Owner { get; set; }
-        public float? Value { get; set; }
-        public int ArticleId { get; set; }
-        public Article Article { get; set; }
-        public int? AuctionId { get; set; }
-        public Auction? Auction { get; set; }
-				public DateTime CreatedAt { get; set; }
-				public DateTime UpdatedAt { get; set; }
+	public class Collectible : ITimestamped
+	{
+		public int Id { get; set; }
+		// Entity properties
+		public int CommunityId { get; set; }
+		public string Name { get; set; } = string.Empty;
+		public int OwnerId { get; set; }
+		public float? Value { get; set; }
+		public int ArticleId { get; set; }
+		public int? AuctionId { get; set; }
+		public int? SaleId { get; set; }
+		public int? ExchangeId { get; set; }
+		public DateTime CreatedAt { get; set; }
+		public DateTime UpdatedAt { get; set; }
 
-        public Collectible(
-                    string name,
-                    int ownerId,
-                    float? value
-                )
-        {
-            SetName(name);
-            SetOwnerId(ownerId);
-            SetValue(value);
-        }
+		// Navigation properties
+		public User? Owner { get; set; }
+		public Article? Article { get; set; }
+		public Auction? Auction { get; set; }
+		public Sale? Sale { get; set; }
+		public Exchange? Exchange { get; set; }
 
-        public bool IsLinkedToProcess()
-        {
-            // Verify if in auction
-            return AuctionId != null;
+		public Collectible(
+			int communityId,
+			string name,
+			int ownerId,
+			float? value
+		)
+		{
+			CommunityId = communityId;
+			SetName(name);
+			SetOwnerId(ownerId);
+			SetValue(value);
+		}
 
-            // TODO: Verify if in other processes when implemented
-        }
+		public bool IsLinkedToProcess()
+		{
+			// Verify if in auction
+			return AuctionId != null;
 
-        private void SetName(string name)
-        {
-            if (name.Length < 3 || name.Length > 100)
-            {
-                throw new CollectibleModelException("Name must be between 1 and 100 characters");
-            }
-            Name = name;
-        }
+			// TODO: Verify if in other processes when implemented
+		}
 
-        private void SetOwnerId(int ownerId)
-        {
-            OwnerId = ownerId;
-        }
+		private void SetName(string name)
+		{
+			if (name.Length < 3 || name.Length > 100)
+			{
+				throw new CollectibleModelException("Name must be between 1 and 100 characters");
+			}
+			Name = name;
+		}
 
-        private void SetValue(float? value)
-        {
-            Value = value ?? null;
-        }
-    }
+		private void SetOwnerId(int ownerId)
+		{
+			OwnerId = ownerId;
+		}
+
+		private void SetValue(float? value)
+		{
+			Value = value ?? null;
+		}
+	}
 }

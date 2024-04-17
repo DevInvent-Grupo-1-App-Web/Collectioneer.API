@@ -1,9 +1,12 @@
 ﻿namespace Collectioneer.API.Operational.Domain.Models.ValueObjects;
 
-public enum RoleType
+public class RoleType
 {
-		Owner,
-		Admin,
-		Moderator,
-		Member
+	public int Id { get; set; }
+	public string Name { get; set; }
+
+	public RoleType(string name)
+	{
+		Name = name;
+	}
 }

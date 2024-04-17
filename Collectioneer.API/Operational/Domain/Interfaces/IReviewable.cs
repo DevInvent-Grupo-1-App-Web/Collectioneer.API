@@ -4,6 +4,6 @@ namespace Collectioneer.API.Operational.Domain.Interfaces
 {
 		public interface IReviewable
 		{
-				public ICollection<Review?> Reviews { get; set; }
+				public ICollection<Review> Reviews { get; set; }
 		}
 }
