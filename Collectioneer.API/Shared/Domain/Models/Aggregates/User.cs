@@ -25,6 +25,7 @@ public class User
     public ICollection<Auction> Auctions { get; set; } = [];
     public ICollection<Bid> Bids { get; set; } = [];
 		public ICollection<Sale> Sales { get; set; } = [];
+		public ICollection<Sale> Purchases { get; set; } = [];
 		public ICollection<Exchange> Exchanges { get; set; } = [];
 		public ICollection<Reaction> Reactions { get; set; } = [];
 		public ICollection<Post> Posts { get; set; } = [];

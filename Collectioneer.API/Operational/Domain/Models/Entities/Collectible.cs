@@ -2,6 +2,7 @@
 using Collectioneer.API.Operational.Domain.Models.Exceptions;
 using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
@@ -22,6 +23,7 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 
 		// Navigation properties
 		public User? Owner { get; set; }
+		public Community? Community { get; set; }
 		public Article? Article { get; set; }
 		public Auction? Auction { get; set; }
 		public Sale? Sale { get; set; }

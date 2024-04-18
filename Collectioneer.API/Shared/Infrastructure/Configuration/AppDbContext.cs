@@ -7,6 +7,7 @@ using Collectioneer.API.Shared.Domain.Models.Aggregates;
 using Collectioneer.API.Shared.Domain.Models.Entities;
 using Collectioneer.API.Social.Domain.Models.Aggregates;
 using Collectioneer.API.Social.Domain.Models.ValueObjects;
+using Collectioneer.API.Social.Domain.Abstracts;
 
 namespace Collectioneer.API.Shared.Infrastructure.Configuration
 {
@@ -26,11 +27,9 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		public DbSet<Community> Communities { get; set; }
 		public DbSet<Post> Posts { get; set; }
 		public DbSet<Comment> Comments { get; set; }
-		public DbSet<CommentParent> CommentParents { get; set; }
 		public DbSet<Filter> Filters { get; set; }
 		public DbSet<FilterType> FilterTypes { get; set; }
 		public DbSet<PostTag> PostTags { get; set; }
-		public DbSet<ReactionReactable> ReactionReactables { get; set; }
 		public DbSet<Reaction> Reactions { get; set; }
 		public DbSet<ReactionType> ReactionTypes { get; set; }
 		public DbSet<Tag> Tags { get; set; }
@@ -53,12 +52,10 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			CommunityModelBuilder(modelBuilder);
 			PostModelBuilder(modelBuilder);
 			CommentModelBuilder(modelBuilder);
-			CommentParentModelBuilder(modelBuilder);
 			FilterModelBuilder(modelBuilder);
 			FilterTypeModelBuilder(modelBuilder);
 			PostTagModelBuilder(modelBuilder);
 			ReactionModelBuilder(modelBuilder);
-			ReactionReactableModelBuilder(modelBuilder);
 			ReactionTypeModelBuilder(modelBuilder);
 			TagModelBuilder(modelBuilder);
 
@@ -95,7 +92,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			modelBuilder.Entity<Auction>()
 					.Property(x => x.Deadline)
 					.IsRequired();
-			
+
 			modelBuilder.Entity<Auction>()
 					.Property(x => x.IsOpen)
 					.IsRequired()
@@ -185,6 +182,10 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.Id)
 					.IsRequired()
 					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.CommunityId)
+					.IsRequired();
 
 			modelBuilder.Entity<Sale>()
 					.Property(x => x.VendorId)
@@ -296,7 +297,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 
 			modelBuilder.Entity<Collectible>()
 					.Property(x => x.AuctionId);
-			
+
 			modelBuilder.Entity<Collectible>()
 					.Property(x => x.SaleId);
 
@@ -594,11 +595,11 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.Id)
 					.IsRequired()
 					.ValueGeneratedOnAdd();
-			
+
 			modelBuilder.Entity<Comment>()
 					.Property(x => x.CommentParentId)
 					.IsRequired();
-			
+
 			modelBuilder.Entity<Comment>()
 					.Property(x => x.UserId)
 					.IsRequired();
@@ -617,7 +618,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.UpdatedAt)
 					.IsRequired()
 					.ValueGeneratedOnAddOrUpdate();
-				
+
 			modelBuilder.Entity<Comment>()
 					.Property(x => x.IsHidden)
 					.IsRequired()
@@ -630,7 +631,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 
 			modelBuilder.Entity<CommentParent>()
 					.HasKey(x => x.Id);
-				
+
 			modelBuilder.Entity<CommentParent>()
 					.Property(x => x.Id)
 					.IsRequired()
@@ -696,7 +697,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		{
 			modelBuilder.Entity<PostTag>()
 					.ToTable("PostTags");
-			
+
 			modelBuilder.Entity<PostTag>()
 					.HasKey(x => x.Id);
 
@@ -704,7 +705,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.Id)
 					.IsRequired()
 					.ValueGeneratedOnAdd();
-				
+
 			modelBuilder.Entity<PostTag>()
 					.Property(x => x.PostId)
 					.IsRequired();
@@ -725,9 +726,9 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.Id)
 					.IsRequired()
 					.ValueGeneratedOnAdd();
-					
+
 			modelBuilder.Entity<Reaction>()
-					.Property(x => x.ReactionReactableId)
+					.Property(x => x.ReactableId)
 					.IsRequired();
 
 			modelBuilder.Entity<Reaction>()
@@ -807,7 +808,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			modelBuilder.Entity<Tag>()
 					.Property(x => x.CommunityId)
 					.IsRequired();
-				
+
 			modelBuilder.Entity<Tag>()
 					.Property(x => x.Name)
 					.IsRequired()
@@ -820,143 +821,258 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		}
 		private static void RelationshipBuilder(ModelBuilder modelBuilder)
 		{
-			// One auction has one auctioneer
-			modelBuilder.Entity<Auction>().
-					HasOne(x => x.Auctioneer)
-					.WithMany(x => x.Auctions)
-					.HasForeignKey(x => x.AuctioneerId)
-					.OnDelete(DeleteBehavior.Restrict);
+			// One user has many roles
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Roles)
+				.WithOne(x => x.User)
+				.HasForeignKey(x => x.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One role has one user
 
+			// One community has many roles
+			modelBuilder.Entity<Community>()
+				.HasMany(x => x.Roles)
+				.WithOne(x => x.Community)
+				.HasForeignKey(x => x.CommunityId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One role has one community
+
+			// One user has many collectibles
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Collectibles)
+				.WithOne(x => x.Owner)
+				.HasForeignKey(x => x.OwnerId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One collectible has one user
+
+			// One user has many auction
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Auctions)
+				.WithOne(x => x.Auctioneer)
+				.HasForeignKey(x => x.AuctioneerId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One auction has one user
+
+			// One user has many bid
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Bids)
+				.WithOne(x => x.Bidder)
+				.HasForeignKey(x => x.BidderId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One bid has one user
+
+			// One user has many exchange
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Exchanges)
+				.WithOne(x => x.Exchanger)
+				.HasForeignKey(x => x.ExchangerId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One exchange has one user
+
+			// One user has many sale
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Sales)
+				.WithOne(x => x.Vendor)
+				.HasForeignKey(x => x.VendorId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One sale has one user
+
+			// One user has many review
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Reviews)
+				.WithOne(x => x.Reviewer)
+				.HasForeignKey(x => x.ReviewerId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One review has one user
+
+			// One user has many reaction
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Reactions)
+				.WithOne(x => x.User)
+				.HasForeignKey(x => x.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One reaction has one user
+
+			// One user has many post
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Posts)
+				.WithOne(x => x.Author)
+				.HasForeignKey(x => x.AuthorId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One post has one user
+
+			// One user has many comment
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Comments)
+				.WithOne(x => x.User)
+				.HasForeignKey(x => x.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One comment has one user
+
+			// One media has one user
+			modelBuilder.Entity<MediaElement>()
+				.HasOne(x => x.Uploader)
+				.WithMany(x => x.MediaElements)
+				.HasForeignKey(x => x.UploaderId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One user has many media
+
+			// One community has many filter
+			modelBuilder.Entity<Community>()
+				.HasMany(x => x.CommunityFilters)
+				.WithOne(x => x.Community)
+				.HasForeignKey(x => x.CommunityId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One filter has one community
+
+			// One community has many tag
+			modelBuilder.Entity<Community>()
+				.HasMany(x => x.CommunityTags)
+				.WithOne(x => x.Community)
+				.HasForeignKey(x => x.CommunityId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One tag has one community
+
+			// One community has many post
+			modelBuilder.Entity<Community>()
+				.HasMany(x => x.Posts)
+				.WithOne(x => x.Community)
+				.HasForeignKey(x => x.CommunityId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One post has one community
+
+			// One community has many auction
+			modelBuilder.Entity<Community>()
+				.HasMany(x => x.Auctions)
+				.WithOne(x => x.Community)
+				.HasForeignKey(x => x.CommunityId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One auction has one community
+			// 
+			// One community has many exchange
+			modelBuilder.Entity<Community>()
+				.HasMany(x => x.Exchanges)
+				.WithOne(x => x.Community)
+				.HasForeignKey(x => x.CommunityId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One exchange has one community
+			// 
+			// One community has many sale
+			modelBuilder.Entity<Community>()
+				.HasMany(x => x.Sales)
+				.WithOne(x => x.Community)
+				.HasForeignKey(x => x.CommunityId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One sale has one community
+			// 
+			// 
+			// One bid has one auction
+			modelBuilder.Entity<Bid>()
+				.HasOne(x => x.Auction)
+				.WithMany(x => x.Bids)
+				.HasForeignKey(x => x.AuctionId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One auction has many bid
+			// 
+			// 
+			// One collectible has one article
+			modelBuilder.Entity<Collectible>()
+				.HasOne(x => x.Article)
+				.WithOne(x => x.Collectible)
+				.HasForeignKey<Article>(x => x.CollectibleId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One article has one collectible
+			// 
+			// 
+			// 
 			// One auction has one collectible
 			modelBuilder.Entity<Auction>()
-					.HasOne(x => x.Collectible)
-					.WithOne(x => x.Auction)
-					.HasForeignKey<Auction>("CollectibleId")
-					.OnDelete(DeleteBehavior.Restrict);
-
-			// One auction has many bids
-			modelBuilder.Entity<Auction>()
-					.HasMany(x => x.Bids)
-					.WithOne(x => x.Auction)
-					.HasForeignKey(x => x.AuctionId)
-					.OnDelete(DeleteBehavior.Cascade);
-
-			// One collectible has one article
-			modelBuilder.Entity<Article>()
-					.HasOne(x => x.Collectible)
-					.WithOne(x => x.Article)
-					.HasForeignKey<Article>("CollectibleId")
-					.OnDelete(DeleteBehavior.Cascade);
-
-			// Many collectibles have one owner
-			modelBuilder.Entity<Collectible>()
-					.HasOne(x => x.Owner)
-					.WithMany(x => x.Collectibles)
-					.HasForeignKey(x => x.OwnerId)
-					.OnDelete(DeleteBehavior.Cascade);
-
-			// One collectible has one article
-			modelBuilder.Entity<Collectible>()
-					.HasOne(x => x.Article)
-					.WithOne(x => x.Collectible)
-					.HasForeignKey<Collectible>("ArticleId")
-					.OnDelete(DeleteBehavior.Restrict);
-
+				.HasOne(x => x.Collectible)
+				.WithOne(x => x.Auction)
+				.HasForeignKey<Collectible>(x => x.AuctionId)
+				.OnDelete(DeleteBehavior.SetNull);
 			// One collectible has zero or one auction
-			modelBuilder.Entity<Collectible>()
-					.HasOne(c => c.Auction)
-					.WithOne(a => a.Collectible)
-					.HasForeignKey<Auction>(a => a.CollectibleId)
-					.OnDelete(DeleteBehavior.Restrict);
-
-			// One reviewer has many reviews
-			modelBuilder.Entity<Review>()
-					.HasOne(x => x.Reviewer)
-					.WithMany(x => x.Reviews)
-					.HasForeignKey(x => x.ReviewerId)
-					.OnDelete(DeleteBehavior.Restrict);
-
-			// One review has one reviewed item
-			modelBuilder.Entity<Review>()
-					.HasOne(x => x.ReviewedArticle)
-					.WithMany(x => x.Reviews)
-					.HasForeignKey(x => x.ArticleId)
-					.OnDelete(DeleteBehavior.Restrict);
-
-			// One auction has many bids
-			modelBuilder.Entity<Bid>()
-					.HasOne(x => x.Auction)
-					.WithMany(x => x.Bids)
-					.HasForeignKey(x => x.AuctionId)
-					.OnDelete(DeleteBehavior.Cascade);
 
 
-			// One bid has one bidder
-			modelBuilder.Entity<Bid>()
-					.HasOne(x => x.Bidder)
-					.WithMany(x => x.Bids)
-					.HasForeignKey(x => x.BidderId)
-					.OnDelete(DeleteBehavior.Restrict);
+			// One sale has one collectible
+			modelBuilder.Entity<Sale>()
+				.HasOne(x => x.Collectible)
+				.WithOne(x => x.Sale)
+				.HasForeignKey<Collectible>(x => x.SaleId)
+				.OnDelete(DeleteBehavior.Restrict);
+			// One collectible has zero or one sale
 
-			modelBuilder.Entity<Role>()
-					.HasOne(x => x.User)
-					.WithMany(x => x.Roles)
-					.HasForeignKey(x => x.UserId)
-					.OnDelete(DeleteBehavior.Cascade);
+			// One sale has one user (buyer)
+			modelBuilder.Entity<Sale>()
+			.HasOne(x => x.Buyer)
+			.WithMany(x => x.Sales)
+			.HasForeignKey(x => x.BuyerId)
+			.OnDelete(DeleteBehavior.SetNull);
+			// One user has many sale as buyer
 
-			modelBuilder.Entity<Role>()
-					.HasOne(x => x.Community)
-					.WithMany(x => x.Roles)
-					.HasForeignKey(x => x.CommunityId)
-					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<User>()
-					.HasMany(x => x.Collectibles)
-					.WithOne(x => x.Owner)
-					.HasForeignKey(x => x.OwnerId)
-					.OnDelete(DeleteBehavior.Cascade);
+			// One exchange has one collectible
+			modelBuilder.Entity<Exchange>()
+				.HasOne(x => x.Collectible)
+				.WithOne(x => x.Exchange)
+				.HasForeignKey<Collectible>(x => x.ExchangeId)
+				.OnDelete(DeleteBehavior.SetNull);
+			// One collectible has zero or one exchange
 
-			modelBuilder.Entity<User>()
-					.HasMany(x => x.Auctions)
-					.WithOne(x => x.Auctioneer)
-					.HasForeignKey(x => x.AuctioneerId)
-					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<User>()
-					.HasMany(x => x.Bids)
-					.WithOne(x => x.Bidder)
-					.HasForeignKey(x => x.BidderId)
-					.OnDelete(DeleteBehavior.Cascade);
+			// One article has many review
+			modelBuilder.Entity<Article>()
+				.HasMany(x => x.Reviews)
+				.WithOne(x => x.ReviewedArticle)
+				.HasForeignKey(x => x.ArticleId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One review has one article
 
-			modelBuilder.Entity<MediaElement>()
-					.HasOne(x => x.Uploader)
-					.WithMany(x => x.MediaElements)
-					.HasForeignKey(x => x.UploaderId)
-					.OnDelete(DeleteBehavior.Cascade);
+			// One interactable has many reactions
+			modelBuilder.Entity<Interactable>()
+				.HasMany(x => x.Reactions)
+				.WithOne(x => x.Interactable)
+				.HasForeignKey(x => x.InteractableId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One reaction has one interactable
 
-			modelBuilder.Entity<Community>()
-					.HasMany(x => x.Roles)
-					.WithOne(x => x.Community)
-					.HasForeignKey(x => x.CommunityId)
-					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<Community>()
-					.HasMany(x => x.CommunityFilters)
-					.WithOne(x => x.Community)
-					.HasForeignKey(x => x.CommunityId)
-					.OnDelete(DeleteBehavior.Cascade);
+			// One interactable has many comments
+			modelBuilder.Entity<Interactable>()
+				.HasMany(x => x.Comments)
+				.WithOne(x => x.Interactable)
+				.HasForeignKey(x => x.InteractableId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One comment has one interactable
 
-			modelBuilder.Entity<Community>()
-					.HasMany(x => x.CommunityTags)
-					.WithOne(x => x.Community)
-					.HasForeignKey(x => x.CommunityId)
-					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<Reaction>()
-					.HasOne(x => x.User)
-					.WithMany(x => x.Reactions)
-					.HasForeignKey(x => x.UserId)
-					.OnDelete(DeleteBehavior.Cascade);
+			// One post has many comment
+			// One comment has one post
+			// 
+			// One post has many posttag
+			// One posttag has one post
+			// 
+			// 
+			// One comment has many comment
+			// One comment has one comment
+
 		}
 	}
 }
+
+
+/*
+El 12% de los trabajadores de una empresa padece de hipertensión arterial y el 17% padece de diabetes. Además, el 25% padece hipertensión arterial o diabetes. Se selecciona al azar a un trabajador.
+
+A = {
+	P(A) = 0.12 -> P(A') = 1 - P(A) = 1 - 0.12 = 0.88
+}
+
+B = {
+	P(B) = 0.17 -> P(B') = 1 - P(B) = 1 - 0.17 = 0.83
+}
+
+P(A U B) = 0.25 -> P(A ∩ B) = P(A) + P(B) - P(A U B) = 0.12 + 0.17 - 0.25 = 0.04
+
+
+*/

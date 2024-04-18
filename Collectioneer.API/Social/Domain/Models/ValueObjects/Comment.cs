@@ -1,14 +1,13 @@
 using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
 using Collectioneer.API.Social.Domain.Abstracts;
-using Collectioneer.API.Social.Domain.Interfaces;
 
 namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 {
-	public class Comment : Reactable, ICommentable, ITimestamped
+	public class Comment : Interactable, ITimestamped
 	{
 		public int Id { get; set; }
-		public int CommentParentId { get; set; }
+		public int InteractableId { get; set; }
 		public int UserId { get; set; }
 		public string Content { get; set; } = string.Empty;
 		public DateTime CreatedAt { get; set; }
@@ -16,17 +15,16 @@ namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 		public bool IsHidden { get; set; } = false;
 
 		// Navigation properties
-		public CommentParent? CommentParent{ get; set; }
+		public Interactable? Interactable { get; set; }
 		public User? User { get; set; }
-		public ICollection<Comment> Comments { get; set; } = [];
 
 		public Comment(
-			int commentParentId,
+			int interactableId,
 			int userId,
 			string content
 		)
 		{
-			CommentParentId = commentParentId;
+			InteractableId = interactableId;
 			UserId = userId;
 			Content = content;
 		}

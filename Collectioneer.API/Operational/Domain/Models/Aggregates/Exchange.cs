@@ -1,6 +1,8 @@
 ﻿using Collectioneer.API.Operational.Domain.Interfaces;
+using Collectioneer.API.Operational.Domain.Models.Entities;
 using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 {
@@ -19,7 +21,9 @@ namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 
 		// Navigation properties
 		public User? Exchanger { get; set; }
+		public Collectible? Collectible { get; set; }
 		public ICollection<int> ProposedExchanges { get; set; } = [];
+		public Community? Community { get; set; }
 
 		public Exchange(
 			int communityId,

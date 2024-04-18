@@ -6,7 +6,7 @@ using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
-	public class Review : Reactable, ITimestamped
+	public class Review : IReactable, ITimestamped
 	{
 		public int Id { get; set; }
 		public int ReviewerId { get; set; }
