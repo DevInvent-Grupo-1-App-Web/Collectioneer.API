@@ -1,12 +1,10 @@
 ﻿using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
 using Collectioneer.API.Social.Domain.Abstracts;
-using Collectioneer.API.Social.Domain.Interfaces;
-using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
-	public class Review : IReactable, ITimestamped
+	public class Review : ITimestamped
 	{
 		public int Id { get; set; }
 		public int ReviewerId { get; set; }

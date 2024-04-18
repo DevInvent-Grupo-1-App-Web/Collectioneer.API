@@ -1,7 +1,9 @@
 ﻿namespace Collectioneer.API.Shared.Domain.Queries
 {
-    public record UserDataFetchQuery
+    public record UserDataFetchQuery(
+				string Username
+		)
     {
-        public string Username { get; init; }
+        public string Username { get; init; } = Username;
     }
 }

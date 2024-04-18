@@ -597,7 +597,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.ValueGeneratedOnAdd();
 
 			modelBuilder.Entity<Comment>()
-					.Property(x => x.CommentParentId)
+					.Property(x => x.InteractableId)
 					.IsRequired();
 
 			modelBuilder.Entity<Comment>()
@@ -623,31 +623,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.IsHidden)
 					.IsRequired()
 					.HasDefaultValue(false);
-		}
-		private static void CommentParentModelBuilder(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<CommentParent>()
-					.ToTable("CommentParents");
-
-			modelBuilder.Entity<CommentParent>()
-					.HasKey(x => x.Id);
-
-			modelBuilder.Entity<CommentParent>()
-					.Property(x => x.Id)
-					.IsRequired()
-					.ValueGeneratedOnAdd();
-
-			modelBuilder.Entity<CommentParent>()
-					.Property(x => x.CommentId)
-					.IsRequired();
-
-			modelBuilder.Entity<CommentParent>()
-					.Property(x => x.ParentId)
-					.IsRequired();
-
-			modelBuilder.Entity<CommentParent>()
-					.Property(x => x.ParentType)
-					.IsRequired();
 		}
 		private static void FilterModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -728,7 +703,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.ValueGeneratedOnAdd();
 
 			modelBuilder.Entity<Reaction>()
-					.Property(x => x.ReactableId)
+					.Property(x => x.InteractableId)
 					.IsRequired();
 
 			modelBuilder.Entity<Reaction>()
@@ -748,31 +723,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.UpdatedAt)
 					.IsRequired()
 					.ValueGeneratedOnAddOrUpdate();
-		}
-		private static void ReactionReactableModelBuilder(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<ReactionReactable>()
-					.ToTable("ReactionReactables");
-
-			modelBuilder.Entity<ReactionReactable>()
-					.HasKey(x => x.Id);
-
-			modelBuilder.Entity<ReactionReactable>()
-					.Property(x => x.Id)
-					.IsRequired()
-					.ValueGeneratedOnAdd();
-
-			modelBuilder.Entity<ReactionReactable>()
-					.Property(x => x.ReactionId)
-					.IsRequired();
-
-			modelBuilder.Entity<ReactionReactable>()
-					.Property(x => x.ReactableId)
-					.IsRequired();
-
-			modelBuilder.Entity<ReactionReactable>()
-					.Property(x => x.ReactableType)
-					.IsRequired();
 		}
 		private static void ReactionTypeModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -1045,16 +995,13 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				.OnDelete(DeleteBehavior.Cascade);
 			// One comment has one interactable
 
-
-			// One post has many comment
-			// One comment has one post
-			// 
 			// One post has many posttag
+			modelBuilder.Entity<Post>()
+				.HasMany(x => x.PostTags)
+				.WithOne(x => x.Post)
+				.HasForeignKey(x => x.PostId)
+				.OnDelete(DeleteBehavior.Cascade);
 			// One posttag has one post
-			// 
-			// 
-			// One comment has many comment
-			// One comment has one comment
 
 		}
 	}

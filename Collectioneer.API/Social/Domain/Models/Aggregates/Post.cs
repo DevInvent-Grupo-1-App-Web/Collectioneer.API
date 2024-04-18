@@ -7,7 +7,7 @@ using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Social.Domain.Models.Aggregates
 {
-	public class Post : IReactable, ICommentable, ITimestamped
+	public class Post : Interactable, ITimestamped
 	{
 		public int Id { get; set; }
 		public int CommunityId { get; set; }
@@ -23,7 +23,6 @@ namespace Collectioneer.API.Social.Domain.Models.Aggregates
 		public Community? Community { get; set; }
 		public User? Author { get; set; }
 		public ICollection<PostTag> PostTags { get; set; } = [];
-		public ICollection<Comment> Comments { get; set; } = [];
 		public Post(
 			int communityId,
 			string title,
