@@ -30,6 +30,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		public DbSet<Filter> Filters { get; set; }
 		public DbSet<FilterType> FilterTypes { get; set; }
 		public DbSet<PostTag> PostTags { get; set; }
+		public DbSet<ReactionReactable> ReactionReactables { get; set; }
 		public DbSet<Reaction> Reactions { get; set; }
 		public DbSet<ReactionType> ReactionTypes { get; set; }
 		public DbSet<Tag> Tags { get; set; }
@@ -38,18 +39,28 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		{
 			base.OnModelCreating(modelBuilder);
 
-			MediaElementModelBuilder(modelBuilder);
-			RoleModelBuilder(modelBuilder);
-			ReviewModelBuilder(modelBuilder);
-			ReactionModelBuilder(modelBuilder);
-			RoleTypeModelBuilder(modelBuilder);
-			CommunityModelBuilder(modelBuilder);
-
-			UserModelBuilder(modelBuilder);
-			CollectibleModelBuilder(modelBuilder);
-			ArticleModelBuilder(modelBuilder);
 			AuctionModelBuilder(modelBuilder);
+			ExchangeModelBuilder(modelBuilder);
+			SaleModelBuilder(modelBuilder);
+			ArticleModelBuilder(modelBuilder);
+			CollectibleModelBuilder(modelBuilder);
+			ReviewModelBuilder(modelBuilder);
 			BidModelBuilder(modelBuilder);
+			RoleModelBuilder(modelBuilder);
+			RoleTypeModelBuilder(modelBuilder);
+			UserModelBuilder(modelBuilder);
+			MediaElementModelBuilder(modelBuilder);
+			CommunityModelBuilder(modelBuilder);
+			PostModelBuilder(modelBuilder);
+			CommentModelBuilder(modelBuilder);
+			CommentParentModelBuilder(modelBuilder);
+			FilterModelBuilder(modelBuilder);
+			FilterTypeModelBuilder(modelBuilder);
+			PostTagModelBuilder(modelBuilder);
+			ReactionModelBuilder(modelBuilder);
+			ReactionReactableModelBuilder(modelBuilder);
+			ReactionTypeModelBuilder(modelBuilder);
+			TagModelBuilder(modelBuilder);
 
 			RelationshipBuilder(modelBuilder);
 
@@ -84,14 +95,136 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			modelBuilder.Entity<Auction>()
 					.Property(x => x.Deadline)
 					.IsRequired();
+			
+			modelBuilder.Entity<Auction>()
+					.Property(x => x.IsOpen)
+					.IsRequired()
+					.HasDefaultValue(true);
+
+			modelBuilder.Entity<Auction>()
+					.Property(x => x.AuctioneerHasCollected)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+			modelBuilder.Entity<Auction>()
+					.Property(x => x.BidderHasCollected)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+			modelBuilder.Entity<Auction>()
+					.Property(x => x.CreatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Auction>()
+					.Property(x => x.UpdatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAddOrUpdate();
 		}
 		private static void ExchangeModelBuilder(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<Exchange>()
+					.ToTable("Exchanges");
 
+			modelBuilder.Entity<Exchange>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.CommunityId)
+					.IsRequired();
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.ExchangerId)
+					.IsRequired();
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.CollectibleId)
+					.IsRequired();
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.Price)
+					.IsRequired();
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.IsOpen)
+					.IsRequired()
+					.HasDefaultValue(true);
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.ExchangerHasConfirmed)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.AcceptedExchangeId);
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.CreatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Exchange>()
+					.Property(x => x.UpdatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAddOrUpdate();
 		}
 		private static void SaleModelBuilder(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<Sale>()
+					.ToTable("Sales");
 
+			modelBuilder.Entity<Sale>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.VendorId)
+					.IsRequired();
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.CollectibleId)
+					.IsRequired();
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.BuyerId);
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.Price)
+					.IsRequired();
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.IsOpen)
+					.IsRequired()
+					.HasDefaultValue(true);
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.VendorHasCollected)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.BuyerHasCollected)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.CreatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Sale>()
+					.Property(x => x.UpdatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAddOrUpdate();
 		}
 		private static void ArticleModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -118,11 +251,21 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			modelBuilder.Entity<Article>()
 					.Property(x => x.Content)
 					.HasMaxLength(500);
+
+			modelBuilder.Entity<Article>()
+					.Property(x => x.CreatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Article>()
+					.Property(x => x.UpdatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAddOrUpdate();
 		}
 		private static void CollectibleModelBuilder(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Collectible>()
-								.ToTable("Collectibles");
+					.ToTable("Collectibles");
 
 			modelBuilder.Entity<Collectible>()
 					.HasKey(x => x.Id);
@@ -131,6 +274,10 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.Id)
 					.IsRequired()
 					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Collectible>()
+					.Property(x => x.CommunityId)
+					.IsRequired();
 
 			modelBuilder.Entity<Collectible>()
 					.Property(x => x.Name)
@@ -149,6 +296,22 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 
 			modelBuilder.Entity<Collectible>()
 					.Property(x => x.AuctionId);
+			
+			modelBuilder.Entity<Collectible>()
+					.Property(x => x.SaleId);
+
+			modelBuilder.Entity<Collectible>()
+					.Property(x => x.ExchangeId);
+
+			modelBuilder.Entity<Collectible>()
+					.Property(x => x.CreatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Collectible>()
+					.Property(x => x.UpdatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAddOrUpdate();
 		}
 		private static void ReviewModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -191,7 +354,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		private static void BidModelBuilder(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Bid>()
-								.ToTable("Bids");
+					.ToTable("Bids");
 
 			modelBuilder.Entity<Bid>()
 					.HasKey(x => x.Id);
@@ -367,28 +530,57 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			modelBuilder.Entity<Community>()
 					.Property(x => x.Description)
 					.HasMaxLength(500);
-
-			modelBuilder.Entity<Community>()
-					.HasMany(x => x.Roles)
-					.WithOne(x => x.Community)
-					.HasForeignKey(x => x.CommunityId)
-					.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<Community>()
-					.HasMany(x => x.CommunityFilters)
-					.WithOne(x => x.Community)
-					.HasForeignKey(x => x.CommunityId)
-					.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<Community>()
-					.HasMany(x => x.CommunityTags)
-					.WithOne(x => x.Community)
-					.HasForeignKey(x => x.CommunityId)
-					.OnDelete(DeleteBehavior.Cascade);
 		}
 		private static void PostModelBuilder(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<Post>()
+					.ToTable("Posts");
 
+			modelBuilder.Entity<Post>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.CommunityId)
+					.IsRequired();
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.Title)
+					.IsRequired()
+					.HasMaxLength(50);
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.Content)
+					.IsRequired()
+					.HasMaxLength(500);
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.AuthorId)
+					.IsRequired();
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.IsHidden)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.IsArchived)
+					.IsRequired()
+					.HasDefaultValue(false);
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.CreatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.UpdatedAt)
+					.IsRequired()
+					.ValueGeneratedOnAddOrUpdate();
 		}
 		private static void CommentModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -414,7 +606,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			modelBuilder.Entity<Comment>()
 					.Property(x => x.Content)
 					.IsRequired()
-					.HasMaxLength(512);
+					.HasMaxLength(1024);
 
 			modelBuilder.Entity<Comment>()
 					.Property(x => x.CreatedAt)
@@ -428,7 +620,8 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				
 			modelBuilder.Entity<Comment>()
 					.Property(x => x.IsHidden)
-					.IsRequired();
+					.IsRequired()
+					.HasDefaultValue(false);
 		}
 		private static void CommentParentModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -457,15 +650,68 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		}
 		private static void FilterModelBuilder(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<Filter>()
+					.ToTable("Filters");
 
+			modelBuilder.Entity<Filter>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<Filter>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Filter>()
+					.Property(x => x.CommunityId)
+					.IsRequired();
+
+			modelBuilder.Entity<Filter>()
+					.Property(x => x.Name)
+					.IsRequired()
+					.HasMaxLength(50);
+
+			modelBuilder.Entity<Filter>()
+					.Property(x => x.Type)
+					.IsRequired();
 		}
 		private static void FilterTypeModelBuilder(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<FilterType>()
+					.ToTable("FilterTypes");
 
+			modelBuilder.Entity<FilterType>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<FilterType>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<FilterType>()
+					.Property(x => x.Name)
+					.IsRequired()
+					.HasMaxLength(50);
 		}
 		private static void PostTagModelBuilder(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<PostTag>()
+					.ToTable("PostTags");
+			
+			modelBuilder.Entity<PostTag>()
+					.HasKey(x => x.Id);
 
+			modelBuilder.Entity<PostTag>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+				
+			modelBuilder.Entity<PostTag>()
+					.Property(x => x.PostId)
+					.IsRequired();
+
+			modelBuilder.Entity<PostTag>()
+					.Property(x => x.TagId)
+					.IsRequired();
 		}
 		private static void ReactionModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -479,13 +725,9 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.Id)
 					.IsRequired()
 					.ValueGeneratedOnAdd();
-
+					
 			modelBuilder.Entity<Reaction>()
-					.Property(x => x.ReactableId)
-					.IsRequired();
-
-			modelBuilder.Entity<Reaction>()
-					.Property(x => x.ReactableType)
+					.Property(x => x.ReactionReactableId)
 					.IsRequired();
 
 			modelBuilder.Entity<Reaction>()
@@ -505,6 +747,31 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.UpdatedAt)
 					.IsRequired()
 					.ValueGeneratedOnAddOrUpdate();
+		}
+		private static void ReactionReactableModelBuilder(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<ReactionReactable>()
+					.ToTable("ReactionReactables");
+
+			modelBuilder.Entity<ReactionReactable>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<ReactionReactable>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<ReactionReactable>()
+					.Property(x => x.ReactionId)
+					.IsRequired();
+
+			modelBuilder.Entity<ReactionReactable>()
+					.Property(x => x.ReactableId)
+					.IsRequired();
+
+			modelBuilder.Entity<ReactionReactable>()
+					.Property(x => x.ReactableType)
+					.IsRequired();
 		}
 		private static void ReactionTypeModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -526,9 +793,31 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		}
 		private static void TagModelBuilder(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<Tag>()
+					.ToTable("Tags");
 
+			modelBuilder.Entity<Tag>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<Tag>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Tag>()
+					.Property(x => x.CommunityId)
+					.IsRequired();
+				
+			modelBuilder.Entity<Tag>()
+					.Property(x => x.Name)
+					.IsRequired()
+					.HasMaxLength(50);
+
+			modelBuilder.Entity<Tag>()
+					.Property(x => x.Value)
+					.IsRequired()
+					.HasMaxLength(50);
 		}
-
 		private static void RelationshipBuilder(ModelBuilder modelBuilder)
 		{
 			// One auction has one auctioneer
@@ -645,10 +934,22 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.HasForeignKey(x => x.UploaderId)
 					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<Reaction>()
-					.HasOne(x => x.Reactable)
-					.WithMany(x => x.Reactions)
-					.HasForeignKey(x => new { x.ReactableId, x.ReactableType })
+			modelBuilder.Entity<Community>()
+					.HasMany(x => x.Roles)
+					.WithOne(x => x.Community)
+					.HasForeignKey(x => x.CommunityId)
+					.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<Community>()
+					.HasMany(x => x.CommunityFilters)
+					.WithOne(x => x.Community)
+					.HasForeignKey(x => x.CommunityId)
+					.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<Community>()
+					.HasMany(x => x.CommunityTags)
+					.WithOne(x => x.Community)
+					.HasForeignKey(x => x.CommunityId)
 					.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<Reaction>()

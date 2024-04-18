@@ -11,7 +11,7 @@ namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 		public int ExchangerId {get; set; }
 		public int CollectibleId { get; set; }
 		public float Price { get; set; }
-		public bool IsClosed { get; set; } = false;
+		public bool IsOpen { get; set; } = true;
 		public bool ExchangerHasConfirmed { get; set; } = false;
 		public int? AcceptedExchangeId { get; set; }
 		public DateTime CreatedAt { get; set; }

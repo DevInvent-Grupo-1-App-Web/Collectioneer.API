@@ -9,7 +9,16 @@ namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 		public int TagId { get; set; }
 		
 		// Navigation properties
-		public Post Post { get; set; }
-		public Tag Tag { get; set; }
+		public Post? Post { get; set; }
+		public Tag? Tag { get; set; }
+
+		public PostTag(
+			int postId,
+			int tagId
+		)
+		{
+			PostId = postId;
+			TagId = tagId;
+		}
 	}
 }

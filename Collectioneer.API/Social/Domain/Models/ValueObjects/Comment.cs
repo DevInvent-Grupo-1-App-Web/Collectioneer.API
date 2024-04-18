@@ -19,5 +19,16 @@ namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 		public CommentParent? CommentParent{ get; set; }
 		public User? User { get; set; }
 		public ICollection<Comment> Comments { get; set; } = [];
+
+		public Comment(
+			int commentParentId,
+			int userId,
+			string content
+		)
+		{
+			CommentParentId = commentParentId;
+			UserId = userId;
+			Content = content;
+		}
 	}
 }
