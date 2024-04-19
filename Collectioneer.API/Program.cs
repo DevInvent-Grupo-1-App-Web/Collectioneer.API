@@ -154,8 +154,8 @@ namespace Collectioneer.API
                 var context = scope.ServiceProvider.GetService<AppDbContext>();
                 try
                 {
-                    context.Database.OpenConnection();
-                    context.Database.CloseConnection();
+                    context?.Database.OpenConnection();
+                    context?.Database.CloseConnection();
                 }
                 catch (Exception ex)
                 {
@@ -169,6 +169,7 @@ namespace Collectioneer.API
             using (var scope = app.Services.CreateScope())
             using (var context = scope.ServiceProvider.GetService<AppDbContext>())
             {
+                // context?.Database.EnsureDeleted();
                 context?.Database.EnsureCreated();
             }
 

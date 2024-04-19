@@ -1,8 +1,11 @@
 namespace Collectioneer.API.Shared.Domain.Commands
 {
-    public record UserDeleteCommand
-    {
-        public string Password { get; init; }
-        public string Username { get; init; }
-    }
+	public record UserDeleteCommand(
+		string Username,
+		string Password
+	)
+	{
+		public string Password { get; init; } = Password;
+		public string Username { get; init; } = Username;
+	}
 }

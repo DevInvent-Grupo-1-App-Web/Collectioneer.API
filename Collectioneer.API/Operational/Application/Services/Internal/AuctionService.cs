@@ -8,6 +8,7 @@ using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Exceptions;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API;
 
@@ -26,11 +27,19 @@ public class AuctionService(
 
 	public async Task<int> CreateAuction(AuctionCreationCommand command)
 	{
-		var auction = new Auction(command.AuctioneerId, command.CollectibleId, command.StartingPrice, command.Deadline);
+		var auction = new Auction(
+			command.CommunityId,
+			command.AuctioneerId, 
+			command.CollectibleId, 
+			command.StartingPrice, 
+			command.Deadline);
+			
 		await _auctionRepository.Add(auction);
 		await _unitOfWork.CompleteAsync();
 
-		await _collectibleService.RegisterAuctionIdInCollectible(new CollectibleAuctionIdRegisterCommand { AuctionId = auction.Id, CollectibleId = command.CollectibleId });
+		await _collectibleService.RegisterAuctionIdInCollectible(new CollectibleAuctionIdRegisterCommand(command.CollectibleId, auction.Id));
+
+
 		await _unitOfWork.CompleteAsync();
 
 		return auction.Id;
@@ -38,7 +47,7 @@ public class AuctionService(
 
 	public async Task<int> PlaceBid(BidCreationCommand command)
 	{
-		var bid = new Bid(command.AuctionId, command.BidderId, command.Amount, DateTime.Now);
+		var bid = new Bid(command.AuctionId, command.BidderId, command.Amount);
 		var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
 
 		var lastBid = auction.Bids.LastOrDefault();
