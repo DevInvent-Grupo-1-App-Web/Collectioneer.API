@@ -9,7 +9,7 @@ namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 		public int Id { get; set; }
 		public int InteractableId { get; set; }
 		public int UserId { get; set; }
-		public ReactionType Type { get; set; }
+		public int ReactionTypeId { get; set; }
 		public DateTime CreatedAt { get; set; }
 		public DateTime UpdatedAt { get; set; }
 
@@ -17,15 +17,17 @@ namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 		public User? User { get; set; }
 		public Interactable? Interactable { get; set; }
 
-		public Reaction(
+        public ReactionType? ReactionType { get; set; }
+
+        public Reaction(
 			int interactableId,
 			int userId,
-			ReactionType type
+			int reactionTypeId
 		)
 		{
 			InteractableId = interactableId;
 			UserId = userId;
-			Type = type;
+			ReactionTypeId = reactionTypeId;
 		}
 	}
 }

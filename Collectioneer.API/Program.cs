@@ -169,8 +169,8 @@ namespace Collectioneer.API
             using (var scope = app.Services.CreateScope())
             using (var context = scope.ServiceProvider.GetService<AppDbContext>())
             {
-							context?.Database.EnsureDeleted();
-							context?.Database.EnsureCreated();
+                // context?.Database.EnsureDeleted();
+                context?.Database.EnsureCreated();
             }
 
 

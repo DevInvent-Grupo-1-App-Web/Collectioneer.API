@@ -9,10 +9,8 @@ namespace Collectioneer.API.Social.Domain.Models.Aggregates
 {
 	public class Post : Interactable, ITimestamped
 	{
-		public int Id { get; set; }
 		public int CommunityId { get; set; }
 		public string Title { get; set; } = string.Empty;
-		public string Content { get; set; } = string.Empty;
 		public int AuthorId { get; set; }
 		public bool IsHidden { get; set; } = false;
 		public bool IsArchived { get; set; } = false;

@@ -7,20 +7,21 @@ namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 		public int Id { get; set; }
 		public int CommunityId { get; set; }
 		public string Name { get; set; } = string.Empty;
-		public FilterType Type { get; set; }
+		public int FilterTypeId { get; set; }
 
 		// Navigation properties
 		public Community? Community { get; set; }
+		public FilterType? FilterType { get; set; }
 
 		public Filter(
 			int communityId,
 			string name,
-			FilterType type
+			int filterTypeId
 		)
 		{
 			CommunityId = communityId;
 			Name = name;
-			Type = type;
+            FilterTypeId = filterTypeId;
 		}
 	}
 }
