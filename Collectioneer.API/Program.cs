@@ -17,6 +17,10 @@ using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Shared.Application.Internal.Services;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Application.Internal.MappingProfiles;
+using Collectioneer.API.Social.Domain.Repositories;
+using Collectioneer.API.Social.Infrastructure.Repositories;
+using Collectioneer.API.Social.Domain.Services;
+using Collectioneer.API.Social.Application;
 
 namespace Collectioneer.API
 {
@@ -120,6 +124,9 @@ namespace Collectioneer.API
             builder.Services.AddScoped<IAuctionService, AuctionService>();
 
             builder.Services.AddScoped<IBidRepository, BidRepository>();
+
+            builder.Services.AddScoped<ICommunityRepository, CommunityRepository>();
+            builder.Services.AddScoped<ICommunityService, CommunityService>();
 
 
             builder.Services.AddAutoMapper(typeof(Program));
