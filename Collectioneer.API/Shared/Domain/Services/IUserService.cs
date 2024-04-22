@@ -10,5 +10,6 @@ namespace Collectioneer.API.Shared.Domain.Services
         public Task<string> LoginUser(UserLoginQuery query);
         public Task DeleteUser(UserDeleteCommand query);
         public string HashPassword(string password);
+        public Task<int> GetUserIdByToken(string? token);
     }
 }

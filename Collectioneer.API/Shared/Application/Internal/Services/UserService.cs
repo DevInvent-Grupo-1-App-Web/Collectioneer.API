@@ -115,5 +115,28 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
             return hash;
         }
+
+        public async Task<int> GetUserIdByToken(string? token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+
+            var claim = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
+            if (claim == null)
+            {
+                throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
+            }
+
+            var username = claim.Value;
+
+            var user = await _userRepository.GetUserData(username);
+            if (user == null)
+            {
+                throw new UserNotFoundException($"User with username {username} not found.");
+            }
+
+            return user.Id;
+        }
+
     }
 }
