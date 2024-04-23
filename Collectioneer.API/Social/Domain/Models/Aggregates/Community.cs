@@ -1,6 +1,5 @@
 ﻿using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Models.Entities;
-using Collectioneer.API.Operational.Domain.Models.ValueObjects;
 using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Social.Domain.Models.Aggregates;

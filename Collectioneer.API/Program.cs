@@ -1,7 +1,6 @@
 using Collectioneer.API.Operational.Application.Services.Internal;
 using Collectioneer.API.Operational.Application.Services.Internal.MappingProfiles;
 using Collectioneer.API.Operational.Domain.Repositories;
-using Collectioneer.API.Operational.Domain.Services;
 using Collectioneer.API.Operational.Infrastructure.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
@@ -17,6 +16,10 @@ using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Shared.Application.Internal.Services;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Application.Internal.MappingProfiles;
+using Collectioneer.API.Social.Domain.Repositories;
+using Collectioneer.API.Social.Infrastructure.Repositories;
+using Collectioneer.API.Social.Domain.Services;
+using Collectioneer.API.Social.Application;
 
 namespace Collectioneer.API
 {
@@ -48,7 +51,7 @@ namespace Collectioneer.API
             });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -67,19 +70,19 @@ namespace Collectioneer.API
                     Scheme = "Bearer"
                 });
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
                 options.OperationFilter<AuthorizeCheckOperationFilter>();
             });
 
@@ -120,6 +123,15 @@ namespace Collectioneer.API
             builder.Services.AddScoped<IAuctionService, AuctionService>();
 
             builder.Services.AddScoped<IBidRepository, BidRepository>();
+
+            builder.Services.AddScoped<ICommunityRepository, CommunityRepository>();
+            builder.Services.AddScoped<ICommunityService, CommunityService>();
+
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
+
+            builder.Services.AddScoped<IRoleTypeRepository, RoleTypeRepository>();
+            builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
 
 
             builder.Services.AddAutoMapper(typeof(Program));
