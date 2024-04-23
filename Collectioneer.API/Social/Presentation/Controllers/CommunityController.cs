@@ -7,7 +7,7 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 {
     [Route("api/v1")]
     [ApiController]
-    public class CommunityController(ICommunityService communityService, ILogger<UserController> logger) : ControllerBase
+    public class CommunityController(ICommunityService communityService, ILogger<UserController> logger, IUserService userService) : ControllerBase
     {
         [HttpPost("new-community")]
         public async Task<IActionResult> CreateCommunity([FromBody] CommunityCreateCommand request)
@@ -15,6 +15,7 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
             try
             {
                 await communityService.CreateNewCommunity(request);
+
                 return Created();
             }
             catch (Exception ex)

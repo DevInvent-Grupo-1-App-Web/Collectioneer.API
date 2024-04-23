@@ -1,7 +1,6 @@
 using Collectioneer.API.Operational.Application.Services.Internal;
 using Collectioneer.API.Operational.Application.Services.Internal.MappingProfiles;
 using Collectioneer.API.Operational.Domain.Repositories;
-using Collectioneer.API.Operational.Domain.Services;
 using Collectioneer.API.Operational.Infrastructure.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
@@ -52,7 +51,7 @@ namespace Collectioneer.API
             });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -71,19 +70,19 @@ namespace Collectioneer.API
                     Scheme = "Bearer"
                 });
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
                 options.OperationFilter<AuthorizeCheckOperationFilter>();
             });
 
@@ -127,6 +126,12 @@ namespace Collectioneer.API
 
             builder.Services.AddScoped<ICommunityRepository, CommunityRepository>();
             builder.Services.AddScoped<ICommunityService, CommunityService>();
+
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
+
+            builder.Services.AddScoped<IRoleTypeRepository, RoleTypeRepository>();
+            builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
 
 
             builder.Services.AddAutoMapper(typeof(Program));

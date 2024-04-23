@@ -7,9 +7,9 @@ using Collectioneer.API.Social.Domain.Services;
 namespace Collectioneer.API.Social.Application
 {
     public class RoleTypeService(
-                   IRoleTypeRepository roleTypeRepository,
-                              IUnitOfWork unitOfWork
-                   ) : IRoleTypeService
+        IRoleTypeRepository roleTypeRepository,
+        IUnitOfWork unitOfWork
+    ) : IRoleTypeService
     {
         public async Task CreateNewRoleType(CreateRoleTypeCommand command)
         {

@@ -8,15 +8,12 @@ namespace Collectioneer.API.Social.Application
 {
     public class RoleService(
         IRoleRepository roleRepository,
-        IRoleTypeRepository roleTypeRepository,
         IUnitOfWork unitOfWork
     ) : IRoleService
     {
         public async Task CreateNewRole(CreateRoleCommand command)
         {
-            var roletype = await roleTypeRepository.GetRoleTypeByName(command.RoleType) ?? throw new Exception("RoleType not found.");
-
-            var newRole = new Role(command.UserId, command.CommunityId, roletype );
+            var newRole = new Role(command.UserId, command.CommunityId, 1 );
             
             try
             {

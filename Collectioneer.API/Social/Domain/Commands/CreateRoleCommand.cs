@@ -3,7 +3,8 @@
     public record CreateRoleCommand(
         int UserId,
         int CommunityId,
-        string RoleType)
+        string RoleType
+    )
     {
         public int UserId { get; init; } = UserId;
         public int CommunityId { get; init; } = CommunityId;
