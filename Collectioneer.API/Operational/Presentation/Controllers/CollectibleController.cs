@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Operational.Presentation.Controllers
 {
-    [Route("api/v1/[controller]")]
     [ApiController]
     public class CollectibleController : ControllerBase
     {
@@ -25,8 +24,8 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
         {
             try
             {
-                var response = await _collectibleService.RegisterCollectible(request);
-                return Ok(response);
+                await _collectibleService.RegisterCollectible(request);
+                return Created();
             }
             catch (Exception ex)
             {

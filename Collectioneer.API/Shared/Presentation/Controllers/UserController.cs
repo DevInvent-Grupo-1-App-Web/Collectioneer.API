@@ -1,4 +1,5 @@
-﻿using Collectioneer.API.Shared.Domain.Commands;
+﻿using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Domain.Commands;
 using Collectioneer.API.Shared.Domain.Queries;
 using Collectioneer.API.Shared.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -27,7 +28,7 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			try
 			{
 				var response = await _userService.RegisterNewUser(request);
-				return Ok(response);
+				return Created();
 			}
 			catch (Exception ex)
 			{
@@ -42,7 +43,7 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			try
 			{
 				var response = await _userService.LoginUser(request);
-				return Ok(response);
+				return Ok(new { token = response, type = "Bearer"});
 			}
 			catch (Exception ex)
 			{
@@ -63,7 +64,11 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting user.");
-                return StatusCode(500, ex.Message);
+				if (ex.GetType() == typeof(UserNotFoundException)) return NotFound(ex.Message);
+
+				if (ex.GetType() == typeof(ModelIntegrityException)) return BadRequest(ex.Message);
+
+				return StatusCode(500, ex.Message);
             }
         }
 
