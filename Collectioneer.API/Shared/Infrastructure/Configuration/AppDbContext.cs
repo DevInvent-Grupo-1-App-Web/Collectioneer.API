@@ -410,10 +410,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
                     .IsRequired();
 
             modelBuilder.Entity<Role>()
-                    .Property(x => x.RoleType)
-                    .HasConversion(
-                        v => v.ToString(),
-                        v => (RoleType)Enum.Parse(typeof(RoleType), v))
+                    .Property(x => x.RoleTypeId)
                     .IsRequired();
 
             modelBuilder.Entity<Role>()
@@ -908,9 +905,8 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
                 .HasForeignKey<Article>(x => x.CollectibleId)
                 .OnDelete(DeleteBehavior.Cascade);
             // One article has one collectible
-            // 
-            // 
-            // 
+
+
             // One auction has one collectible
             modelBuilder.Entity<Auction>()
                 .HasOne(x => x.Collectible)
@@ -1010,6 +1006,14 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
                 .HasForeignKey(x => x.ReactionTypeId)
                 .OnDelete(DeleteBehavior.Cascade);
             // One reactiontype has many reaction
+
+            // One role has one roletype
+            modelBuilder.Entity<Role>()
+                .HasOne(x => x.RoleType)
+                .WithMany(x => x.Roles)
+                .HasForeignKey(x => x.RoleTypeId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // One roletype has many role
         }
     }
 }
