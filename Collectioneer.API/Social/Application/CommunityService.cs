@@ -13,6 +13,12 @@ namespace Collectioneer.API.Social.Application
         IRoleTypeService roleTypeService
     ) : ICommunityService
     {
+        public async Task AddUserToCommunity(CommunityJoinCommand command)
+        {
+            await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, command.CommunityId, "Member"));
+            await unitOfWork.CompleteAsync();
+        }
+
         public async Task CreateNewCommunity(CommunityCreateCommand command)
         {
             var newCommunity = new Community(command.Name, command.Description);
@@ -30,5 +36,7 @@ namespace Collectioneer.API.Social.Application
                 throw new Exception("Unknown error creating community.", ex);
             }
         }
+
+
     }
 }
