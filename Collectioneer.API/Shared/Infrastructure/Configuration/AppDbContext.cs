@@ -313,7 +313,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Collectible>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void ReviewModelBuilder(ModelBuilder modelBuilder)
         {
