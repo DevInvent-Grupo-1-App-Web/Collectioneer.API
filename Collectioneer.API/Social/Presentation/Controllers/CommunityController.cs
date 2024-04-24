@@ -24,5 +24,21 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("join-community")]
+        public async Task<IActionResult> JoinCommunity([FromBody] CommunityJoinCommand request)
+        {
+            try
+            {
+                await communityService.AddUserToCommunity(request);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error joining community.");
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

@@ -5,5 +5,6 @@ namespace Collectioneer.API.Social.Domain.Services
     public interface ICommunityService
     {
         public Task CreateNewCommunity(CommunityCreateCommand command);
+        public Task AddUserToCommunity(CommunityJoinCommand command);
     }
 }
