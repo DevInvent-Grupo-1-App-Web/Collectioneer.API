@@ -48,17 +48,9 @@ namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 			return Bids.Count == 0 ? StartingPrice : Bids.Last().Amount;
 		}
 
-		public Bid? Close()
+		public void Close()
 		{
-			if (Bids.Count == 0)
-			{
-				return null;
-			}
-
-			var winningBid = Bids.LastOrDefault();
 			IsOpen = false;
-
-			return winningBid;
 		}
 
 		public void CollectAuctioneer()
