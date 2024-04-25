@@ -8,7 +8,6 @@ using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Exceptions;
-using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API;
 
@@ -16,13 +15,11 @@ public class AuctionService(
 		IAuctionRepository auctionRepository,
 		ICollectibleService collectibleService,
 		IBidRepository bidRepository,
-		IMapper mapper,
 		IUnitOfWork unitOfWork) : IAuctionService
 {
 	private readonly IAuctionRepository _auctionRepository = auctionRepository;
 	private readonly ICollectibleService _collectibleService = collectibleService;
 	private readonly IBidRepository _bidRepository = bidRepository;
-	private readonly IMapper _mapper = mapper;
 	private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
 	public async Task<int> CreateAuction(AuctionCreationCommand command)
@@ -70,9 +67,11 @@ public class AuctionService(
 	public async Task<Bid?> CloseAuction(AuctionCloseCommand command)
 	{
 		var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
-		var winningBid = auction.Close();
+		var bids = await GetBids(new BidRetrieveQuery(command.AuctionId));
+		bids = bids.OrderByDescending(b => b.Amount);
+		auction.Close();
 		await _unitOfWork.CompleteAsync();
-		return winningBid ?? null;
+		return bids.FirstOrDefault();
 	}
 
 	public async Task AuctioneerConfirmation(AuctionValidationCommand command)

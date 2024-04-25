@@ -48,6 +48,7 @@ namespace Collectioneer.API.Operational.Application.Services.Internal
 		{
 			var collectible = await _collectibleRepository.GetById(command.CollectibleId) ?? throw new Exception("Collectible not found.");
 			collectible.AuctionId = command.AuctionId;
+			await _collectibleRepository.Update(collectible);
 			await _unitOfWork.CompleteAsync();
 		}
 	}

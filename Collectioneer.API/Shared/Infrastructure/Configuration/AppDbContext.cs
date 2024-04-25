@@ -117,7 +117,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Auction>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void ExchangeModelBuilder(ModelBuilder modelBuilder)
         {
@@ -169,7 +169,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Exchange>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void SaleModelBuilder(ModelBuilder modelBuilder)
         {
@@ -226,7 +226,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Sale>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void ArticleModelBuilder(ModelBuilder modelBuilder)
         {
@@ -262,7 +262,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Article>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void CollectibleModelBuilder(ModelBuilder modelBuilder)
         {
@@ -313,7 +313,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Collectible>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void ReviewModelBuilder(ModelBuilder modelBuilder)
         {
@@ -351,7 +351,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Review>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void BidModelBuilder(ModelBuilder modelBuilder)
         {
@@ -386,7 +386,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Bid>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void RoleModelBuilder(ModelBuilder modelBuilder)
         {
@@ -421,7 +421,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Role>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void RoleTypeModelBuilder(ModelBuilder modelBuilder)
         {
@@ -509,7 +509,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<MediaElement>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void CommunityModelBuilder(ModelBuilder modelBuilder)
         {
@@ -583,7 +583,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Post>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void CommentModelBuilder(ModelBuilder modelBuilder)
         {
@@ -606,7 +606,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Comment>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Comment>()
                     .Property(x => x.IsHidden)
@@ -711,7 +711,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Reaction>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAddOrUpdate();
+                    .ValueGeneratedOnAdd();
         }
         private static void ReactionTypeModelBuilder(ModelBuilder modelBuilder)
         {

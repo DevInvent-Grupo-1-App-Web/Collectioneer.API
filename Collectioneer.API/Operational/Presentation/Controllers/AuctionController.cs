@@ -89,17 +89,8 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 
         [Authorize]
         [HttpPost("auctions/confirm")]
-        public async Task<IActionResult> AuctioneerConfirmation([FromBody] AuctionValidationCommand command, [FromHeader(Name = "Authorization")] string? token)
+        public async Task<IActionResult> AuctioneerConfirmation([FromBody] AuctionValidationCommand command)
         {
-            token = token?.Replace("Bearer ", string.Empty);
-
-            if (string.IsNullOrEmpty(token))
-            {
-                return Unauthorized();
-            }
-
-            int userId = await _userService.GetUserIdByToken(token);
-
             try
             {
                 if (command.AsAuctioneer)
