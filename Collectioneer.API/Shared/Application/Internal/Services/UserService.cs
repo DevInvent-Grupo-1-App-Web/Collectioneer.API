@@ -61,7 +61,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
                 var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
                         _configuration["JWT_AUDIENCE"],
                         null,
-                        expires: DateTime.Now.AddMinutes(120),
+                        expires: DateTime.Now.AddDays(30),
                         signingCredentials: credentials);
 
                 return new JwtSecurityTokenHandler().WriteToken(token);
