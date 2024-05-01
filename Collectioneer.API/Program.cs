@@ -183,6 +183,7 @@ namespace Collectioneer.API
             {
                 // context?.Database.EnsureDeleted();
                 context?.Database.EnsureCreated();
+				context?.RunSqlScript("./Scripts/Startup.sql");
             }
 
 
@@ -232,8 +233,8 @@ namespace Collectioneer.API
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             // Check for Authorize attribute
-            var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any()
-                                                 || context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+			var hasAuthorize = context.MethodInfo.DeclaringType?.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() ?? false
+							|| context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
 
             if (hasAuthorize)
             {
@@ -264,6 +265,6 @@ namespace Collectioneer.API
         }
     }
 
-
+	
 
 }

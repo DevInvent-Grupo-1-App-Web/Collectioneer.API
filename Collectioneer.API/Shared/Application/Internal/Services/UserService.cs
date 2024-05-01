@@ -55,7 +55,13 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
             try
             {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_KEY"]));
+				var jwtKey = _configuration["JWT_KEY"];
+				if (jwtKey == null)
+				{
+					throw new ArgumentNullException(nameof(jwtKey), "JWT_KEY is not set in the configuration.");
+				}
+
+				var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
@@ -84,7 +90,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             var user = await _userRepository.GetUserData(command.Username);
 
             if (
-                user.Auctions.Count != 0 ||
+                user?.Auctions.Count != 0 ||
                 user.Bids.Count != 0
                 )
             {
@@ -121,7 +127,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
-            var claim = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
+            var claim = jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
             if (claim == null)
             {
                 throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
