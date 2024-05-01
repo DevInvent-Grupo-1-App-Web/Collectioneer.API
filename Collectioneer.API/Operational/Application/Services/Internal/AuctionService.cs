@@ -26,11 +26,11 @@ public class AuctionService(
 	{
 		var auction = new Auction(
 			command.CommunityId,
-			command.AuctioneerId, 
-			command.CollectibleId, 
-			command.StartingPrice, 
+			command.AuctioneerId,
+			command.CollectibleId,
+			command.StartingPrice,
 			command.Deadline);
-			
+
 		await _auctionRepository.Add(auction);
 		await _unitOfWork.CompleteAsync();
 
@@ -70,6 +70,7 @@ public class AuctionService(
 		var bids = await GetBids(new BidRetrieveQuery(command.AuctionId));
 		bids = bids.OrderByDescending(b => b.Amount);
 		auction.Close();
+		await _auctionRepository.Update(auction);
 		await _unitOfWork.CompleteAsync();
 		return bids.FirstOrDefault();
 	}
@@ -78,6 +79,7 @@ public class AuctionService(
 	{
 		var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
 		auction.CollectAuctioneer();
+		await _auctionRepository.Update(auction);
 		await _unitOfWork.CompleteAsync();
 	}
 
@@ -85,6 +87,7 @@ public class AuctionService(
 	{
 		var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
 		auction.CollectBidder();
+		await _auctionRepository.Update(auction);
 		await _unitOfWork.CompleteAsync();
 	}
 }

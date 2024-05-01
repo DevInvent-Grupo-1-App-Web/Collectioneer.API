@@ -1,3 +1,4 @@
+using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
 using Collectioneer.API.Shared.Infrastructure.Exceptions;
@@ -41,6 +42,11 @@ namespace Collectioneer.API.Shared.Infrastructure.Repositories
 
 		public async Task<T> Update(T entity)
 		{
+			if (entity is ITimestamped timestampedEntity)
+			{
+				timestampedEntity.UpdatedAt = DateTime.UtcNow;
+			}
+
 			_context.Set<T>().Update(entity);
 			await _context.SaveChangesAsync();
 			return entity;

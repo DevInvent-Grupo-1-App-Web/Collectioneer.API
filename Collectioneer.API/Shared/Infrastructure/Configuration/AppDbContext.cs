@@ -117,7 +117,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
             modelBuilder.Entity<Auction>()
                     .Property(x => x.UpdatedAt)
                     .IsRequired()
-                    .ValueGeneratedOnAdd();
+					.ValueGeneratedOnAdd();
         }
         private static void ExchangeModelBuilder(ModelBuilder modelBuilder)
         {
