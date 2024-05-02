@@ -1,5 +1,3 @@
-using Collectioneer.API.Operational.Application.Services.Internal;
-using Collectioneer.API.Operational.Application.Services.Internal.MappingProfiles;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Operational.Infrastructure.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
@@ -19,7 +17,9 @@ using Collectioneer.API.Shared.Application.Internal.MappingProfiles;
 using Collectioneer.API.Social.Domain.Repositories;
 using Collectioneer.API.Social.Infrastructure.Repositories;
 using Collectioneer.API.Social.Domain.Services;
-using Collectioneer.API.Social.Application;
+using Collectioneer.API.Social.Application.Internal.Services;
+using Collectioneer.API.Operational.Application.Internal.MappingProfiles;
+using Collectioneer.API.Operational.Application.Internal.Services;
 
 namespace Collectioneer.API
 {

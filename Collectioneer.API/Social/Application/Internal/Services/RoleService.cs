@@ -4,7 +4,7 @@ using Collectioneer.API.Social.Domain.Models.ValueObjects;
 using Collectioneer.API.Social.Domain.Repositories;
 using Collectioneer.API.Social.Domain.Services;
 
-namespace Collectioneer.API.Social.Application
+namespace Collectioneer.API.Social.Application.Internal.Services
 {
     public class RoleService(
         IRoleRepository roleRepository,
@@ -13,8 +13,8 @@ namespace Collectioneer.API.Social.Application
     {
         public async Task CreateNewRole(CreateRoleCommand command)
         {
-            var newRole = new Role(command.UserId, command.CommunityId, 1 );
-            
+            var newRole = new Role(command.UserId, command.CommunityId, 1);
+
             try
             {
                 await roleRepository.Add(newRole);

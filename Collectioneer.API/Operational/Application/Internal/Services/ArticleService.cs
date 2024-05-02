@@ -5,7 +5,7 @@ using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Domain.Repositories;
 
-namespace Collectioneer.API.Operational.Application.Services.Internal
+namespace Collectioneer.API.Operational.Application.Internal.Services
 {
     public class ArticleService : IArticleService
     {
@@ -22,8 +22,8 @@ namespace Collectioneer.API.Operational.Application.Services.Internal
         {
             var article = new Article
             (
-                collectible.CollectibleId, 
-                collectible.Title 
+                collectible.CollectibleId,
+                collectible.Title
             );
 
             await _articleRepository.Add(article);

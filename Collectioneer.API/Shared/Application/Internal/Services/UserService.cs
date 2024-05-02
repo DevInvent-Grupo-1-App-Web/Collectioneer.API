@@ -1,6 +1,7 @@
 ﻿using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Application.External.Objects;
 using Collectioneer.API.Shared.Domain.Commands;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
 using Collectioneer.API.Shared.Domain.Queries;
@@ -24,7 +25,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
         private readonly ICollectibleRepository _collectibleRepository = collectibleRepository;
         private readonly IConfiguration _configuration = configuration;
 
-        public async Task<int> RegisterNewUser(UserRegisterCommand command)
+        public async Task<UserDTO> RegisterNewUser(UserRegisterCommand command)
         {
             if (!await _userRepository.IsEmailUnique(command.Email))
             {
@@ -41,7 +42,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             await _userRepository.Add(user);
             await _unitOfWork.CompleteAsync();
 
-            return user.Id;
+            return new UserDTO(user);
         }
 
         public async Task<string> LoginUser(UserLoginQuery query)
@@ -78,6 +79,14 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             }
 
             // TODO: It would be interesting to add a login register to the user, so we can keep track of the last time the user logged in.
+        }
+
+        public async Task<UserDTO> GetUser(int id)
+        {
+            var user = await _userRepository.GetById(id) ??
+                throw new UserNotFoundException($"User with id {id} not found.");
+
+            return new UserDTO(user);
         }
 
         public async Task DeleteUser(UserDeleteCommand command)
