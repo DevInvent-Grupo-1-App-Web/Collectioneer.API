@@ -1,4 +1,5 @@
-﻿using Collectioneer.API.Operational.Domain.Commands;
+﻿using Collectioneer.API.Operational.Application.External;
+using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Domain.Services;
@@ -20,7 +21,54 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             _userService = userService;
         }
 
-        // POST api/v1/auctions
+        [Authorize]
+        [HttpGet("auctions")]
+        public async Task<ActionResult<ICollection<AuctionDTO>>> GetAuctions([FromBody]AuctionBulkRetrieveQuery query)
+        {
+            try
+            {
+                var response = await _auctionService.GetAuctions(query);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting auctions.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("auction")]
+        public async Task<ActionResult<AuctionDTO>> GetAuctionFromCollectible([FromBody] AuctionGetByCollectibleIdQuery query)
+        {
+            try
+            {
+                var response = await _auctionService.GetAuctionFromCollectibleId(query);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting auction.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("auctions/{id}")]
+        public async Task<IActionResult> GetAuction([FromRoute] int id)
+        {
+            try
+            {
+                var response = await _auctionService.GetAuction(id);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting auction.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
         [Authorize]
         [HttpPost("auctions")]
         public async Task<IActionResult> CreateAuction([FromBody] AuctionCreationCommand command)

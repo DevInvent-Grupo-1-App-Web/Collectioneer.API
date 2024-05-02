@@ -22,15 +22,32 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			_logger = logger;
 		}
 
+		[HttpGet("user/{id}")]
+		public async Task<IActionResult> GetUser([FromRoute] int id)
+		{
+            try
+			{
+                var response = await _userService.GetUser(id);
+                return Ok(response);
+            }
+            catch (Exception ex)
+			{
+                _logger.LogError(ex, "Error getting user.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
 		[HttpPost("register-user")]
 		public async Task<IActionResult> RegisterUser([FromBody] UserRegisterCommand request)
 		{
 			try
 			{
 				var response = await _userService.RegisterNewUser(request);
-				return Created();
-			}
-			catch (Exception ex)
+                return CreatedAtRoute(nameof(GetUser), new { id = response.Id }, response);
+
+            }
+            catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error registering user.");
 				return StatusCode(500, ex.Message);
