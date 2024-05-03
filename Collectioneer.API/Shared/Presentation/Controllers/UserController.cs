@@ -42,11 +42,12 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			try
 			{
-				var response = await _userService.RegisterNewUser(request);
-                return CreatedAtRoute(nameof(GetUser), new { id = response.Id }, response);
-
-            }
-            catch (Exception ex)
+				var registerResponse = await _userService.RegisterNewUser(request);
+				var loginRequest = new UserLoginQuery( request.Username, request.Password);
+				var loginResponse = await _userService.LoginUser(loginRequest);
+				return Ok(new { user = registerResponse, token = loginResponse, type = "Bearer" });
+			}
+			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error registering user.");
 				return StatusCode(500, ex.Message);
