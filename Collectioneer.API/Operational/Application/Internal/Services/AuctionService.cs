@@ -7,10 +7,8 @@ using Collectioneer.API.Operational.Domain.Models.ValueObjects;
 using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Operational.Domain.Services.Intern;
-using Collectioneer.API.Operational.Infrastructure.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Exceptions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Collectioneer.API.Operational.Application.Internal.Services;
 
@@ -25,7 +23,7 @@ public class AuctionService(
     private readonly IBidRepository _bidRepository = bidRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<int> CreateAuction(AuctionCreationCommand command)
+    public async Task<AuctionDTO> CreateAuction(AuctionCreationCommand command)
     {
         var auction = new Auction(
             command.CommunityId,
@@ -42,10 +40,10 @@ public class AuctionService(
 
         await _unitOfWork.CompleteAsync();
 
-        return auction.Id;
+        return new AuctionDTO(auction);
     }
 
-    public async Task<int> PlaceBid(BidCreationCommand command)
+    public async Task<BidDTO> PlaceBid(BidCreationCommand command)
     {
         var bid = new Bid(command.AuctionId, command.BidderId, command.Amount);
         var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
@@ -59,24 +57,26 @@ public class AuctionService(
 
         await _bidRepository.Add(bid);
         await _unitOfWork.CompleteAsync();
-        return bid.Id;
+        return new BidDTO(bid);
     }
 
-    public async Task<IEnumerable<Bid>> GetBids(BidRetrieveQuery query)
+    public async Task<ICollection<BidDTO>> GetBids(BidRetrieveQuery query)
     {
-        return await _bidRepository.GetBidsByAuctionId(query.AuctionId);
+		var bids = await _bidRepository.GetBidsByAuctionId(query.AuctionId);
+		return bids.Select(b => new BidDTO(b)).ToList();
     }
 
-    public async Task<Bid?> CloseAuction(AuctionCloseCommand command)
-    {
-        var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
-        var bids = await GetBids(new BidRetrieveQuery(command.AuctionId));
-        bids = bids.OrderByDescending(b => b.Amount);
-        auction.Close();
-        await _auctionRepository.Update(auction);
-        await _unitOfWork.CompleteAsync();
-        return bids.FirstOrDefault();
-    }
+	public async Task<BidDTO?> CloseAuction(AuctionCloseCommand command)
+	{
+		var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
+		var bids = await GetBids(new BidRetrieveQuery(command.AuctionId));
+		bids = bids.OrderByDescending(b => b.Amount).ToList();
+		auction.Close();
+		await _auctionRepository.Update(auction);
+		await _unitOfWork.CompleteAsync();
+		var winningBid = bids.FirstOrDefault();
+		return winningBid;
+	}
 
     public async Task AuctioneerConfirmation(AuctionValidationCommand command)
     {
@@ -103,7 +103,7 @@ public class AuctionService(
         }
         return new AuctionDTO(auction);
     }
-    public async Task<IEnumerable<AuctionDTO>> GetAuctions(AuctionBulkRetrieveQuery query)
+    public async Task<ICollection<AuctionDTO>> GetAuctions(AuctionBulkRetrieveQuery query)
     {
         var auctions = await _auctionRepository.GetAuctions(query.CommunityId, query.MaxAmount, query.Offset);
         return auctions.Select(c => new AuctionDTO(c)).ToList();
@@ -114,7 +114,7 @@ public class AuctionService(
         var auction = await _auctionRepository.GetAuctionByCollectibleId(query.CollectibleId);
         if (auction == null)
         {
-            throw new EntityNotFoundException("Auction not found");
+            throw new EntityNotFoundException($"Couldn't found an auction for collectible with id {query.CollectibleId}");
         }
         return new AuctionDTO(auction);
     }

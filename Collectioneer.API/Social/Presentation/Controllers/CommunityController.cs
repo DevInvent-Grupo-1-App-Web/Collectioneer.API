@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Shared.Presentation.Controllers
 {
-    [Route("api/v1")]
     [ApiController]
     public class CommunityController(ICommunityService communityService, ILogger<UserController> logger) : ControllerBase
     {

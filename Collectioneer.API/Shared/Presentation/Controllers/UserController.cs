@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Shared.Presentation.Controllers
 {
-	[Route("api/v1")]
 	[ApiController]
 	public class UserController : ControllerBase
 	{

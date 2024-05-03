@@ -22,8 +22,8 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
         }
 
         [Authorize]
-        [HttpGet("auctions")]
-        public async Task<ActionResult<ICollection<AuctionDTO>>> GetAuctions([FromBody]AuctionBulkRetrieveQuery query)
+		[HttpGet("auctions")]
+		public async Task<ActionResult<ICollection<AuctionDTO>>> GetAuctions([FromQuery]AuctionBulkRetrieveQuery query)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 
         [Authorize]
         [HttpGet("auction")]
-        public async Task<ActionResult<AuctionDTO>> GetAuctionFromCollectible([FromBody] AuctionGetByCollectibleIdQuery query)
+        public async Task<ActionResult<AuctionDTO>> GetAuctionFromCollectible([FromQuery] AuctionGetByCollectibleIdQuery query)
         {
             try
             {
@@ -69,21 +69,26 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
         }
 
 
-        [Authorize]
-        [HttpPost("auctions")]
-        public async Task<IActionResult> CreateAuction([FromBody] AuctionCreationCommand command)
-        {
-            try
-            {
-                var response = await _auctionService.CreateAuction(command);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating auction.");
-                return StatusCode(500, ex.Message);
-            }
-        }
+        // GET api/v1/auctions/bids
+		[Authorize]
+		[HttpPost("auctions")]
+		public async Task<ActionResult<AuctionDTO>> CreateAuction([FromBody] AuctionCreationCommand command)
+		{
+			try
+			{
+				var response = await _auctionService.CreateAuction(command);
+				return CreatedAtAction(
+					nameof(GetAuction), 
+					new { id = response.Id }, 
+					response
+				);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating auction.");
+				return StatusCode(500, ex.Message);
+			}
+		}
 
         // POST api/v1/auctions/bids
         [Authorize]
