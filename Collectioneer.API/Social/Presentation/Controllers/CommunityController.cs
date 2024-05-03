@@ -8,7 +8,7 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 {
     [Route("api/v1")]
     [ApiController]
-    public class CommunityController(ICommunityService communityService, ILogger<UserController> logger, IUserService userService) : ControllerBase
+    public class CommunityController(ICommunityService communityService, ILogger<UserController> logger) : ControllerBase
     {
         [HttpPost("new-community")]
         public async Task<ActionResult<CommunityDTO>> CreateCommunity([FromBody] CommunityCreateCommand request)
@@ -17,7 +17,11 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
             {
                 var newCommunity = await communityService.CreateNewCommunity(request);
 
-                return CreatedAtAction(nameof(GetCommunity), new { id = newCommunity.Id }, newCommunity);
+                return CreatedAtAction(
+					nameof(GetCommunity), 
+					new { communityId = newCommunity.Id }, 
+					newCommunity
+				);
             }
             catch (Exception ex)
             {
@@ -42,12 +46,12 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
             }
         }
 
-        [HttpGet("community/{command}")]
-        public async Task<ActionResult<CommunityDTO>> GetCommunity([FromRoute] CommunityGetCommand command)
+        [HttpGet("community/{communityId}")]
+        public async Task<ActionResult<CommunityDTO>> GetCommunity([FromRoute] int communityId)
         {
             try
             {
-                var community = await communityService.GetCommunity(command);
+                var community = await communityService.GetCommunity(new CommunityGetCommand(communityId));
 
                 return Ok(community);
             }
