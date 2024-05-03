@@ -1,6 +1,6 @@
 ﻿namespace Collectioneer.API.Operational.Domain.Queries
 {
-    public class AuctionGetByCollectibleIdQuery(
+    public record AuctionGetByCollectibleIdQuery(
         int CollectibleId    
     )
     {
