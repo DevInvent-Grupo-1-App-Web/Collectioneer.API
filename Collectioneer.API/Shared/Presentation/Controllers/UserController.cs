@@ -60,7 +60,9 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			try
 			{
 				var response = await _userService.LoginUser(request);
-				return Ok(new { token = response, type = "Bearer"});
+				var requestedUser = await _userService.GetUserByUsername(request.Username);
+				var userId = requestedUser.Id;
+				return Ok(new { token = response, type = "Bearer", userId });
 			}
 			catch (Exception ex)
 			{

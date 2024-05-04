@@ -8,6 +8,7 @@ namespace Collectioneer.API.Shared.Domain.Services
     {
         public Task<UserDTO> RegisterNewUser(UserRegisterCommand command);
         public Task<string> LoginUser(UserLoginQuery query);
+		public Task<UserDTO> GetUserByUsername(string username);
         public Task<UserDTO> GetUser(int id);
         public Task DeleteUser(UserDeleteCommand query);
         public string HashPassword(string password);

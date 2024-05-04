@@ -17,7 +17,7 @@ namespace Collectioneer.API.Social.Application.Internal.Services
     {
         public async Task AddUserToCommunity(CommunityJoinCommand command)
         {
-            await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, command.CommunityId, "Member"));
+            await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, command.CommunityId, "User"));
             await unitOfWork.CompleteAsync();
         }
 
