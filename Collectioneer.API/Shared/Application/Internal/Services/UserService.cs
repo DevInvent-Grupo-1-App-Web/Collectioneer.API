@@ -14,48 +14,48 @@ using System.Text;
 
 namespace Collectioneer.API.Shared.Application.Internal.Services
 {
-    public class UserService(
-        IUnitOfWork unitOfWork,
-        IUserRepository userRepository,
-        IConfiguration configuration,
-        ICollectibleRepository collectibleRepository) : IUserService
-    {
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
-        private readonly IUserRepository _userRepository = userRepository;
-        private readonly ICollectibleRepository _collectibleRepository = collectibleRepository;
-        private readonly IConfiguration _configuration = configuration;
+	public class UserService(
+		IUnitOfWork unitOfWork,
+		IUserRepository userRepository,
+		IConfiguration configuration,
+		ICollectibleRepository collectibleRepository) : IUserService
+	{
+		private readonly IUnitOfWork _unitOfWork = unitOfWork;
+		private readonly IUserRepository _userRepository = userRepository;
+		private readonly ICollectibleRepository _collectibleRepository = collectibleRepository;
+		private readonly IConfiguration _configuration = configuration;
 
-        public async Task<UserDTO> RegisterNewUser(UserRegisterCommand command)
-        {
-            if (!await _userRepository.IsEmailUnique(command.Email))
-            {
-                throw new DuplicatedCredentialsException($"Email {command.Email} is already in use.");
-            }
+		public async Task<UserDTO> RegisterNewUser(UserRegisterCommand command)
+		{
+			if (!await _userRepository.IsEmailUnique(command.Email))
+			{
+				throw new DuplicatedCredentialsException($"Email {command.Email} is already in use.");
+			}
 
-            if (!await _userRepository.IsUsernameUnique(command.Username))
-            {
-                throw new DuplicatedCredentialsException($"Username {command.Username} is already in use.");
-            }
+			if (!await _userRepository.IsUsernameUnique(command.Username))
+			{
+				throw new DuplicatedCredentialsException($"Username {command.Username} is already in use.");
+			}
 
-            var user = new User(command.Username, command.Email, command.Name, HashPassword(command.Password));
+			var user = new User(command.Username, command.Email, command.Name, HashPassword(command.Password));
 
-            await _userRepository.Add(user);
-            await _unitOfWork.CompleteAsync();
+			await _userRepository.Add(user);
+			await _unitOfWork.CompleteAsync();
 
-            return new UserDTO(user);
-        }
+			return new UserDTO(user);
+		}
 
-        public async Task<string> LoginUser(UserLoginQuery query)
-        {
-            var user = await _userRepository.GetUserData(query.Username);
+		public async Task<string> LoginUser(UserLoginQuery query)
+		{
+			var user = await _userRepository.GetUserData(query.Username);
 
-            if (user == null || !user.CheckPassword(HashPassword(query.Password)))
-            {
-                throw new UserNotFoundException($"User with username {query.Username} not found.");
-            }
+			if (user == null || !user.CheckPassword(HashPassword(query.Password)))
+			{
+				throw new UserNotFoundException($"User with username {query.Username} not found.");
+			}
 
-            try
-            {
+			try
+			{
 				var jwtKey = _configuration["JWT_KEY"];
 				if (jwtKey == null)
 				{
@@ -63,95 +63,125 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 				}
 
 				var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+				var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
-                        _configuration["JWT_AUDIENCE"],
-                        null,
-                        expires: DateTime.Now.AddDays(30),
-                        signingCredentials: credentials);
+				var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
+						_configuration["JWT_AUDIENCE"],
+						null,
+						expires: DateTime.Now.AddDays(30),
+						signingCredentials: credentials);
 
-                return new JwtSecurityTokenHandler().WriteToken(token);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+				return new JwtSecurityTokenHandler().WriteToken(token);
+			}
+			catch (Exception)
+			{
+				throw;
+			}
 
-            // TODO: It would be interesting to add a login register to the user, so we can keep track of the last time the user logged in.
-        }
+			// TODO: It would be interesting to add a login register to the user, so we can keep track of the last time the user logged in.
+		}
 
-        public async Task<UserDTO> GetUser(int id)
-        {
-            var user = await _userRepository.GetById(id) ??
-                throw new UserNotFoundException($"User with id {id} not found.");
+		public async Task<UserDTO> GetUser(int id)
+		{
+			var user = await _userRepository.GetById(id) ??
+				throw new UserNotFoundException($"User with id {id} not found.");
 
-            return new UserDTO(user);
-        }
+			return new UserDTO(user);
+		}
 
-        public async Task DeleteUser(UserDeleteCommand command)
-        {
-            if (!await _userRepository.IsValidUser(command.Username, command.Password))
-            {
-                throw new UserNotFoundException($"User with username {command.Username} not found.");
-            }
+		public async Task DeleteUser(UserDeleteCommand command)
+		{
+			if (!await _userRepository.IsValidUser(command.Username, command.Password))
+			{
+				throw new UserNotFoundException($"User with username {command.Username} not found.");
+			}
 
-            var user = await _userRepository.GetUserData(command.Username);
+			var user = await _userRepository.GetUserData(command.Username);
 
-            if (
-                user?.Auctions.Count != 0 ||
-                user.Bids.Count != 0
-                )
-            {
-                throw new ModelIntegrityException("User has active auctions or bids. Cannot delete user.");
-            }
+			if (
+				user?.Auctions.Count != 0 ||
+				user.Bids.Count != 0
+				)
+			{
+				throw new ModelIntegrityException("User has active auctions or bids. Cannot delete user.");
+			}
 
-            if (user.Collectibles.Count != 0)
-            {
-                try
-                {
-                    await _collectibleRepository.DeleteUserCollectibles(user.Id);
-                }
-                catch (Exception)
-                {
-                    throw new ModelIntegrityException("User has collectibles that could not be deleted. Cannot delete user.");
-                }
-            }
+			if (user.Collectibles.Count != 0)
+			{
+				try
+				{
+					await _collectibleRepository.DeleteUserCollectibles(user.Id);
+				}
+				catch (Exception)
+				{
+					throw new ModelIntegrityException("User has collectibles that could not be deleted. Cannot delete user.");
+				}
+			}
 
-            await _userRepository.Delete(user.Id);
-            await _unitOfWork.CompleteAsync();
-        }
+			await _userRepository.Delete(user.Id);
+			await _unitOfWork.CompleteAsync();
+		}
 
-        public string HashPassword(string password)
-        {
-            var hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+		public string HashPassword(string password)
+		{
+			var hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
 
-            var hash = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+			var hash = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
 
-            return hash;
-        }
+			return hash;
+		}
 
-        public async Task<int> GetUserIdByToken(string? token)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+		public async Task<int> GetUserIdByToken(string? token)
+		{
+			var handler = new JwtSecurityTokenHandler();
+			var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
-            var claim = jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
-            if (claim == null)
-            {
-                throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
-            }
+			var claim = jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
+			if (claim == null)
+			{
+				throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
+			}
 
-            var username = claim.Value;
+			var username = claim.Value;
 
-            var user = await _userRepository.GetUserData(username);
-            if (user == null)
-            {
-                throw new UserNotFoundException($"User with username {username} not found.");
-            }
+			var user = await _userRepository.GetUserData(username);
+			if (user == null)
+			{
+				throw new UserNotFoundException($"User with username {username} not found.");
+			}
 
-            return user.Id;
-        }
+			return user.Id;
+		}
 
-    }
+		public async Task ForgotPassword(ForgotPasswordCommand command)
+		{
+			// Get the user
+			var user = await _userManager.FindByEmailAsync(command.Email);
+			if (user == null)
+			{
+				// Don't reveal that the user does not exist
+				return;
+			}
+
+			// Generate password reset token
+			var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+			// Create password reset link
+			var passwordResetLink = Url.Action("ResetPassword", "Account", new { email = command.Email, token = token }, Request.Scheme);
+
+			// Create email
+			var email = new SendGridMessage
+			{
+				From = new EmailAddress("no-reply@yourdomain.com", "Your Name"),
+				Subject = "Password Reset",
+				PlainTextContent = $"Please reset your password by clicking here: {passwordResetLink}",
+				HtmlContent = $"Please reset your password by <a href='{passwordResetLink}'>clicking here</a>."
+			};
+			email.AddTo(new EmailAddress(command.Email));
+
+			// Send email
+			var client = new SendGridClient(_configuration["SendGrid:ApiKey"]);
+			await client.SendEmailAsync(email);
+		}
+	}
 }

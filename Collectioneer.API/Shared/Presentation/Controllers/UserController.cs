@@ -89,5 +89,20 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
             }
         }
 
+		[HttpPost("forgot-password")]
+		public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand request)
+		{
+			try
+			{
+				await _userService.ForgotPassword(request);
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error sending password reset email.");
+				return StatusCode(500, ex.Message);
+			}
+		}
+
 	}
 }
