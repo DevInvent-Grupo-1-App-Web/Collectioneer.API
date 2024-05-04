@@ -14,7 +14,7 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 		public string Name { get; set; } = string.Empty;
 		public int OwnerId { get; set; }
 		public float? Value { get; set; }
-		public int ArticleId { get; set; }
+		public string Description { get; set; } = string.Empty;
 		public int? AuctionId { get; set; }
 		public int? SaleId { get; set; }
 		public int? ExchangeId { get; set; }
@@ -24,20 +24,22 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 		// Navigation properties
 		public User? Owner { get; set; }
 		public Community? Community { get; set; }
-		public Article? Article { get; set; }
 		public Auction? Auction { get; set; }
 		public Sale? Sale { get; set; }
 		public Exchange? Exchange { get; set; }
+		public ICollection<Review>? Reviews { get; set; }
 
 		public Collectible(
 			int communityId,
 			string name,
+			string description,
 			int ownerId,
 			float? value
 		)
 		{
 			CommunityId = communityId;
 			SetName(name);
+			Description = description;
 			SetOwnerId(ownerId);
 			SetValue(value);
 		}

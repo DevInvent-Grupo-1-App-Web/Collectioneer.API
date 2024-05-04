@@ -54,12 +54,12 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
         // POST api/v1/collectibles
         [Authorize]
         [HttpPost("collectibles")]
-        public async Task<IActionResult> CreateCollectible([FromBody] CollectibleRegisterCommand request)
+        public async Task<ActionResult<CollectibleDTO>> CreateCollectible([FromBody] CollectibleRegisterCommand request)
         {
             try
             {
-                await _collectibleService.RegisterCollectible(request);
-                return Created();
+                var collectible = await _collectibleService.RegisterCollectible(request);
+                return CreatedAtAction(nameof(GetCollectible), new { id = collectible.Id }, collectible);
             }
             catch (Exception ex)
             {
