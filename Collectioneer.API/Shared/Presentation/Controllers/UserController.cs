@@ -1,4 +1,5 @@
-﻿using Collectioneer.API.Shared.Domain.Commands;
+﻿using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Domain.Commands;
 using Collectioneer.API.Shared.Domain.Queries;
 using Collectioneer.API.Shared.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Shared.Presentation.Controllers
 {
-	[Route("api/v1/[controller]")]
 	[ApiController]
 	public class UserController : ControllerBase
 	{
@@ -21,14 +21,31 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			_logger = logger;
 		}
 
-		// POST api/v1/register-user
+		[HttpGet("user/{id}")]
+		public async Task<IActionResult> GetUser([FromRoute] int id)
+		{
+            try
+			{
+                var response = await _userService.GetUser(id);
+                return Ok(response);
+            }
+            catch (Exception ex)
+			{
+                _logger.LogError(ex, "Error getting user.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
 		[HttpPost("register-user")]
 		public async Task<IActionResult> RegisterUser([FromBody] UserRegisterCommand request)
 		{
 			try
 			{
-				var response = await _userService.RegisterNewUser(request);
-				return Ok(response);
+				var registerResponse = await _userService.RegisterNewUser(request);
+				var loginRequest = new UserLoginQuery( request.Username, request.Password);
+				var loginResponse = await _userService.LoginUser(loginRequest);
+				return Ok(new { user = registerResponse, token = loginResponse, type = "Bearer" });
 			}
 			catch (Exception ex)
 			{
@@ -37,14 +54,13 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			}
 		}
 
-		// POST api/v1/login
 		[HttpPost("login")]
 		public async Task<IActionResult> LoginUser([FromBody] UserLoginQuery request)
 		{
 			try
 			{
 				var response = await _userService.LoginUser(request);
-				return Ok(response);
+				return Ok(new { token = response, type = "Bearer"});
 			}
 			catch (Exception ex)
 			{
@@ -53,7 +69,6 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			}
 		}
 
-        // DELETE api/v1/delete-user
         [Authorize]
         [HttpDelete("delete-user")]
         public async Task<IActionResult> DeleteUser([FromBody] UserDeleteCommand request)
@@ -66,7 +81,11 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting user.");
-                return StatusCode(500, ex.Message);
+				if (ex.GetType() == typeof(UserNotFoundException)) return NotFound(ex.Message);
+
+				if (ex.GetType() == typeof(ModelIntegrityException)) return BadRequest(ex.Message);
+
+				return StatusCode(500, ex.Message);
             }
         }
 

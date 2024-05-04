@@ -10,6 +10,6 @@ namespace Collectioneer.API.Shared.Domain.Repositories
 
         public Task<bool> IsValidUser(string username, string password);
 
-        public Task<User> GetUserData(string username);
+        public Task<User?> GetUserData(string username);
     }
 }
