@@ -1,6 +1,7 @@
 ﻿using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
+using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -76,5 +77,21 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+		[HttpGet("communities/{userId}")]
+		public async Task<ActionResult<IEnumerable<CommunityDTO>>> GetUserCommunities([FromRoute] int userId)
+		{
+			try
+			{
+				var communities = await communityService.GetUserCommunities(new CommunityFetchByUserQuery(userId));
+
+				return Ok(communities);
+			}
+			catch (Exception ex)
+			{
+				logger.LogError(ex, "Error getting user communities.");
+				return StatusCode(500, ex.Message);
+			}
+		}
     }
 }
