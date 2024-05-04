@@ -3,20 +3,35 @@ using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Models.Entities;
 using Collectioneer.API.Operational.Domain.Models.ValueObjects;
 using Collectioneer.API.Shared.Domain.Exceptions;
+using Collectioneer.API.Shared.Domain.Models.Entities;
+using Collectioneer.API.Social.Domain.Models.Aggregates;
+using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Shared.Domain.Models.Aggregates;
 
 public class User
 {
+    // Entity identifier
     public int Id { get; private set; }
+    // Entity properties
     public string Username { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
     public string Name { get; private set; } = string.Empty;
     public string Password { get; private set; } = string.Empty;
+
+    // Navigation properties
+    public ICollection<Role> Roles { get; set; } = [];
     public ICollection<Collectible> Collectibles { get; set; } = [];
     public ICollection<Auction> Auctions { get; set; } = [];
     public ICollection<Bid> Bids { get; set; } = [];
-
+    public ICollection<Sale> Sales { get; set; } = [];
+    public ICollection<Sale> Purchases { get; set; } = [];
+    public ICollection<Exchange> Exchanges { get; set; } = [];
+    public ICollection<Reaction> Reactions { get; set; } = [];
+    public ICollection<Post> Posts { get; set; } = [];
+    public ICollection<Comment> Comments { get; set; } = [];
+    public ICollection<Review> Reviews { get; set; } = [];
+    public ICollection<MediaElement> MediaElements { get; set; } = [];
     public User(
         string username,
         string email,

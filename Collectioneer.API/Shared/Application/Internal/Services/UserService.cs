@@ -1,6 +1,7 @@
 ﻿using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Application.External.Objects;
 using Collectioneer.API.Shared.Domain.Commands;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
 using Collectioneer.API.Shared.Domain.Queries;
@@ -24,7 +25,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
         private readonly ICollectibleRepository _collectibleRepository = collectibleRepository;
         private readonly IConfiguration _configuration = configuration;
 
-        public async Task<int> RegisterNewUser(UserRegisterCommand command)
+        public async Task<UserDTO> RegisterNewUser(UserRegisterCommand command)
         {
             if (!await _userRepository.IsEmailUnique(command.Email))
             {
@@ -41,7 +42,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             await _userRepository.Add(user);
             await _unitOfWork.CompleteAsync();
 
-            return user.Id;
+            return new UserDTO(user);
         }
 
         public async Task<string> LoginUser(UserLoginQuery query)
@@ -55,13 +56,19 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
             try
             {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_KEY"]));
+				var jwtKey = _configuration["JWT_KEY"];
+				if (jwtKey == null)
+				{
+					throw new ArgumentNullException(nameof(jwtKey), "JWT_KEY is not set in the configuration.");
+				}
+
+				var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
                         _configuration["JWT_AUDIENCE"],
                         null,
-                        expires: DateTime.Now.AddMinutes(120),
+                        expires: DateTime.Now.AddDays(30),
                         signingCredentials: credentials);
 
                 return new JwtSecurityTokenHandler().WriteToken(token);
@@ -74,6 +81,14 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             // TODO: It would be interesting to add a login register to the user, so we can keep track of the last time the user logged in.
         }
 
+        public async Task<UserDTO> GetUser(int id)
+        {
+            var user = await _userRepository.GetById(id) ??
+                throw new UserNotFoundException($"User with id {id} not found.");
+
+            return new UserDTO(user);
+        }
+
         public async Task DeleteUser(UserDeleteCommand command)
         {
             if (!await _userRepository.IsValidUser(command.Username, command.Password))
@@ -84,7 +99,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             var user = await _userRepository.GetUserData(command.Username);
 
             if (
-                user.Auctions.Count != 0 ||
+                user?.Auctions.Count != 0 ||
                 user.Bids.Count != 0
                 )
             {
@@ -115,5 +130,28 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
             return hash;
         }
+
+        public async Task<int> GetUserIdByToken(string? token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+
+            var claim = jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
+            if (claim == null)
+            {
+                throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
+            }
+
+            var username = claim.Value;
+
+            var user = await _userRepository.GetUserData(username);
+            if (user == null)
+            {
+                throw new UserNotFoundException($"User with username {username} not found.");
+            }
+
+            return user.Id;
+        }
+
     }
 }

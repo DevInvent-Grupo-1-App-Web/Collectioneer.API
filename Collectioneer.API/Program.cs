@@ -1,7 +1,4 @@
-using Collectioneer.API.Operational.Application.Services.Internal;
-using Collectioneer.API.Operational.Application.Services.Internal.MappingProfiles;
 using Collectioneer.API.Operational.Domain.Repositories;
-using Collectioneer.API.Operational.Domain.Services;
 using Collectioneer.API.Operational.Infrastructure.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
@@ -17,6 +14,12 @@ using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Shared.Application.Internal.Services;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Application.Internal.MappingProfiles;
+using Collectioneer.API.Social.Domain.Repositories;
+using Collectioneer.API.Social.Infrastructure.Repositories;
+using Collectioneer.API.Social.Domain.Services;
+using Collectioneer.API.Social.Application.Internal.Services;
+using Collectioneer.API.Operational.Application.Internal.MappingProfiles;
+using Collectioneer.API.Operational.Application.Internal.Services;
 
 namespace Collectioneer.API
 {
@@ -48,7 +51,7 @@ namespace Collectioneer.API
             });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -67,19 +70,19 @@ namespace Collectioneer.API
                     Scheme = "Bearer"
                 });
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
                 options.OperationFilter<AuthorizeCheckOperationFilter>();
             });
 
@@ -121,6 +124,15 @@ namespace Collectioneer.API
 
             builder.Services.AddScoped<IBidRepository, BidRepository>();
 
+            builder.Services.AddScoped<ICommunityRepository, CommunityRepository>();
+            builder.Services.AddScoped<ICommunityService, CommunityService>();
+
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
+
+            builder.Services.AddScoped<IRoleTypeRepository, RoleTypeRepository>();
+            builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
+
 
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(UserProfile).Assembly);
@@ -154,8 +166,8 @@ namespace Collectioneer.API
                 var context = scope.ServiceProvider.GetService<AppDbContext>();
                 try
                 {
-                    context.Database.OpenConnection();
-                    context.Database.CloseConnection();
+                    context?.Database.OpenConnection();
+                    context?.Database.CloseConnection();
                 }
                 catch (Exception ex)
                 {
@@ -169,7 +181,9 @@ namespace Collectioneer.API
             using (var scope = app.Services.CreateScope())
             using (var context = scope.ServiceProvider.GetService<AppDbContext>())
             {
+                // context?.Database.EnsureDeleted();
                 context?.Database.EnsureCreated();
+				context?.RunSqlScript("./Scripts/Startup.sql");
             }
 
 
@@ -219,8 +233,8 @@ namespace Collectioneer.API
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             // Check for Authorize attribute
-            var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any()
-                                                 || context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+			var hasAuthorize = context.MethodInfo.DeclaringType?.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() ?? false
+							|| context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
 
             if (hasAuthorize)
             {
@@ -251,6 +265,6 @@ namespace Collectioneer.API
         }
     }
 
-
+	
 
 }

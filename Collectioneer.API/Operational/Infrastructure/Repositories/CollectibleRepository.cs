@@ -11,10 +11,10 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
     {
         public CollectibleRepository(AppDbContext context) : base(context)
         {
-					
+
         }
 
-				public async Task DeleteUserCollectibles(int userId)
+        public async Task DeleteUserCollectibles(int userId)
         {
             var collectibles = await _context.Collectibles.Where(c => c.OwnerId == userId).ToListAsync();
 
@@ -28,6 +28,23 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<ICollection<Collectible>> GetCollectibles(int communityId, int maxAmount, int offset)
+        {
+            var query = _context.Collectibles.Where(c => c.CommunityId == communityId);
+
+            if (offset > 0)
+            {
+                query = query.Skip(offset);
+            }
+
+            if (maxAmount != -1)
+            {
+                query = query.Take(maxAmount);
+            }
+
+            return await query.ToListAsync();
         }
     }
 }

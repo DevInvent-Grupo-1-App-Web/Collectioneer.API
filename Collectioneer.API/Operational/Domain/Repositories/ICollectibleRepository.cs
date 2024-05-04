@@ -5,6 +5,7 @@ namespace Collectioneer.API.Operational.Domain.Repositories
 {
     public interface ICollectibleRepository : IBaseRepository<Collectible>
     {
-			public Task DeleteUserCollectibles(int userId);
+		public Task DeleteUserCollectibles(int userId);
+        public Task<ICollection<Collectible>> GetCollectibles(int communityId, int maxAmount, int offset);
     }
 }
