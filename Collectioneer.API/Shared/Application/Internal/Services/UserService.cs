@@ -153,5 +153,12 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             return user.Id;
         }
 
-    }
+		public async Task<UserDTO> GetUserByUsername(string username)
+		{
+			var user = await _userRepository.GetUserData(username) ??
+				throw new UserNotFoundException($"User with username {username} not found.");
+
+			return new UserDTO(user);
+		}
+	}
 }
