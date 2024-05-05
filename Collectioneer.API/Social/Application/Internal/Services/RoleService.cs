@@ -25,5 +25,11 @@ namespace Collectioneer.API.Social.Application.Internal.Services
                 throw new Exception("Unknown error creating role.", ex);
             }
         }
+
+		public async Task<ICollection<Role>> GetUserRoles(int userId)
+		{
+			var roles = await roleRepository.GetRolesByUserId(userId);
+			return roles;
+		}
     }
 }

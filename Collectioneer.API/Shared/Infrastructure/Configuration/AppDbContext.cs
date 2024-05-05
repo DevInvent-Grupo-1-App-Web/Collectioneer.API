@@ -18,7 +18,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		public DbSet<Auction> Auctions { get; set; }
 		public DbSet<Exchange> Exchanges { get; set; }
 		public DbSet<Sale> Sales { get; set; }
-		public DbSet<Article> Articles { get; set; }
 		public DbSet<Collectible> Collectibles { get; set; }
 		public DbSet<Review> Reviews { get; set; }
 		public DbSet<Bid> Bids { get; set; }
@@ -41,7 +40,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			AuctionModelBuilder(modelBuilder);
 			ExchangeModelBuilder(modelBuilder);
 			SaleModelBuilder(modelBuilder);
-			ArticleModelBuilder(modelBuilder);
 			CollectibleModelBuilder(modelBuilder);
 			ReviewModelBuilder(modelBuilder);
 			BidModelBuilder(modelBuilder);
@@ -228,42 +226,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.IsRequired()
 					.ValueGeneratedNever();
 		}
-		private static void ArticleModelBuilder(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<Article>()
-								.ToTable("Articles");
-
-			modelBuilder.Entity<Article>()
-					.HasKey(x => x.Id);
-
-			modelBuilder.Entity<Article>()
-					.Property(x => x.Id)
-					.IsRequired()
-					.ValueGeneratedOnAdd();
-
-			modelBuilder.Entity<Article>()
-					.Property(x => x.CollectibleId)
-					.IsRequired();
-
-			modelBuilder.Entity<Article>()
-					.Property(x => x.Title)
-					.IsRequired()
-					.HasMaxLength(50);
-
-			modelBuilder.Entity<Article>()
-					.Property(x => x.Content)
-					.HasMaxLength(500);
-
-			modelBuilder.Entity<Article>()
-					.Property(x => x.CreatedAt)
-					.IsRequired()
-					.ValueGeneratedOnAdd();
-
-			modelBuilder.Entity<Article>()
-					.Property(x => x.UpdatedAt)
-					.IsRequired()
-					.ValueGeneratedNever();
-		}
 		private static void CollectibleModelBuilder(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Collectible>()
@@ -294,7 +256,8 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.Value);
 
 			modelBuilder.Entity<Collectible>()
-					.Property(x => x.ArticleId);
+					.Property(x => x.Description)
+					.HasMaxLength(2048);
 
 			modelBuilder.Entity<Collectible>()
 					.Property(x => x.AuctionId);
@@ -333,7 +296,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.IsRequired();
 
 			modelBuilder.Entity<Review>()
-					.Property(x => x.ArticleId)
+					.Property(x => x.CollectibleId)
 					.IsRequired();
 
 			modelBuilder.Entity<Review>()
@@ -900,16 +863,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				.HasForeignKey(x => x.AuctionId)
 				.OnDelete(DeleteBehavior.Cascade);
 			// One auction has many bid
-			// 
-			// 
-			// One collectible has one article
-			modelBuilder.Entity<Collectible>()
-				.HasOne(x => x.Article)
-				.WithOne(x => x.Collectible)
-				.HasForeignKey<Article>(x => x.CollectibleId)
-				.OnDelete(DeleteBehavior.Cascade);
-			// One article has one collectible
-
 
 			// One auction has one collectible
 			modelBuilder.Entity<Auction>()
@@ -936,6 +889,13 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			.OnDelete(DeleteBehavior.SetNull);
 			// One user has many sale as buyer
 
+			// One review has one collectible
+			modelBuilder.Entity<Review>()
+                .HasOne(x => x.ReviewedCollectible)
+                .WithMany(x => x.Reviews)
+                .HasForeignKey(x => x.CollectibleId)
+                .OnDelete(DeleteBehavior.Cascade);
+			// One collectible has many reviews
 
 			// One exchange has one collectible
 			modelBuilder.Entity<Exchange>()
@@ -944,15 +904,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				.HasForeignKey<Collectible>(x => x.ExchangeId)
 				.OnDelete(DeleteBehavior.SetNull);
 			// One collectible has zero or one exchange
-
-
-			// One article has many review
-			modelBuilder.Entity<Article>()
-				.HasMany(x => x.Reviews)
-				.WithOne(x => x.ReviewedArticle)
-				.HasForeignKey(x => x.ArticleId)
-				.OnDelete(DeleteBehavior.Cascade);
-			// One review has one article
 
 			// One interactable has many reactions
 			modelBuilder.Entity<Interactable>()
@@ -1049,12 +1000,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			DROP TRIGGER IF EXISTS update_sale;
 			CREATE TRIGGER update_sale
 			BEFORE UPDATE ON sales
-			FOR EACH ROW
-			SET NEW.updated_at = NOW();
-
-			DROP TRIGGER IF EXISTS update_article;
-			CREATE TRIGGER update_article
-			BEFORE UPDATE ON articles
 			FOR EACH ROW
 			SET NEW.updated_at = NOW();
 

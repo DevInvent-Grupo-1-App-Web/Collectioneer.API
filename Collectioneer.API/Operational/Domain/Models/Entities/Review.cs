@@ -8,7 +8,7 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 	{
 		public int Id { get; set; }
 		public int ReviewerId { get; set; }
-		public int ArticleId { get; set; }
+		public int CollectibleId { get; set; }
 		public string Content { get; set; }
 		public int Rating { get; set; }
 		public DateTime CreatedAt { get; set; }
@@ -16,17 +16,17 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 
 		// Navigation properties
 		public User? Reviewer { get; set; }
-		public Article? ReviewedArticle { get; set; }
+		public Collectible? ReviewedCollectible { get; set; }
 
 		public Review(
 			int reviewerId,
-			int articleId,
+			int collectibleId,
 			string content,
 			int rating
 		)
 		{
 			ReviewerId = reviewerId;
-			ArticleId = articleId;
+			CollectibleId = collectibleId;
 			Content = content;
 			Rating = rating;
 		}
