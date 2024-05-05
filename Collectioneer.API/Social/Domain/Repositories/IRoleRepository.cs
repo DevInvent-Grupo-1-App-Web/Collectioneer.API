@@ -5,6 +5,7 @@ namespace Collectioneer.API.Social.Domain.Repositories
 {
     public interface IRoleRepository : IBaseRepository<Role>
     {
+		public Task<ICollection<Role>> GetRolesByUserId(int userId);
     }
 
 }
