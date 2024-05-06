@@ -29,6 +29,11 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
                 var response = await _userService.GetUser(id);
                 return Ok(response);
             }
+			catch (ExposableException ex)
+			{
+				_logger.LogError(ex, "Error getting user.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
             catch (Exception ex)
 			{
                 _logger.LogError(ex, "Error getting user.");
@@ -47,6 +52,11 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 				var loginResponse = await _userService.LoginUser(loginRequest);
 				return Ok(new { user = registerResponse, token = loginResponse, type = "Bearer" });
 			}
+			catch (ExposableException ex)
+			{
+				_logger.LogError(ex, "Error registering user.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error registering user.");
@@ -64,6 +74,11 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 				var userId = requestedUser.Id;
 				return Ok(new { token = response, type = "Bearer", userId });
 			}
+			catch (ExposableException ex)
+			{
+				_logger.LogError(ex, "Error logging in user.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error logging in user.");
@@ -80,15 +95,16 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
                 await _userService.DeleteUser(request);
                 return Ok();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting user.");
-				if (ex.GetType() == typeof(UserNotFoundException)) return NotFound(ex.Message);
-
-				if (ex.GetType() == typeof(ModelIntegrityException)) return BadRequest(ex.Message);
-
+			catch (ExposableException ex)
+			{
+				_logger.LogError(ex, "Error deleting user.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting user.");
 				return StatusCode(500, ex.Message);
-            }
+			}
         }
 
 	}
