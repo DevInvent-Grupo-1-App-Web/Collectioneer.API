@@ -2,6 +2,7 @@
 using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Services.Intern;
+using Collectioneer.API.Shared.Application.Exceptions;
 using Collectioneer.API.Shared.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,11 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
                 var response = await _auctionService.GetAuctions(query);
                 return Ok(response);
             }
+			catch (ExposableException ex)
+			{
+				_logger.LogError(ex, "Error getting auctions.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting auctions.");
@@ -46,6 +52,11 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
                 var response = await _auctionService.GetAuctionFromCollectibleId(query);
                 return Ok(response);
             }
+			catch (ExposableException ex)
+			{
+				_logger.LogError(ex, "Error getting auction.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting auction.");
@@ -161,6 +172,11 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
                     return BadRequest("Operation role not specified.");
                 }
             }
+			catch (ExposableException ex)
+			{
+				_logger.LogError(ex, "Error confirming auctioneer.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error confirming auctioneer.");
