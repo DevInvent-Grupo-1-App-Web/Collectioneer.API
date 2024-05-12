@@ -78,7 +78,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
                 throw;
             }
 
-            // TODO: It would be interesting to add a login register to the user, so we can keep track of the last time the user logged in.
+            /* TODO: It would be interesting to add a login register to the user, so we can keep track of the last time the user logged in. */
         }
 
         public async Task<UserDTO> GetUser(int id)
@@ -136,21 +136,14 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
-            var claim = jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
-            if (claim == null)
-            {
-                throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
-            }
+            var claim = (jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name")) ?? 
+			throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
 
-            var username = claim.Value;
+			var username = claim.Value;
 
-            var user = await _userRepository.GetUserData(username);
-            if (user == null)
-            {
-                throw new UserNotFoundException($"User with username {username} not found.");
-            }
+            var user = await GetUserByUsername(username);
 
-            return user.Id;
+			return user.Id;
         }
 
 		public async Task<UserDTO> GetUserByUsername(string username)
