@@ -45,7 +45,7 @@ public class User
 		SetPassword(password);
 	}
 
-	private void SetPassword(string hashedPassword)
+	public void SetPassword(string hashedPassword)
 	{
 		if (hashedPassword.Length != 64)
 		{
