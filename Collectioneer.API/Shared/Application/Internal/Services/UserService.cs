@@ -173,7 +173,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 			}
 
 			// Change the user's password
-			var user = await _userRepository.GetUserByEmail(command.Username) ??
+			var user = await _userRepository.GetUserByUsername(command.Username) ??
 				throw new UserNotFoundException($"User with email {command.Username} not found.");
 			user.SetPassword(HashPassword(command.NewPassword));
 
