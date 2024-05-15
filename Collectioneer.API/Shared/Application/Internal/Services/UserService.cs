@@ -24,6 +24,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 		private readonly IUserRepository _userRepository = userRepository;
 		private readonly ICollectibleRepository _collectibleRepository = collectibleRepository;
 		private readonly IConfiguration _configuration = configuration;
+		private readonly CommunicationService _communicationService = new CommunicationService(configuration);
 
 		public async Task<UserDTO> RegisterNewUser(UserRegisterCommand command)
 		{
@@ -47,7 +48,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
 		public async Task<string> LoginUser(UserLoginQuery query)
 		{
-			var user = await _userRepository.GetUserData(query.Username);
+			var user = await _userRepository.GetUserByUsername(query.Username);
 
 			if (user == null || !user.CheckPassword(HashPassword(query.Password)))
 			{
@@ -96,7 +97,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 				throw new UserNotFoundException($"User with username {command.Username} not found.");
 			}
 
-			var user = await _userRepository.GetUserData(command.Username);
+			var user = await _userRepository.GetUserByUsername(command.Username);
 
 			if (
 				user?.Auctions.Count != 0 ||
@@ -136,19 +137,19 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 			var handler = new JwtSecurityTokenHandler();
 			var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
-            var claim = (jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name")) ?? 
+			var claim = (jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name")) ??
 			throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
 
 			var username = claim.Value;
 
-            var user = await GetUserByUsername(username);
+			var user = await GetUserByUsername(username);
 
 			return user.Id;
-        }
+		}
 
 		public async Task<UserDTO> GetUserByUsername(string username)
 		{
-			var user = await _userRepository.GetUserData(username) ??
+			var user = await _userRepository.GetUserByUsername(username) ??
 				throw new UserNotFoundException($"User with username {username} not found.");
 
 			return new UserDTO(user);
@@ -156,7 +157,51 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
 		public async Task ForgotPassword(ForgotPasswordCommand command)
 		{
+			// Validate if email exists for a user account
+			_ = await _userRepository.GetUserByEmail(command.Email) ??
+				throw new UserNotFoundException($"User with email {command.Email} not found.");
 			
+			// Generate an expirable token for password recovery using JWT_KEY. It must contain the user's email and have a validity of 1 hour.
+			var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+			var date = DateTime.UtcNow.Date;
+			var input = $"{jwtKey}{date}";
+			using var sha256 = SHA256.Create();
+			var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+			var recoveryCode = BitConverter.ToUInt32(hash, 0) % 1000000;
+
+			// Send an email with the email as recipient, the subject "Collectioneer account recovery" and the body containing the token.
+			var subject = "Collectioneer account recovery";
+			var body = $"Your recovery token is: {recoveryCode:D6}.\n\nUse this code to recover your account password. It has a validity of 24 hours. If you did not request this code, please ignore this email.";
+			await _communicationService.SendEmail(command.Email, subject, body);
+		}
+
+		public async Task ChangeUserPassword(PasswordChangeCommand command)
+		{
+			var jwtKey = _configuration["JWT_KEY"];
+			var date = DateTime.UtcNow.Date;
+			var input = $"{jwtKey}{date}";
+			using var sha256 = SHA256.Create();
+			var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+			var recoveryCode = BitConverter.ToUInt32(hash, 0) % 1000000;
+
+			// Compare the generated recovery code with the code entered by the user
+			if (recoveryCode.ToString("D6") != command.RecoveryToken)
+			{
+				throw new ArgumentException("Invalid recovery token.");
+			}
+
+			// Change the user's password
+			var user = await _userRepository.GetUserByEmail(command.Username) ??
+				throw new UserNotFoundException($"User with email {command.Username} not found.");
+			user.SetPassword(HashPassword(command.NewPassword));
+
+			await _unitOfWork.CompleteAsync();
+
+			// Send an email to the user confirming the password change
+			var subject = "Collectioneer password change";
+			var body = "Your password has been successfully changed. If you did not request this change, please contact support immediately.";
+			await _communicationService.SendEmail(user.Email, subject, body);
+
 		}
 	}
 }

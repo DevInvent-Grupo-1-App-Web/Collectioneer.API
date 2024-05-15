@@ -31,13 +31,13 @@ namespace Collectioneer.API.Shared.Infrastructure.Repositories
 			return !await _context.Users.AnyAsync(u => u.Username == username);
 		}
 
-        public async Task<bool> IsValidUser(string username, string hashedPassword)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-            return user != null && user.CheckPassword(hashedPassword);
-        }
+		public async Task<bool> IsValidUser(string username, string hashedPassword)
+		{
+			var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+			return user != null && user.CheckPassword(hashedPassword);
+		}
 
-        public async Task<User?> GetUserData(string username)
+		public async Task<User?> GetUserByUsername(string username)
 		{
 			return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
 		}
