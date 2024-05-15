@@ -53,6 +53,17 @@ namespace Collectioneer.API.Shared.Domain.Services
 		/// <param name="token"></param>
 		/// <returns></returns>
         public Task<int> GetUserIdByToken(string? token);
+		/// <summary>
+		/// Sends an email to the user with a recovery code to reset their password.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
 		public Task ForgotPassword(ForgotPasswordCommand command);
-    }
+		/// <summary>
+		/// Changes the user password using the recovery code.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
+		public Task ChangeUserPassword(PasswordChangeCommand command);
+	}
 }

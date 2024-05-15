@@ -122,6 +122,10 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		}
 
 		[HttpPost("forgot-password")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(500)]
 		public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand request)
 		{
 			try
@@ -132,6 +136,24 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error sending password reset email.");
+				return StatusCode(500, ex.Message);
+			}
+		}
+
+		[HttpPost("change-password")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(500)]
+		public async Task<IActionResult> ChangePassword([FromBody] PasswordChangeCommand request)
+		{
+			try
+			{
+				await _userService.ChangeUserPassword(request);
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error changing password.");
 				return StatusCode(500, ex.Message);
 			}
 		}

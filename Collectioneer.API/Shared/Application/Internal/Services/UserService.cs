@@ -157,35 +157,17 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
 		public async Task ForgotPassword(ForgotPasswordCommand command)
 		{
-			// Validate if email exists for a user account
 			_ = await _userRepository.GetUserByEmail(command.Email) ??
 				throw new UserNotFoundException($"User with email {command.Email} not found.");
-			
-			// Generate an expirable token for password recovery using JWT_KEY. It must contain the user's email and have a validity of 1 hour.
-			var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
-			var date = DateTime.UtcNow.Date;
-			var input = $"{jwtKey}{date}";
-			using var sha256 = SHA256.Create();
-			var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
-			var recoveryCode = BitConverter.ToUInt32(hash, 0) % 1000000;
 
-			// Send an email with the email as recipient, the subject "Collectioneer account recovery" and the body containing the token.
 			var subject = "Collectioneer account recovery";
-			var body = $"Your recovery token is: {recoveryCode:D6}.\n\nUse this code to recover your account password. It has a validity of 24 hours. If you did not request this code, please ignore this email.";
+			var body = $"Your recovery token is:\n{GenerateRecoveryToken(command.Email)}.\n\nUse this code to recover your account password. It has a validity of 24 hours. If you did not request this code, please ignore this email.";
 			await _communicationService.SendEmail(command.Email, subject, body);
 		}
 
 		public async Task ChangeUserPassword(PasswordChangeCommand command)
 		{
-			var jwtKey = _configuration["JWT_KEY"];
-			var date = DateTime.UtcNow.Date;
-			var input = $"{jwtKey}{date}";
-			using var sha256 = SHA256.Create();
-			var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
-			var recoveryCode = BitConverter.ToUInt32(hash, 0) % 1000000;
-
-			// Compare the generated recovery code with the code entered by the user
-			if (recoveryCode.ToString("D6") != command.RecoveryToken)
+			if (GenerateRecoveryToken(await GetEmailByUsername(command.Username)) != command.RecoveryToken)
 			{
 				throw new ArgumentException("Invalid recovery token.");
 			}
@@ -202,6 +184,25 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 			var body = "Your password has been successfully changed. If you did not request this change, please contact support immediately.";
 			await _communicationService.SendEmail(user.Email, subject, body);
 
+		}
+
+		private string GenerateRecoveryToken(string email)
+		{
+			var jwtKey = _configuration["JWT_KEY"];
+			var date = DateTime.UtcNow.Date;
+			var input = $"{jwtKey}{date}{email}";
+			var hash = SHA256.HashData(Encoding.UTF8.GetBytes(input));
+			var recoveryCode = BitConverter.ToUInt32(hash, 0) % 1000000;
+
+			return recoveryCode.ToString("D6");
+		}
+
+		private async Task<string> GetEmailByUsername(string username)
+		{
+			var user = await _userRepository.GetUserByUsername(username) ??
+				throw new UserNotFoundException($"User with username {username} not found.");
+				
+			return user.Email;
 		}
 	}
 }
