@@ -64,6 +64,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             }
         }
 
+		[Authorize]
         [HttpGet("auctions/{id}")]
         public async Task<IActionResult> GetAuction([FromRoute] int id)
         {

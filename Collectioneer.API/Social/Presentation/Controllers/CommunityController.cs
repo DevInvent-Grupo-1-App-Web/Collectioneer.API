@@ -3,10 +3,12 @@ using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Shared.Presentation.Controllers
 {
+	[Authorize]
     [ApiController]
     public class CommunityController(ICommunityService communityService, ILogger<UserController> logger) : ControllerBase
     {
