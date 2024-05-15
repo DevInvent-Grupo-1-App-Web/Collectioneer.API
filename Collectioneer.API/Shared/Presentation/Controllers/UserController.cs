@@ -1,11 +1,10 @@
 ﻿using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Application.External.Objects;
 using Collectioneer.API.Shared.Domain.Commands;
 using Collectioneer.API.Shared.Domain.Queries;
 using Collectioneer.API.Shared.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Collectioneer.API.Shared.Presentation.Controllers
 {
@@ -22,30 +21,46 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		}
 
 		[HttpGet("user/{id}")]
-		public async Task<IActionResult> GetUser([FromRoute] int id)
+		[ProducesResponseType(typeof(UserDTO), 200)]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(500)]
+		public async Task<ActionResult<UserDTO>> GetUser([FromRoute] int id)
 		{
-            try
+			try
 			{
-                var response = await _userService.GetUser(id);
-                return Ok(response);
-            }
-            catch (Exception ex)
+				var response = await _userService.GetUser(id);
+				return StatusCode(200, response);
+			}
+			catch (ExposableException ex)
 			{
-                _logger.LogError(ex, "Error getting user.");
-                return StatusCode(500, ex.Message);
-            }
-        }
+				_logger.LogInformation(ex, "Error getting user.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting user.");
+				return StatusCode(500, ex.Message);
+			}
+		}
 
 
 		[HttpPost("register-user")]
+		[ProducesResponseType(typeof((UserDTO, string, string)), 200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(500)]
 		public async Task<IActionResult> RegisterUser([FromBody] UserRegisterCommand request)
 		{
 			try
 			{
 				var registerResponse = await _userService.RegisterNewUser(request);
-				var loginRequest = new UserLoginQuery( request.Username, request.Password);
+				var loginRequest = new UserLoginQuery(request.Username, request.Password);
 				var loginResponse = await _userService.LoginUser(loginRequest);
 				return Ok(new { user = registerResponse, token = loginResponse, type = "Bearer" });
+			}
+			catch (ExposableException ex)
+			{
+				_logger.LogInformation(ex, "Error registering user.");
+				return StatusCode(ex.StatusCode, ex.Message);
 			}
 			catch (Exception ex)
 			{
@@ -55,12 +70,23 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		}
 
 		[HttpPost("login")]
+		[ProducesResponseType(typeof((string, string, int)), 200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(500)]
 		public async Task<IActionResult> LoginUser([FromBody] UserLoginQuery request)
 		{
 			try
 			{
 				var response = await _userService.LoginUser(request);
-				return Ok(new { token = response, type = "Bearer"});
+				var requestedUser = await _userService.GetUserByUsername(request.Username);
+				var userId = requestedUser.Id;
+				return Ok(new { token = response, type = "Bearer", userId });
+			}
+			catch (ExposableException ex)
+			{
+				_logger.LogInformation(ex, "Error logging in user.");
+				return StatusCode(ex.StatusCode, ex.Message);
 			}
 			catch (Exception ex)
 			{
@@ -69,25 +95,31 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			}
 		}
 
-        [Authorize]
-        [HttpDelete("delete-user")]
-        public async Task<IActionResult> DeleteUser([FromBody] UserDeleteCommand request)
-        {
-            try
-            {
-                await _userService.DeleteUser(request);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting user.");
-				if (ex.GetType() == typeof(UserNotFoundException)) return NotFound(ex.Message);
-
-				if (ex.GetType() == typeof(ModelIntegrityException)) return BadRequest(ex.Message);
-
+		[Authorize]
+		[HttpDelete("delete-user")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(401)]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(500)]
+		public async Task<IActionResult> DeleteUser([FromBody] UserDeleteCommand request)
+		{
+			try
+			{
+				await _userService.DeleteUser(request);
+				return Ok();
+			}
+			catch (ExposableException ex)
+			{
+				_logger.LogInformation(ex, "Error deleting user.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error deleting user.");
 				return StatusCode(500, ex.Message);
-            }
-        }
+			}
+		}
 
 		[HttpPost("forgot-password")]
 		public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand request)

@@ -2,6 +2,7 @@
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Models.Aggregates;
+using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Repositories;
 using Collectioneer.API.Social.Domain.Services;
 
@@ -16,7 +17,7 @@ namespace Collectioneer.API.Social.Application.Internal.Services
     {
         public async Task AddUserToCommunity(CommunityJoinCommand command)
         {
-            await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, command.CommunityId, "Member"));
+            await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, command.CommunityId, "User"));
             await unitOfWork.CompleteAsync();
         }
 
@@ -55,5 +56,23 @@ namespace Collectioneer.API.Social.Application.Internal.Services
             }
             return new CommunityDTO(community);
         }
-    }
+
+		public async Task<ICollection<CommunityDTO>> GetUserCommunities(CommunityFetchByUserQuery query)
+		{
+			var communities = await roleService.GetUserRoles(query.UserId) ?? throw new Exception("User is has not registered in any communities.");
+			var communitiesId = communities.Select(c => c.CommunityId).ToList();
+			var userCommunities = new List<Community>();
+		
+			foreach (var id in communitiesId)
+			{
+				var community = await communityRepository.GetById(id);
+				if (community != null)
+				{
+					userCommunities.Add(community);
+				}
+			}
+		
+			return userCommunities.Select(c => new CommunityDTO(c)).ToList();
+		}
+	}
 }

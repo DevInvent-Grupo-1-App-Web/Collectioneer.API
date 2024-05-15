@@ -136,52 +136,27 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 			var handler = new JwtSecurityTokenHandler();
 			var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
-			var claim = jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name");
-			if (claim == null)
-			{
-				throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
-			}
+            var claim = (jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "unique_name")) ?? 
+			throw new ArgumentException("Invalid token. The token does not contain a 'unique_name' claim.");
 
 			var username = claim.Value;
 
-			var user = await _userRepository.GetUserData(username);
-			if (user == null)
-			{
-				throw new UserNotFoundException($"User with username {username} not found.");
-			}
+            var user = await GetUserByUsername(username);
 
 			return user.Id;
+        }
+
+		public async Task<UserDTO> GetUserByUsername(string username)
+		{
+			var user = await _userRepository.GetUserData(username) ??
+				throw new UserNotFoundException($"User with username {username} not found.");
+
+			return new UserDTO(user);
 		}
 
 		public async Task ForgotPassword(ForgotPasswordCommand command)
 		{
-			// Get the user
-			var user = await _userManager.FindByEmailAsync(command.Email);
-			if (user == null)
-			{
-				// Don't reveal that the user does not exist
-				return;
-			}
-
-			// Generate password reset token
-			var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-			// Create password reset link
-			var passwordResetLink = Url.Action("ResetPassword", "Account", new { email = command.Email, token = token }, Request.Scheme);
-
-			// Create email
-			var email = new SendGridMessage
-			{
-				From = new EmailAddress("no-reply@yourdomain.com", "Your Name"),
-				Subject = "Password Reset",
-				PlainTextContent = $"Please reset your password by clicking here: {passwordResetLink}",
-				HtmlContent = $"Please reset your password by <a href='{passwordResetLink}'>clicking here</a>."
-			};
-			email.AddTo(new EmailAddress(command.Email));
-
-			// Send email
-			var client = new SendGridClient(_configuration["SendGrid:ApiKey"]);
-			await client.SendEmailAsync(email);
+			
 		}
 	}
 }

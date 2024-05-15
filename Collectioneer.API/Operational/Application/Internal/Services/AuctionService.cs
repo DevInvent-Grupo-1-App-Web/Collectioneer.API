@@ -7,8 +7,11 @@ using Collectioneer.API.Operational.Domain.Models.ValueObjects;
 using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Operational.Domain.Services.Intern;
+using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Domain.Exceptions;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Operational.Application.Internal.Services;
 
@@ -24,29 +27,43 @@ public class AuctionService(
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<AuctionDTO> CreateAuction(AuctionCreationCommand command)
+{
+    var auction = new Auction(
+        command.CommunityId,
+        command.AuctioneerId,
+        command.CollectibleId,
+        command.StartingPrice,
+        command.Deadline);
+    try
     {
-        var auction = new Auction(
-            command.CommunityId,
-            command.AuctioneerId,
-            command.CollectibleId,
-            command.StartingPrice,
-            command.Deadline);
-
         await _auctionRepository.Add(auction);
         await _unitOfWork.CompleteAsync();
 
         await _collectibleService.RegisterAuctionIdInCollectible(new CollectibleAuctionIdRegisterCommand(command.CollectibleId, auction.Id));
-
-
         await _unitOfWork.CompleteAsync();
-
-        return new AuctionDTO(auction);
     }
+    catch (DbUpdateException ex)
+    {
+		throw new ExposableException("Invalid entity referenced in request.", 400, ex);
+    }
+	catch (Exception ex)
+	{
+		if ( ex is ExposableException )
+		{
+			throw;
+		}
+		else{
+			throw new ExposableException("An error occurred while creating the auction.", 500, ex);
+		}
+	}
+
+    return new AuctionDTO(auction);
+}
 
     public async Task<BidDTO> PlaceBid(BidCreationCommand command)
     {
         var bid = new Bid(command.AuctionId, command.BidderId, command.Amount);
-        var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
+        var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found.");
 
         var lastBid = auction.Bids.LastOrDefault();
 
