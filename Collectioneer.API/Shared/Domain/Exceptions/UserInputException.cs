@@ -2,7 +2,7 @@
 
 namespace Collectioneer.API.Shared.Domain.Exceptions
 {
-    public class UserModelException(string message) : ExposableException(message, 400)
-    {
-    }
+	public class UserInputException(string message) : ExposableException(message, 400)
+	{
+	}
 }
