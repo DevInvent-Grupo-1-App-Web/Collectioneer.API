@@ -1,5 +1,6 @@
 using Azure;
 using Azure.AI.ContentSafety;
+using Collectioneer.API.Shared.Infrastructure.Configuration;
 
 namespace Collectioneer.API.Shared.Application.External.Services;
 
@@ -8,10 +9,10 @@ public class ContentModerationService
 	private readonly ContentSafetyClient _contentSafetyClient;
     private readonly ILogger<ContentModerationService> _logger;
 
-    public ContentModerationService(IConfiguration configuration, ILogger<ContentModerationService> logger)
+    public ContentModerationService(AppKeys appKeys, ILogger<ContentModerationService> logger)
     {
         _contentSafetyClient = new ContentSafetyClient(
-            new Uri(configuration["CONTENT_SAFETY_ENDPOINT"]),new AzureKeyCredential(configuration["CONTENT_SAFETY_KEY"])
+            new Uri(appKeys.ContentSafety.Endpoint),new AzureKeyCredential(appKeys.ContentSafety.Key)
         );
         _logger = logger;
     }

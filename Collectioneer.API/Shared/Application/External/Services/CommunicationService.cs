@@ -1,18 +1,19 @@
 using Azure;
 using Azure.Communication.Email;
 using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Infrastructure.Configuration;
 
 namespace Collectioneer.API.Shared.Application.External.Services;
 
 public class CommunicationService 
 {
-	private readonly IConfiguration _configuration;
+	private readonly AppKeys _appKeys;
 	private readonly EmailClient _emailClient;
 
-	public CommunicationService(IConfiguration configuration)
+	public CommunicationService(AppKeys appKeys)
 	{
-		_configuration = configuration;
-		_emailClient = new(_configuration["COMMUNICATION_SERVICES_CONNECTION_STRING"]);
+		_appKeys = appKeys;
+		_emailClient = new EmailClient(_appKeys.ExternalCommunication.ConnectionString);
 	}
 
 	public async Task SendEmail(string to, string subject, string body)

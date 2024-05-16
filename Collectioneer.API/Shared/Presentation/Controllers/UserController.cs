@@ -158,5 +158,10 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			}
 		}
 
+		// [HttpGet("who-is")]
+		// public async Task<int> WhoIs([FromQuery] string token)
+		// {
+		// 	return await _userService.GetUserIdByToken(token);
+		// }
 	}
 }

@@ -65,5 +65,10 @@ namespace Collectioneer.API.Shared.Domain.Services
 		/// <param name="command"></param>
 		/// <returns></returns>
 		public Task ChangeUserPassword(PasswordChangeCommand command);
+		/// <summary>
+		/// Get the user id from the token of the request.
+		/// </summary>
+		/// <returns></returns>
+		public Task<int> GetIdFromRequestHeader();
 	}
 }

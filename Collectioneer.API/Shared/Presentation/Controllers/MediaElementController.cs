@@ -11,17 +11,20 @@ public class MediaElementController : ControllerBase
 {
 	private readonly IMediaElementService _mediaElementService;
 	private readonly ContentModerationService _contentModerationService;
+	private readonly IUserService _userService;
     private readonly ILogger<MediaElementController> _logger;
 
 	public MediaElementController(
 		IMediaElementService mediaElementService,
 		ContentModerationService contentModerationService,
-		ILogger<MediaElementController> logger
+		ILogger<MediaElementController> logger,
+		IUserService userService
 	)
 	{
 		_mediaElementService = mediaElementService;
 		_contentModerationService = contentModerationService;
 		_logger = logger;
+		_userService = userService;
 	}
 	
 	[Authorize]
@@ -49,7 +52,7 @@ public class MediaElementController : ControllerBase
 			_logger.LogWarning("Content moderation service is not available. Skipping content moderation check.");	
 		}
 
-		var result = await _mediaElementService.UploadMedia(command);
+		var result = await _mediaElementService.UploadMedia(command, await _userService.GetIdFromRequestHeader());
 		return Ok(result);
 	}
 }
