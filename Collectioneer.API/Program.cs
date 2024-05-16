@@ -19,6 +19,7 @@ using Collectioneer.API.Social.Infrastructure.Repositories;
 using Collectioneer.API.Social.Domain.Services;
 using Collectioneer.API.Social.Application.Internal.Services;
 using Collectioneer.API.Operational.Application.Internal.Services;
+using Collectioneer.API.Shared.Application.External.Services;
 
 namespace Collectioneer.API
 {
@@ -128,6 +129,11 @@ namespace Collectioneer.API
 
             builder.Services.AddScoped<IRoleTypeRepository, RoleTypeRepository>();
             builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
+
+			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
+
+			builder.Services.AddScoped<ContentModerationService>();
+			
 
             builder.Services.AddAuthentication(
             JwtBearerDefaults.AuthenticationScheme)

@@ -2,7 +2,7 @@ using Azure;
 using Azure.Communication.Email;
 using Collectioneer.API.Shared.Application.Exceptions;
 
-namespace Collectioneer.API.Shared.Application.Internal.Services;
+namespace Collectioneer.API.Shared.Application.External.Services;
 
 public class CommunicationService 
 {
