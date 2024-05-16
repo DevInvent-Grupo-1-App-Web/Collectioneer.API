@@ -13,12 +13,12 @@ using Collectioneer.API.Shared.Infrastructure.Repositories;
 using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Shared.Application.Internal.Services;
 using Collectioneer.API.Operational.Domain.Services.Intern;
-using Collectioneer.API.Shared.Application.Internal.MappingProfiles;
 using Collectioneer.API.Social.Domain.Repositories;
 using Collectioneer.API.Social.Infrastructure.Repositories;
 using Collectioneer.API.Social.Domain.Services;
 using Collectioneer.API.Social.Application.Internal.Services;
 using Collectioneer.API.Operational.Application.Internal.Services;
+using Collectioneer.API.Shared.Application.External.Services;
 
 namespace Collectioneer.API
 {
@@ -97,10 +97,17 @@ namespace Collectioneer.API
                     {
                         if (connectionString != null)
                         {
-                            options.UseMySQL(connectionString)
+							if (builder.Environment.IsDevelopment())
+							{
+								options.UseMySQL(connectionString)
                                         .LogTo(Console.WriteLine, LogLevel.Information)
                                         .EnableSensitiveDataLogging()
                                         .EnableDetailedErrors();
+							}
+							else {
+								options.UseMySQL(connectionString);
+							}
+                            
                         }
                     }
             );
@@ -128,6 +135,16 @@ namespace Collectioneer.API
 
             builder.Services.AddScoped<IRoleTypeRepository, RoleTypeRepository>();
             builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
+
+			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
+
+			builder.Services.AddScoped<ContentModerationService>();
+			builder.Services.AddScoped<CommunicationService>();
+
+			builder.Services.AddHttpContextAccessor();
+
+			builder.Services.AddSingleton<AppKeys>();
+			
 
             builder.Services.AddAuthentication(
             JwtBearerDefaults.AuthenticationScheme)
@@ -177,16 +194,14 @@ namespace Collectioneer.API
 
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
 
-                app.UseAuthentication();
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
-                });
-            }
+			app.UseSwagger();
+
+			app.UseAuthentication();
+			app.UseSwaggerUI(options =>
+			{
+				options.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
+			});
 
 
             app.UseHttpsRedirection();

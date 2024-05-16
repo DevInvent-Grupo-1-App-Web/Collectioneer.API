@@ -2,13 +2,16 @@
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Shared.Application.Exceptions;
 using Collectioneer.API.Shared.Application.External.Objects;
+using Collectioneer.API.Shared.Application.External.Services;
 using Collectioneer.API.Shared.Domain.Commands;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
 using Collectioneer.API.Shared.Domain.Queries;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Domain.Services;
+using Collectioneer.API.Shared.Infrastructure.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -17,14 +20,18 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 	public class UserService(
 		IUnitOfWork unitOfWork,
 		IUserRepository userRepository,
-		IConfiguration configuration,
-		ICollectibleRepository collectibleRepository) : IUserService
+		AppKeys appKeys,
+		ICollectibleRepository collectibleRepository,
+		CommunicationService communicationService,
+		IHttpContextAccessor httpContextAccessor
+		) : IUserService
 	{
 		private readonly IUnitOfWork _unitOfWork = unitOfWork;
 		private readonly IUserRepository _userRepository = userRepository;
 		private readonly ICollectibleRepository _collectibleRepository = collectibleRepository;
-		private readonly IConfiguration _configuration = configuration;
-		private readonly CommunicationService _communicationService = new CommunicationService(configuration);
+		private readonly AppKeys _appKeys = appKeys;
+		private readonly CommunicationService _communicationService = communicationService;
+		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
 		public async Task<UserDTO> RegisterNewUser(UserRegisterCommand command)
 		{
@@ -49,36 +56,35 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 		public async Task<string> LoginUser(UserLoginQuery query)
 		{
 			var user = await _userRepository.GetUserByUsername(query.Username);
-
+		
 			if (user == null || !user.CheckPassword(HashPassword(query.Password)))
 			{
 				throw new UserNotFoundException($"User with username {query.Username} not found.");
 			}
-
+		
 			try
 			{
-				var jwtKey = _configuration["JWT_KEY"];
-				if (jwtKey == null)
-				{
-					throw new ArgumentNullException(nameof(jwtKey), "JWT_KEY is not set in the configuration.");
-				}
-
-				var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+				var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appKeys.Jwt.Key));
 				var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-				var token = new JwtSecurityToken(_configuration["JWT_ISSUER"],
-						_configuration["JWT_AUDIENCE"],
-						null,
+		
+				var claims = new[]
+				{
+					new Claim(JwtRegisteredClaimNames.UniqueName, user.Username)
+				};
+		
+				var token = new JwtSecurityToken(_appKeys.Jwt.Issuer,
+						_appKeys.Jwt.Audience,
+						claims,
 						expires: DateTime.Now.AddDays(30),
 						signingCredentials: credentials);
-
+		
 				return new JwtSecurityTokenHandler().WriteToken(token);
 			}
 			catch (Exception)
 			{
 				throw;
 			}
-
+		
 			// TODO: It would be interesting to add a login register to the user, so we can keep track of the last time the user logged in.
 		}
 
@@ -188,9 +194,8 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
 		private string GenerateRecoveryToken(string email)
 		{
-			var jwtKey = _configuration["JWT_KEY"];
 			var date = DateTime.UtcNow.Date;
-			var input = $"{jwtKey}{date}{email}";
+			var input = $"{_appKeys.Jwt.Key}{date}{email}";
 			var hash = SHA256.HashData(Encoding.UTF8.GetBytes(input));
 			var recoveryCode = BitConverter.ToUInt32(hash, 0) % 1000000;
 
@@ -203,6 +208,14 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 				throw new UserNotFoundException($"User with username {username} not found.");
 				
 			return user.Email;
+		}
+
+		public async Task<int> GetIdFromRequestHeader()
+		{
+			var authHeader = _httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString() ?? throw new Exception("Authorization header is missing");
+
+			var token = authHeader.Replace("Bearer ", "");
+			return await GetUserIdByToken(token);
 		}
 	}
 }
