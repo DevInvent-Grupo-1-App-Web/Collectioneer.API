@@ -26,6 +26,12 @@ namespace Collectioneer.API
     {
         public static void Main(string[] args)
         {
+			Console.WriteLine("|-----------------------|");
+			Console.WriteLine("|                       |");
+			Console.WriteLine("|   Collectioneer.API   |");
+			Console.WriteLine("|                       |");
+			Console.WriteLine("|-----------------------|");
+
             var builder = WebApplication.CreateBuilder(args);
 
             if (builder.Environment.IsDevelopment())
@@ -97,7 +103,7 @@ namespace Collectioneer.API
                     {
                         if (connectionString != null)
                         {
-							if (builder.Environment.IsDevelopment())
+							if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
 							{
 								options.UseMySQL(connectionString)
                                         .LogTo(Console.WriteLine, LogLevel.Information)
