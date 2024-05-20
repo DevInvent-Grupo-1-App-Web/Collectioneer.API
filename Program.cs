@@ -53,7 +53,7 @@ namespace Collectioneer.API
 			ConfigureHttpPipeline(app);
 
 			Console.WriteLine("Running app...");
-			Console.WriteLine($"App is listening at port { app.Configuration["ASPNETCORE_URLS"] }")
+			Console.WriteLine($"App is listening at port { app.Configuration["ASPNETCORE_URLS"] }");
 
 			app.Run();
 
