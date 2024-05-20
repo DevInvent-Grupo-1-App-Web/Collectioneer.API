@@ -26,34 +26,32 @@ namespace Collectioneer.API
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine("|-----------------------|");
-			Console.WriteLine("|   Collectioneer.API   |");
-			Console.WriteLine("|-----------------------|");
-
-			Console.WriteLine("Creating builder...");
-
 			var builder = WebApplication.CreateBuilder(args);
 
 			ConfigureEnvironment(builder);
 			ConfigureJwt(builder);
 			ConfigureServices(builder);
 
-			Console.WriteLine("Building app...");
-
 			var app = builder.Build();
+
+			var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+			logger.LogInformation("|-----------------------|");
+			logger.LogInformation("|   Collectioneer.API   |");
+			logger.LogInformation("|-----------------------|");
 
 			var appKeys = app.Services.GetRequiredService<AppKeys>();
 			appKeys.CheckKeys();
 
-			Console.WriteLine("Checking database connection...");
+			logger.LogInformation("Checking database connection...");
 
 			TestDbConnection(app);
 			InitializeDatabase(app);
 
 			ConfigureHttpPipeline(app);
 
-			Console.WriteLine("Running app...");
-			Console.WriteLine($"App is listening at port { app.Configuration["ASPNETCORE_URLS"] }");
+			logger.LogInformation("Running app...");
+			logger.LogInformation($"App is listening at port {app.Configuration["ASPNETCORE_URLS"]}");
 
 			app.Run();
 
