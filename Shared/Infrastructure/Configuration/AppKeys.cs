@@ -51,6 +51,48 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				logger.LogInformation("EXTERNAL_COMMUNICATION:ConnectionString: {ConnectionString}", ExternalCommunication.ConnectionString);
 			}
 		}
+	
+		public void CheckKeys()
+		{
+            if (string.IsNullOrEmpty(Jwt.Key))
+			{
+                throw new ArgumentNullException("JWT key is missing.");
+            }
+            if (string.IsNullOrEmpty(Jwt.Issuer))
+			{
+                throw new ArgumentNullException("JWT issuer was not defined.");
+            }
+            if (string.IsNullOrEmpty(Jwt.Audience))
+			{
+                throw new ArgumentNullException("JWT audience was not defined.");
+            }
+            if (string.IsNullOrEmpty(ContentSafety.Key))
+			{
+                throw new ArgumentNullException("Content safety key is missing.");
+            }
+            if (string.IsNullOrEmpty(ContentSafety.Endpoint))
+			{
+                throw new ArgumentNullException("Content safety endpoint was not defined.");
+            }
+            if (string.IsNullOrEmpty(BlobStorage.URL))
+			{
+                throw new ArgumentNullException("Storage URL is missing.");
+            }
+            if (string.IsNullOrEmpty(BlobStorage.ConnectionString))
+			{
+                throw new ArgumentNullException("Storage account connection string was not defined.");
+            }
+            if (string.IsNullOrEmpty(Persistence.ConnectionString))
+			{
+                throw new ArgumentNullException("MySQL connection string was not defined.");
+            }
+            if (string.IsNullOrEmpty(ExternalCommunication.ConnectionString))
+			{
+                throw new ArgumentNullException("Communication services connection string was not defined.");
+            }
+
+			Console.WriteLine("All keys are present. Continuing with app startup.");
+        }
 	}
 
 	public struct JwtConfig
