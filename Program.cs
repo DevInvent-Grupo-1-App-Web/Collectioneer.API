@@ -30,26 +30,29 @@ namespace Collectioneer.API
 			Console.WriteLine("|   Collectioneer.API   |");
 			Console.WriteLine("|-----------------------|");
 
+			Console.WriteLine("Creating builder...")
+
 			var builder = WebApplication.CreateBuilder(args);
-
-			var httpPort = builder.Configuration["HTTP_PORT"] ?? "80";
-			var httpsPort = builder.Configuration["HTTPS_PORT"] ?? "443";
-
-			builder.WebHost.UseUrls($"http://*:{httpPort}", $"https://*:{httpsPort}");
 
 			ConfigureEnvironment(builder);
 			ConfigureJwt(builder);
 			ConfigureServices(builder);
+
+			Console.WriteLine("Building app...")
 
 			var app = builder.Build();
 
 			var appKeys = app.Services.GetRequiredService<AppKeys>();
 			appKeys.CheckKeys();
 
+			Console.WriteLine("Checking database connection...")
+
 			TestDbConnection(app);
 			InitializeDatabase(app);
 
 			ConfigureHttpPipeline(app);
+
+			Console.WriteLine("Running app...")
 
 			app.Run();
 
