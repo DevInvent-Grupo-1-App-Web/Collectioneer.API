@@ -22,285 +22,290 @@ using Collectioneer.API.Shared.Application.External.Services;
 
 namespace Collectioneer.API
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("|-----------------------|");
-            Console.WriteLine("|   Collectioneer.API   |");
-            Console.WriteLine("|-----------------------|");
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			Console.WriteLine("|-----------------------|");
+			Console.WriteLine("|   Collectioneer.API   |");
+			Console.WriteLine("|-----------------------|");
 
-            var builder = WebApplication.CreateBuilder(args);
+			var builder = WebApplication.CreateBuilder(args);
 
-            ConfigureEnvironment(builder);
-            ConfigureJwt(builder);
-            ConfigureServices(builder);
+			var httpPort = builder.Configuration["HTTP_PORT"] ?? "80";
+			var httpsPort = builder.Configuration["HTTPS_PORT"] ?? "443";
 
-            var app = builder.Build();
+			builder.WebHost.UseUrls($"http://*:{httpPort}", $"https://*:{httpsPort}");
 
-            var appKeys = app.Services.GetRequiredService<AppKeys>();
-            appKeys.CheckKeys();
+			ConfigureEnvironment(builder);
+			ConfigureJwt(builder);
+			ConfigureServices(builder);
 
-            TestDbConnection(app);
-            InitializeDatabase(app);
+			var app = builder.Build();
 
-            ConfigureHttpPipeline(app);
+			var appKeys = app.Services.GetRequiredService<AppKeys>();
+			appKeys.CheckKeys();
 
-            app.Run();
+			TestDbConnection(app);
+			InitializeDatabase(app);
 
-        }
+			ConfigureHttpPipeline(app);
 
-        private static void ConfigureHttpPipeline(WebApplication app)
-        {
-            app.UseCors("AllowAll");
+			app.Run();
 
-            app.UseSwagger();
+		}
 
-            app.UseAuthentication();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
-            });
+		private static void ConfigureHttpPipeline(WebApplication app)
+		{
+			app.UseCors("AllowAll");
 
-            app.UseHttpsRedirection();
+			app.UseSwagger();
 
-            app.UseAuthorization();
+			app.UseAuthentication();
+			app.UseSwaggerUI(options =>
+			{
+				options.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
+			});
 
-            app.MapControllers();
-        }
+			app.UseHttpsRedirection();
 
-        private static void InitializeDatabase(WebApplication app)
-        {
-            using (var scope = app.Services.CreateScope())
-            using (var context = scope.ServiceProvider.GetService<AppDbContext>())
-            {
-                context?.Database.EnsureCreated();
-                context?.RunSqlScript("./Scripts/Startup.sql");
-            }
-        }
+			app.UseAuthorization();
 
-        private static void TestDbConnection(WebApplication app)
-        {
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetService<AppDbContext>();
-                try
-                {
-                    context?.Database.OpenConnection();
-                    context?.Database.CloseConnection();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al conectar con la base de datos: {ex.Message}");
-                    return;
-                }
-            }
-        }
+			app.MapControllers();
+		}
 
-        private static void ConfigureEnvironment(WebApplicationBuilder builder)
-        {
-            if (builder.Environment.IsDevelopment())
-            {
-                builder.Configuration.AddUserSecrets<Program>();
-            }
+		private static void InitializeDatabase(WebApplication app)
+		{
+			using (var scope = app.Services.CreateScope())
+			using (var context = scope.ServiceProvider.GetService<AppDbContext>())
+			{
+				context?.Database.EnsureCreated();
+				context?.RunSqlScript("./Scripts/Startup.sql");
+			}
+		}
 
-            builder.Configuration.AddEnvironmentVariables();
-        }
+		private static void TestDbConnection(WebApplication app)
+		{
+			using (var scope = app.Services.CreateScope())
+			{
+				var context = scope.ServiceProvider.GetService<AppDbContext>();
+				try
+				{
+					context?.Database.OpenConnection();
+					context?.Database.CloseConnection();
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Error al conectar con la base de datos: {ex.Message}");
+					return;
+				}
+			}
+		}
 
-        private static void ConfigureJwt(WebApplicationBuilder builder)
-        {
-            var (issuer, audience, key) = ValidateJwtConfiguration(builder.Configuration);
+		private static void ConfigureEnvironment(WebApplicationBuilder builder)
+		{
+			if (builder.Environment.IsDevelopment())
+			{
+				builder.Configuration.AddUserSecrets<Program>();
+			}
 
-            builder.Services.AddAuthentication(
-            JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
-                };
-            });
-        }
+			builder.Configuration.AddEnvironmentVariables();
+		}
 
-        public static (string, string, string) ValidateJwtConfiguration(IConfiguration configuration)
-        {
-            try
-            {
-                string issuer = configuration["JWT_ISSUER"] ?? throw new NullReferenceException("JWT_ISSUER");
-                string audience = configuration["JWT_AUDIENCE"] ?? throw new NullReferenceException("JWT_AUDIENCE");
-                string key = configuration["JWT_KEY"] ?? throw new NullReferenceException("JWT_KEY");
+		private static void ConfigureJwt(WebApplicationBuilder builder)
+		{
+			var (issuer, audience, key) = ValidateJwtConfiguration(builder.Configuration);
 
-                return (issuer, audience, key);
-            }
-            catch (NullReferenceException ex)
-            {
-                throw new ArgumentException($"Environment variable not found: {ex.Message}. Please check your configuration. Startup failed. No server started.");
-            }
-        }
+			builder.Services.AddAuthentication(
+			JwtBearerDefaults.AuthenticationScheme)
+			.AddJwtBearer(options =>
+			{
+				options.TokenValidationParameters = new TokenValidationParameters
+				{
+					ValidateIssuer = true,
+					ValidateAudience = true,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = true,
+					ValidIssuer = issuer,
+					ValidAudience = audience,
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+				};
+			});
+		}
 
-        private static void ConfigureServices(WebApplicationBuilder builder)
-        {
-            // Add services to the container.
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-                });
-            });
+		public static (string, string, string) ValidateJwtConfiguration(IConfiguration configuration)
+		{
+			try
+			{
+				string issuer = configuration["JWT_ISSUER"] ?? throw new NullReferenceException("JWT_ISSUER");
+				string audience = configuration["JWT_AUDIENCE"] ?? throw new NullReferenceException("JWT_AUDIENCE");
+				string key = configuration["JWT_KEY"] ?? throw new NullReferenceException("JWT_KEY");
 
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            ConfigureSwagger(builder);
-            ConfigureDatabase(builder);
-            RegisterRepositories(builder);
-            RegisterServices(builder);
-        }
+				return (issuer, audience, key);
+			}
+			catch (NullReferenceException ex)
+			{
+				throw new ArgumentException($"Environment variable not found: {ex.Message}. Please check your configuration. Startup failed. No server started.");
+			}
+		}
 
-        private static void ConfigureSwagger(WebApplicationBuilder builder)
-        {
-            builder.Services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Collectioneer.API",
-                    Version = "v1",
-                    Description = "Your Api Description"
-                });
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer 12345abcdef'",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
-                });
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                new string[] {}
-            }
-                });
-                options.OperationFilter<AuthorizeCheckOperationFilter>();
-            });
-        }
+		private static void ConfigureServices(WebApplicationBuilder builder)
+		{
+			// Add services to the container.
+			builder.Services.AddCors(options =>
+			{
+				options.AddPolicy("AllowAll", builder =>
+				{
+					builder.AllowAnyOrigin()
+					.AllowAnyMethod()
+					.AllowAnyHeader();
+				});
+			});
 
+			builder.Services.AddControllers();
+			builder.Services.AddEndpointsApiExplorer();
+			ConfigureSwagger(builder);
+			ConfigureDatabase(builder);
+			RegisterRepositories(builder);
+			RegisterServices(builder);
+		}
 
-        private static void ConfigureDatabase(WebApplicationBuilder builder)
-        {
-            var connectionString = builder.Configuration["MYSQL_CONNECTION_STRING"];
-
-            builder.Services.AddDbContext<AppDbContext>(
-                                   options =>
-                                   {
-                                       if (connectionString != null)
-                                       {
-                                           options.UseMySQL(connectionString);
-                                       }
-                                   }
-                                              );
-
-            builder.Services.AddRouting(options => options.LowercaseUrls = true);
-        }
-
-        private static void RegisterRepositories(WebApplicationBuilder builder)
-        {
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IUserService, UserService>();
-
-            builder.Services.AddScoped<ICollectibleRepository, CollectibleRepository>();
-            builder.Services.AddScoped<ICollectibleService, CollectibleService>();
-
-            builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
-            builder.Services.AddScoped<IAuctionService, AuctionService>();
-
-            builder.Services.AddScoped<IBidRepository, BidRepository>();
-
-            builder.Services.AddScoped<ICommunityRepository, CommunityRepository>();
-            builder.Services.AddScoped<ICommunityService, CommunityService>();
-
-            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-            builder.Services.AddScoped<IRoleService, RoleService>();
-
-            builder.Services.AddScoped<IRoleTypeRepository, RoleTypeRepository>();
-            builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
-
-            builder.Services.AddScoped<IMediaElementService, MediaElementService>();
-
-            builder.Services.AddScoped<ContentModerationService>();
-            builder.Services.AddScoped<CommunicationService>();
-
-            builder.Services.AddHttpContextAccessor();
-
-            builder.Services.AddSingleton<AppKeys>();
-        }
-
-        private static void RegisterServices(WebApplicationBuilder builder)
-        {
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<ICollectibleService, CollectibleService>();
-            builder.Services.AddScoped<IAuctionService, AuctionService>();
-            builder.Services.AddScoped<ICommunityService, CommunityService>();
-            builder.Services.AddScoped<IRoleService, RoleService>();
-            builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
-            builder.Services.AddScoped<IMediaElementService, MediaElementService>();
-            builder.Services.AddScoped<ContentModerationService>();
-            builder.Services.AddScoped<CommunicationService>();
-        }
+		private static void ConfigureSwagger(WebApplicationBuilder builder)
+		{
+			builder.Services.AddSwaggerGen(options =>
+			{
+				options.SwaggerDoc("v1", new OpenApiInfo
+				{
+					Title = "Collectioneer.API",
+					Version = "v1",
+					Description = "Your Api Description"
+				});
+				options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+				{
+					Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer 12345abcdef'",
+					Name = "Authorization",
+					In = ParameterLocation.Header,
+					Type = SecuritySchemeType.ApiKey,
+					Scheme = "Bearer"
+				});
+				options.AddSecurityRequirement(new OpenApiSecurityRequirement
+				{
+			{
+				new OpenApiSecurityScheme
+				{
+					Reference = new OpenApiReference
+					{
+						Type = ReferenceType.SecurityScheme,
+						Id = "Bearer"
+					}
+				},
+				new string[] {}
+			}
+				});
+				options.OperationFilter<AuthorizeCheckOperationFilter>();
+			});
+		}
 
 
-    }
+		private static void ConfigureDatabase(WebApplicationBuilder builder)
+		{
+			var connectionString = builder.Configuration["MYSQL_CONNECTION_STRING"];
 
-    public class AuthorizeCheckOperationFilter : IOperationFilter
-    {
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            var hasAuthorize = context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+			builder.Services.AddDbContext<AppDbContext>(
+								   options =>
+								   {
+									   if (connectionString != null)
+									   {
+										   options.UseMySQL(connectionString);
+									   }
+								   }
+											  );
 
-            if (hasAuthorize)
-            {
-                operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
-                operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
+			builder.Services.AddRouting(options => options.LowercaseUrls = true);
+		}
 
-                operation.Security = new List<OpenApiSecurityRequirement>
-            {
-                new OpenApiSecurityRequirement
-                {
-                    [
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header,
+		private static void RegisterRepositories(WebApplicationBuilder builder)
+		{
+			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-                        }
-                    ] = new List<string>()
-                }
-            };
-            }
-        }
-    }
+			builder.Services.AddScoped<IUserRepository, UserRepository>();
+			builder.Services.AddScoped<IUserService, UserService>();
+
+			builder.Services.AddScoped<ICollectibleRepository, CollectibleRepository>();
+			builder.Services.AddScoped<ICollectibleService, CollectibleService>();
+
+			builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
+			builder.Services.AddScoped<IAuctionService, AuctionService>();
+
+			builder.Services.AddScoped<IBidRepository, BidRepository>();
+
+			builder.Services.AddScoped<ICommunityRepository, CommunityRepository>();
+			builder.Services.AddScoped<ICommunityService, CommunityService>();
+
+			builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+			builder.Services.AddScoped<IRoleService, RoleService>();
+
+			builder.Services.AddScoped<IRoleTypeRepository, RoleTypeRepository>();
+			builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
+
+			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
+
+			builder.Services.AddScoped<ContentModerationService>();
+			builder.Services.AddScoped<CommunicationService>();
+
+			builder.Services.AddHttpContextAccessor();
+
+			builder.Services.AddSingleton<AppKeys>();
+		}
+
+		private static void RegisterServices(WebApplicationBuilder builder)
+		{
+			builder.Services.AddScoped<IUserService, UserService>();
+			builder.Services.AddScoped<ICollectibleService, CollectibleService>();
+			builder.Services.AddScoped<IAuctionService, AuctionService>();
+			builder.Services.AddScoped<ICommunityService, CommunityService>();
+			builder.Services.AddScoped<IRoleService, RoleService>();
+			builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
+			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
+			builder.Services.AddScoped<ContentModerationService>();
+			builder.Services.AddScoped<CommunicationService>();
+		}
+
+
+	}
+
+	public class AuthorizeCheckOperationFilter : IOperationFilter
+	{
+		public void Apply(OpenApiOperation operation, OperationFilterContext context)
+		{
+			var hasAuthorize = context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
+
+			if (hasAuthorize)
+			{
+				operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
+				operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
+
+				operation.Security = new List<OpenApiSecurityRequirement>
+			{
+				new OpenApiSecurityRequirement
+				{
+					[
+						new OpenApiSecurityScheme
+						{
+							Reference = new OpenApiReference
+							{
+								Type = ReferenceType.SecurityScheme,
+								Id = "Bearer"
+							},
+							Scheme = "oauth2",
+							Name = "Bearer",
+							In = ParameterLocation.Header,
+
+						}
+					] = new List<string>()
+				}
+			};
+			}
+		}
+	}
 }
