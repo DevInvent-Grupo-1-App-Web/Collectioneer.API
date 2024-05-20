@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Collectioneer.API", "Collectioneer.API\Collectioneer.API.csproj", "{9FC2ACB3-E2AF-483C-B344-402EDC61DF66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Collectioneer.API", "Collectioneer.API.csproj", "{9FC2ACB3-E2AF-483C-B344-402EDC61DF66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

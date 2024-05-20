@@ -99,7 +99,6 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		[HttpDelete("delete-user")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
-		[ProducesResponseType(401)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(500)]
 		public async Task<IActionResult> DeleteUser([FromBody] UserDeleteCommand request)

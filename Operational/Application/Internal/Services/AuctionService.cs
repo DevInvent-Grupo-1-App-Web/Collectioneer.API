@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Collectioneer.API.Operational.Application.External;
+﻿using Collectioneer.API.Operational.Application.External;
 using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Models.Exceptions;
