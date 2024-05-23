@@ -34,6 +34,17 @@ namespace Collectioneer.API
 
 			var app = builder.Build();
 
+			app.Use( async (context, next) => {
+				if (context.Request.Path == "/")
+				{
+					context.Response.Redirect("https://mycollectioneer.net");
+				}
+				else
+				{
+					await next.Invoke();
+				}
+			});
+
 			var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 			logger.LogInformation("|-----------------------|");
