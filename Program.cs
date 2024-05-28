@@ -262,6 +262,7 @@ namespace Collectioneer.API
 			builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
 
 			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
+			builder.Services.AddScoped<IMediaElementRepository, MediaElementRepository>();
 
 			builder.Services.AddScoped<ContentModerationService>();
 			builder.Services.AddScoped<CommunicationService>();

@@ -32,6 +32,7 @@ public class User
 	public ICollection<Comment> Comments { get; set; } = [];
 	public ICollection<Review> Reviews { get; set; } = [];
 	public ICollection<MediaElement> MediaElements { get; set; } = [];
+	public ICollection<MediaElement> ProfileMediaElements { get; set; } = [];
 	public User(
 		string username,
 		string email,
