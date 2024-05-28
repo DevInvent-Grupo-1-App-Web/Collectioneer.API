@@ -477,6 +477,15 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.UpdatedAt)
 					.IsRequired()
 					.ValueGeneratedNever();
+
+			modelBuilder.Entity<MediaElement>()
+					.Property(x => x.CollectibleId);
+
+			modelBuilder.Entity<MediaElement>()
+					.Property(x => x.PostId);
+
+			modelBuilder.Entity<MediaElement>()
+					.Property(x => x.ProfileId);
 		}
 		private static void CommunityModelBuilder(ModelBuilder modelBuilder)
 		{
@@ -969,6 +978,30 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				.HasForeignKey(x => x.RoleTypeId)
 				.OnDelete(DeleteBehavior.Cascade);
 			// One roletype has many role
+
+			// One collectible has many media
+			modelBuilder.Entity<Collectible>()
+				.HasMany(x => x.MediaElements)
+				.WithOne(x => x.Collectible)
+				.HasForeignKey(x => x.CollectibleId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One media has one collectible
+
+			// One post has many media
+			modelBuilder.Entity<Post>()
+				.HasMany(x => x.MediaElements)
+				.WithOne(x => x.Post)
+				.HasForeignKey(x => x.PostId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One media has one post
+
+			// One user profile has many media
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.ProfileMediaElements)
+				.WithOne(x => x.Profile)
+				.HasForeignKey(x => x.ProfileId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One media has one user profile
 		}
 
 		public void RunSqlScript(string sqlScript)

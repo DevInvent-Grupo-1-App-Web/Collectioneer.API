@@ -2,6 +2,7 @@
 using Collectioneer.API.Operational.Domain.Models.Exceptions;
 using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
+using Collectioneer.API.Shared.Domain.Models.Entities;
 using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
@@ -28,6 +29,7 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 		public Sale? Sale { get; set; }
 		public Exchange? Exchange { get; set; }
 		public ICollection<Review>? Reviews { get; set; }
+		public ICollection<MediaElement>? MediaElements { get; set; }
 
 		public Collectible(
 			int communityId,
