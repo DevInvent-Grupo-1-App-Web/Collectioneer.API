@@ -1,5 +1,6 @@
 ﻿using Collectioneer.API.Operational.Domain.Models.Aggregates;
 using Collectioneer.API.Operational.Domain.Models.Entities;
+using Collectioneer.API.Shared.Domain.Models.Entities;
 using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Social.Domain.Models.Aggregates;
@@ -19,6 +20,7 @@ public class Community
 	public ICollection<Role> Roles { get; set; } = [];
 	public ICollection<Filter> CommunityFilters { get; set; } = [];
 	public ICollection<Tag> CommunityTags { get; set; } = [];
+	public ICollection<MediaElement> MediaElements { get; set; } = [];
 
 	public Community(
 		string name,

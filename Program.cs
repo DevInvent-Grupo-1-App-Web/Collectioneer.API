@@ -34,6 +34,17 @@ namespace Collectioneer.API
 
 			var app = builder.Build();
 
+			app.Use( async (context, next) => {
+				if (context.Request.Path == "/")
+				{
+					context.Response.Redirect("https://mycollectioneer.net");
+				}
+				else
+				{
+					await next.Invoke();
+				}
+			});
+
 			var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 			logger.LogInformation("|-----------------------|");
@@ -251,6 +262,7 @@ namespace Collectioneer.API
 			builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
 
 			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
+			builder.Services.AddScoped<IMediaElementRepository, MediaElementRepository>();
 
 			builder.Services.AddScoped<ContentModerationService>();
 			builder.Services.AddScoped<CommunicationService>();

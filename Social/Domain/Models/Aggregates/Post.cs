@@ -21,6 +21,7 @@ namespace Collectioneer.API.Social.Domain.Models.Aggregates
 		public Community? Community { get; set; }
 		public User? Author { get; set; }
 		public ICollection<PostTag> PostTags { get; set; } = [];
+		public ICollection<MediaElement> MediaElements { get; set; } = [];
 		public Post(
 			int communityId,
 			string title,
