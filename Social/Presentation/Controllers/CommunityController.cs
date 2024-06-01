@@ -95,5 +95,21 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 				return StatusCode(500, ex.Message);
 			}
 		}
+
+        [HttpGet("search/communities")]
+        public async Task<ActionResult<IEnumerable<CommunityDTO>>> SearchCommunities([FromQuery] CommunitySearchQuery query)
+        {
+            try
+            {
+                var communities = await communityService.SearchCommunities(query);
+
+                return Ok(communities);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error searching communities.");
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
