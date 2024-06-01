@@ -5,6 +5,6 @@ namespace Collectioneer.API.Social.Domain.Repositories
 {
     public interface ICommunityRepository : IBaseRepository<Community>
     {
-        public Task<ICollection<Community>> SearchCommunities(string searchTerm);
+        public Task<ICollection<Community>> Search(string searchTerm);
     }
 }
