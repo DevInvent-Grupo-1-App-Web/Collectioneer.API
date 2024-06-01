@@ -1,7 +1,9 @@
-﻿using Collectioneer.API.Shared.Domain.Repositories;
+﻿using Collectioneer.API.Operational.Domain.Repositories;
+using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Models.Aggregates;
+using Collectioneer.API.Social.Domain.Models.ValueObjects;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Repositories;
 using Collectioneer.API.Social.Domain.Services;
@@ -12,7 +14,8 @@ namespace Collectioneer.API.Social.Application.Internal.Services
         ICommunityRepository communityRepository,
         IUnitOfWork unitOfWork,
         IRoleService roleService,
-        IRoleTypeService roleTypeService
+        IRoleTypeService roleTypeService,
+		ICollectibleRepository collectibleRepository
     ) : ICommunityService
     {
         public async Task AddUserToCommunity(CommunityJoinCommand command)
@@ -57,6 +60,28 @@ namespace Collectioneer.API.Social.Application.Internal.Services
             return new CommunityDTO(community);
         }
 
+		public async Task<ICollection<FeedItemDTO>> GetCommunityFeed(CommunityFeedQuery query)
+		{
+			// Get collectibles from the community
+			var collectibles = await collectibleRepository.GetCollectibles(query.CommunityId);
+
+			Console.WriteLine("!!!!!!! Collectibles: " + collectibles.Count);
+
+			var feedElements = collectibles.Select(c => new FeedItemDTO(
+				c.Id,
+				c.MediaElements.Select(m => m.MediaURL).ToList(),
+				c.Description,
+				c.CreatedAt,
+				c.Owner.Username,
+				c.OwnerId,
+				c.CommunityId,
+				c.Community.Name,
+				FeedItemType.Collectible.ToString()
+			)).ToList();
+			
+			return feedElements;
+		}
+
 		public async Task<ICollection<CommunityDTO>> GetUserCommunities(CommunityFetchByUserQuery query)
 		{
 			var communities = await roleService.GetUserRoles(query.UserId) ?? throw new Exception("User is has not registered in any communities.");
@@ -74,11 +99,12 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 		
 			return userCommunities.Select(c => new CommunityDTO(c)).ToList();
 		}
+    
+    public async Task<ICollection<CommunityDTO>> SearchCommunities(CommunitySearchQuery query)
+    {
+        var communities = await communityRepository.Search(query.SearchTerm);
+        return communities.Select(c => new CommunityDTO(c)).ToList();
+    }
 
-        public async Task<ICollection<CommunityDTO>> SearchCommunities(CommunitySearchQuery query)
-        {
-            var communities = await communityRepository.Search(query.SearchTerm);
-            return communities.Select(c => new CommunityDTO(c)).ToList();
-        }
 	}
 }
