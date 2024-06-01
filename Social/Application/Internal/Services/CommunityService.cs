@@ -99,7 +99,12 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 		
 			return userCommunities.Select(c => new CommunityDTO(c)).ToList();
 		}
+    
+    public async Task<ICollection<CommunityDTO>> SearchCommunities(CommunitySearchQuery query)
+    {
+        var communities = await communityRepository.Search(query.SearchTerm);
+        return communities.Select(c => new CommunityDTO(c)).ToList();
+    }
 
-		
 	}
 }
