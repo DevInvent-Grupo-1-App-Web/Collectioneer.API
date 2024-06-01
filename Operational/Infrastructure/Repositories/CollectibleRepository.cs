@@ -7,44 +7,48 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Operational.Infrastructure.Repositories
 {
-    public class CollectibleRepository : BaseRepository<Collectible>, ICollectibleRepository
-    {
-        public CollectibleRepository(AppDbContext context) : base(context)
-        {
+	public class CollectibleRepository : BaseRepository<Collectible>, ICollectibleRepository
+	{
+		public CollectibleRepository(AppDbContext context) : base(context)
+		{
 
-        }
+		}
 
-        public async Task DeleteUserCollectibles(int userId)
-        {
-            var collectibles = await _context.Collectibles.Where(c => c.OwnerId == userId).ToListAsync();
+		public async Task DeleteUserCollectibles(int userId)
+		{
+			var collectibles = await _context.Collectibles.Where(c => c.OwnerId == userId).ToListAsync();
 
-            foreach (var collectible in collectibles)
-            {
-                if (collectible.IsLinkedToProcess())
-                {
-                    throw new ModelIntegrityException("Collectible is currently in active process. Cannot delete.");
-                }
-                _context.Collectibles.Remove(collectible);
-            }
+			foreach (var collectible in collectibles)
+			{
+				if (collectible.IsLinkedToProcess())
+				{
+					throw new ModelIntegrityException("Collectible is currently in active process. Cannot delete.");
+				}
+				_context.Collectibles.Remove(collectible);
+			}
 
-            await _context.SaveChangesAsync();
-        }
+			await _context.SaveChangesAsync();
+		}
 
-        public async Task<ICollection<Collectible>> GetCollectibles(int communityId, int maxAmount, int offset)
-        {
-            var query = _context.Collectibles.Where(c => c.CommunityId == communityId);
+		public async Task<ICollection<Collectible>> GetCollectibles(int communityId, int maxAmount = -1, int offset = 0)
+		{
+			var query = _context.Collectibles
+			.Include(c => c.MediaElements)
+			.Include(c => c.Owner)
+			.Include(c => c.Community)
+			.Where(c => c.CommunityId == communityId);
 
-            if (offset > 0)
-            {
-                query = query.Skip(offset);
-            }
+			if (offset > 0)
+			{
+				query = query.Skip(offset);
+			}
 
-            if (maxAmount != -1)
-            {
-                query = query.Take(maxAmount);
-            }
+			if (maxAmount != -1)
+			{
+				query = query.Take(maxAmount);
+			}
 
-            return await query.ToListAsync();
-        }
-    }
+			return await query.ToListAsync();
+		}
+	}
 }

@@ -95,5 +95,21 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 				return StatusCode(500, ex.Message);
 			}
 		}
-    }
+    
+		[HttpGet("/{communityId}/feed")]
+		public async Task<ActionResult<IEnumerable<FeedItemDTO>>> GetFeedContent([FromRoute] int communityId)
+		{
+			try
+			{
+				var feedItems = await communityService.GetCommunityFeed(new CommunityFeedQuery(communityId));
+
+				return Ok(feedItems);
+			}
+			catch (Exception ex)
+			{
+				logger.LogError(ex, "Error getting feed content.");
+				return StatusCode(500, ex.Message);
+			}
+		}
+	}
 }
