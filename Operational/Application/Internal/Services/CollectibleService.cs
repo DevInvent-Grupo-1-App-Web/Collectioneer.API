@@ -55,7 +55,7 @@ namespace Collectioneer.API.Operational.Application.Internal.Services
 
 		public async Task<ICollection<CollectibleDTO>> SearchCollectibles(CollectibleSearchQuery query)
 		{
-			var collectibles = await _collectibleRepository.Search(query.SearchTerm);
+			var collectibles = await _collectibleRepository.Search(query.SearchTerm, query.CommunityId);
 			return collectibles.Select(c => new CollectibleDTO(c)).ToList();
 		}
 	}

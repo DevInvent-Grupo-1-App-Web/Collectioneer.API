@@ -51,11 +51,16 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
-		public async Task<ICollection<Collectible>> Search(string searchTerm)
+		public async Task<ICollection<Collectible>> Search(string searchTerm, int communityId = 0)
 		{
 			var collectibles = await _context.Collectibles
 				.Where(c => c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm))
 				.ToListAsync();
+
+			if (communityId != 0)
+			{
+				collectibles = collectibles.Where(c => c.CommunityId == communityId).ToList();
+			}
 
 			return collectibles;
 		}

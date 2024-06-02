@@ -74,9 +74,3 @@ CREATE TRIGGER update_reaction
 BEFORE UPDATE ON reactions
 FOR EACH ROW
 SET NEW.updated_at = NOW();
-
--- Generate the default values for the roletypes in role_types
-
-INSERT IGNORE INTO role_types (Name) VALUES ('Owner');
-INSERT IGNORE INTO role_types (Name) VALUES ('Admin');
-INSERT IGNORE INTO role_types (Name) VALUES ('User');
