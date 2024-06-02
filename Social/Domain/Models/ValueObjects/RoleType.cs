@@ -1,15 +1,12 @@
 ﻿namespace Collectioneer.API.Social.Domain.Models.ValueObjects;
 
-public class RoleType
+public enum RoleType
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-
-    // Navigation properties
-    public ICollection<Role> Roles { get; set; } = [];
-
-    public RoleType(string name)
-    {
-        Name = name;
-    }
+    Owner = 0,
+	Admin = 1,
+	Moderator = 2,
+	User = 3,
+	Guest = 4,
+	Banned = 5,
+	Muted = 6
 }

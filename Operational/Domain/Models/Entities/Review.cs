@@ -1,6 +1,6 @@
 ﻿using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
-using Collectioneer.API.Social.Domain.Abstracts;
+using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
@@ -17,6 +17,7 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 		// Navigation properties
 		public User? Reviewer { get; set; }
 		public Collectible? ReviewedCollectible { get; set; }
+		public ICollection<Comment>? Comments { get; set; }
 
 		public Review(
 			int reviewerId,

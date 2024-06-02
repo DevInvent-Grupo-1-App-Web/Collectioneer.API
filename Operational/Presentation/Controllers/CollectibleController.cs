@@ -2,7 +2,9 @@
 using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Services.Intern;
-using Microsoft.AspNetCore.Authorization;
+using Collectioneer.API.Social.Application.External;
+using Collectioneer.API.Social.Domain.Queries;
+using Collectioneer.API.Social.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Operational.Presentation.Controllers
@@ -11,15 +13,16 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
     public class CollectibleController : ControllerBase
     {
         private readonly ICollectibleService _collectibleService;
+		private readonly ICommentService _commentService;
         private readonly ILogger<CollectibleController> _logger;
 
-        public CollectibleController(ICollectibleService collectibleService, ILogger<CollectibleController> logger)
+        public CollectibleController(ICollectibleService collectibleService, ILogger<CollectibleController> logger, ICommentService commentService)
         {
             _collectibleService = collectibleService;
             _logger = logger;
+			_commentService = commentService;
         }
 
-        [Authorize]
         [HttpGet("collectibles")]
         public async Task<ActionResult<ICollection<CollectibleDTO>>> GetCollectibles([FromQuery] CollectibleBulkRetrieveQuery request)
         {
@@ -35,7 +38,6 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("collectibles/{id}")]
         public async Task<ActionResult<CollectibleDTO>> GetCollectible([FromRoute] int id)
         {
@@ -52,7 +54,6 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
         }
 
         // POST api/v1/collectibles
-        [Authorize]
         [HttpPost("collectibles")]
         public async Task<ActionResult<CollectibleDTO>> CreateCollectible([FromBody] CollectibleRegisterCommand request)
         {
@@ -67,20 +68,49 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        [HttpGet("search/collectibles")]
+        public async Task<ActionResult<ICollection<CollectibleDTO>>> SearchCollectibles([FromQuery] CollectibleSearchQuery query)
+        {
+            try
+            {
+                var response = await _collectibleService.SearchCollectibles(query);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching collectibles.");
+                return StatusCode(500, ex.Message);
+            }
+        }
 
-		[HttpGet("search/collectibles")]
-		public async Task<ActionResult<ICollection<CollectibleDTO>>> SearchCollectibles([FromQuery] CollectibleSearchQuery query)
-		{
-			try
-			{
-				var response = await _collectibleService.SearchCollectibles(query);
-				return Ok(response);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error searching collectibles.");
-				return StatusCode(500, ex.Message);
-			}
-		}
-    }
+        [HttpGet("collectibles/{id}/comments")]
+        public async Task<ActionResult<ICollection<CommentDTO>>> GetCommentsForCollectible([FromRoute] int id)
+        {
+            try
+            {
+                var response = await _commentService.GetCommentsForCollectible(id);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting comments for collectible.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("collectibles/{id}/comments")]
+        public async Task<ActionResult<CommentDTO>> CreateCommentForCollectible([FromRoute] int id, [FromBody] CommentRegisterCommand request)
+        {
+            try
+            {
+                request.CollectibleId = id;
+                await _commentService.PostComment(request);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating comment for collectible.");
+                return StatusCode(500, ex.Message);
+            }
+      }
 }

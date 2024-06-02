@@ -19,7 +19,7 @@ namespace Collectioneer.API.Social.Application.Internal.Services
     {
         public async Task AddUserToCommunity(CommunityJoinCommand command)
         {
-            await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, command.CommunityId, "User"));
+            await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, command.CommunityId, (RoleType)3));
             await unitOfWork.CompleteAsync();
         }
 
@@ -32,7 +32,7 @@ namespace Collectioneer.API.Social.Application.Internal.Services
                 await communityRepository.Add(newCommunity);
                 await unitOfWork.CompleteAsync();
 
-                await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, newCommunity.Id, "Owner"));
+                await roleService.CreateNewRole(new CreateRoleCommand(command.UserId, newCommunity.Id, (RoleType)1));
                 await unitOfWork.CompleteAsync();
 
                 return new CommunityDTO(newCommunity);
