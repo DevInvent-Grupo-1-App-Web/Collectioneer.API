@@ -258,11 +258,11 @@ namespace Collectioneer.API
 			builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
 
-			builder.Services.AddScoped<IRoleTypeRepository, RoleTypeRepository>();
-			builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
-
 			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
 			builder.Services.AddScoped<IMediaElementRepository, MediaElementRepository>();
+
+			builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+			builder.Services.AddScoped<ICommentService, CommentService>();
 
 			builder.Services.AddScoped<ContentModerationService>();
 			builder.Services.AddScoped<CommunicationService>();
@@ -279,7 +279,6 @@ namespace Collectioneer.API
 			builder.Services.AddScoped<IAuctionService, AuctionService>();
 			builder.Services.AddScoped<ICommunityService, CommunityService>();
 			builder.Services.AddScoped<IRoleService, RoleService>();
-			builder.Services.AddScoped<IRoleTypeService, RoleTypeService>();
 			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
 			builder.Services.AddScoped<ContentModerationService>();
 			builder.Services.AddScoped<CommunicationService>();

@@ -11,5 +11,6 @@ namespace Collectioneer.API.Operational.Domain.Services.Intern
         public Task RegisterAuctionIdInCollectible(CollectibleAuctionIdRegisterCommand command);
         public Task<CollectibleDTO> GetCollectible(int id);
         public Task<ICollection<CollectibleDTO>> GetCollectibles(CollectibleBulkRetrieveQuery command);
+		public Task<ICollection<CollectibleDTO>> SearchCollectibles(CollectibleSearchQuery query);
     }
 }

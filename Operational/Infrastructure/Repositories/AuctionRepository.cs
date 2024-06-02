@@ -78,7 +78,7 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
 
         }
 
-        public new async Task<Auction> GetById(int id)
+        public new async Task<Auction?> GetById(int id)
         {
             return await _context.Auctions
                 .AsNoTracking()
