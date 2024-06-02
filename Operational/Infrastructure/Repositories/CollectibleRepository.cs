@@ -46,5 +46,14 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
 
             return await query.ToListAsync();
         }
-    }
+
+		public async Task<ICollection<Collectible>> Search(string searchTerm)
+		{
+			var collectibles = await _context.Collectibles
+				.Where(c => c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm))
+				.ToListAsync();
+
+			return collectibles;
+		}
+	}
 }

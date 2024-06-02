@@ -11,8 +11,7 @@ namespace Collectioneer.API.Social.Application.Internal.Services
     public class CommunityService(
         ICommunityRepository communityRepository,
         IUnitOfWork unitOfWork,
-        IRoleService roleService,
-        IRoleTypeService roleTypeService
+        IRoleService roleService
     ) : ICommunityService
     {
         public async Task AddUserToCommunity(CommunityJoinCommand command)

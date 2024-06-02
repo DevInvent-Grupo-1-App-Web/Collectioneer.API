@@ -67,5 +67,20 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+		[HttpGet("search/collectibles")]
+		public async Task<ActionResult<ICollection<CollectibleDTO>>> SearchCollectibles([FromQuery] CollectibleSearchQuery query)
+		{
+			try
+			{
+				var response = await _collectibleService.SearchCollectibles(query);
+				return Ok(response);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error searching collectibles.");
+				return StatusCode(500, ex.Message);
+			}
+		}
     }
 }
