@@ -3,11 +3,13 @@ using Collectioneer.API.Operational.Domain.Models.Exceptions;
 using Collectioneer.API.Shared.Domain.Interfaces;
 using Collectioneer.API.Shared.Domain.Models.Aggregates;
 using Collectioneer.API.Shared.Domain.Models.Entities;
+using Collectioneer.API.Social.Domain.Interfaces;
 using Collectioneer.API.Social.Domain.Models.Aggregates;
+using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Operational.Domain.Models.Entities
 {
-	public class Collectible : ITimestamped
+	public class Collectible : ITimestamped, IReactable
 	{
 		public int Id { get; set; }
 		// Entity properties
@@ -28,8 +30,10 @@ namespace Collectioneer.API.Operational.Domain.Models.Entities
 		public Auction? Auction { get; set; }
 		public Sale? Sale { get; set; }
 		public Exchange? Exchange { get; set; }
-		public ICollection<Review>? Reviews { get; set; }
-		public ICollection<MediaElement>? MediaElements { get; set; }
+		public ICollection<Review> Reviews { get; set; } = [];
+		public ICollection<MediaElement> MediaElements { get; set; } = [];
+		public ICollection<Comment> Comments { get; set; } = [];
+		public ICollection<Reaction> Reactions { get; set; } = [];
 
 		public Collectible(
 			int communityId,

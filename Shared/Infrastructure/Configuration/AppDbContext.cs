@@ -7,7 +7,6 @@ using Collectioneer.API.Shared.Domain.Models.Aggregates;
 using Collectioneer.API.Shared.Domain.Models.Entities;
 using Collectioneer.API.Social.Domain.Models.Aggregates;
 using Collectioneer.API.Social.Domain.Models.ValueObjects;
-using Collectioneer.API.Social.Domain.Abstracts;
 
 namespace Collectioneer.API.Shared.Infrastructure.Configuration
 {
@@ -22,7 +21,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		public DbSet<Review> Reviews { get; set; }
 		public DbSet<Bid> Bids { get; set; }
 		public DbSet<Role> Roles { get; set; }
-		public DbSet<RoleType> RoleTypes { get; set; }
 		public DbSet<Community> Communities { get; set; }
 		public DbSet<Post> Posts { get; set; }
 		public DbSet<Comment> Comments { get; set; }
@@ -30,7 +28,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		public DbSet<FilterType> FilterTypes { get; set; }
 		public DbSet<PostTag> PostTags { get; set; }
 		public DbSet<Reaction> Reactions { get; set; }
-		public DbSet<ReactionType> ReactionTypes { get; set; }
 		public DbSet<Tag> Tags { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,18 +41,15 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			ReviewModelBuilder(modelBuilder);
 			BidModelBuilder(modelBuilder);
 			RoleModelBuilder(modelBuilder);
-			RoleTypeModelBuilder(modelBuilder);
 			UserModelBuilder(modelBuilder);
 			MediaElementModelBuilder(modelBuilder);
 			CommunityModelBuilder(modelBuilder);
-			InteractableModelBuilder(modelBuilder);
 			PostModelBuilder(modelBuilder);
 			CommentModelBuilder(modelBuilder);
 			FilterModelBuilder(modelBuilder);
 			FilterTypeModelBuilder(modelBuilder);
 			PostTagModelBuilder(modelBuilder);
 			ReactionModelBuilder(modelBuilder);
-			ReactionTypeModelBuilder(modelBuilder);
 			TagModelBuilder(modelBuilder);
 
 			RelationshipBuilder(modelBuilder);
@@ -386,28 +380,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.IsRequired()
 					.ValueGeneratedNever();
 		}
-		private static void RoleTypeModelBuilder(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<RoleType>()
-					.ToTable("RoleTypes");
-
-			modelBuilder.Entity<RoleType>()
-					.HasKey(x => x.Id);
-
-			modelBuilder.Entity<RoleType>()
-					.Property(x => x.Id)
-					.IsRequired()
-					.ValueGeneratedOnAdd();
-
-			modelBuilder.Entity<RoleType>()
-					.Property(x => x.Name)
-					.IsRequired()
-					.HasMaxLength(50);
-
-			modelBuilder.Entity<RoleType>()
-				.HasIndex(x => x.Name)
-				.IsUnique();
-		}
 		private static void UserModelBuilder(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<User>()
@@ -509,24 +481,18 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.Property(x => x.Description)
 					.HasMaxLength(500);
 		}
-		private static void InteractableModelBuilder(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<Interactable>()
-					.HasKey(x => x.Id);
-
-			modelBuilder.Entity<Interactable>()
-					.Property(x => x.Id)
-					.IsRequired()
-					.ValueGeneratedOnAdd();
-
-			modelBuilder.Entity<Interactable>()
-					.Property(x => x.Content)
-					.IsRequired();
-		}
 		private static void PostModelBuilder(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Post>()
 					.ToTable("Posts");
+
+			modelBuilder.Entity<Post>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<Post>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
 
 			modelBuilder.Entity<Post>()
 				.Property(x => x.AuthorId)
@@ -567,12 +533,33 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.ToTable("Comments");
 
 			modelBuilder.Entity<Comment>()
+					.HasKey(x => x.Id);
+
+			modelBuilder.Entity<Comment>()
+					.Property(x => x.Id)
+					.IsRequired()
+					.ValueGeneratedOnAdd();
+
+			modelBuilder.Entity<Comment>()
 					.Property(x => x.AuthorId)
 					.IsRequired();
 
 			modelBuilder.Entity<Comment>()
-					.Property(x => x.InteractableId)
-					.IsRequired();
+					.Property(x => x.ParentCommentId);
+					
+			modelBuilder.Entity<Comment>()
+					.Property(x => x.PostId);
+
+			modelBuilder.Entity<Comment>()
+					.Property(x => x.CollectibleId);
+
+			modelBuilder.Entity<Comment>()
+					.Property(x => x.ReviewId);
+
+			modelBuilder.Entity<Comment>()
+					.Property(x => x.Content)
+					.IsRequired()
+					.HasMaxLength(2048);
 
 			modelBuilder.Entity<Comment>()
 					.Property(x => x.CreatedAt)
@@ -668,8 +655,13 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.ValueGeneratedOnAdd();
 
 			modelBuilder.Entity<Reaction>()
-					.Property(x => x.InteractableId)
-					.IsRequired();
+					.Property(x => x.PostId);
+
+			modelBuilder.Entity<Reaction>()
+					.Property(x => x.CommentId);
+
+			modelBuilder.Entity<Reaction>()
+					.Property(x => x.CollectibleId);
 
 			modelBuilder.Entity<Reaction>()
 					.Property(x => x.UserId)
@@ -689,24 +681,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 					.IsRequired()
 					.ValueGeneratedNever();
 		}
-		private static void ReactionTypeModelBuilder(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<ReactionType>()
-					.ToTable("ReactionTypes");
 
-			modelBuilder.Entity<ReactionType>()
-					.HasKey(x => x.Id);
-
-			modelBuilder.Entity<ReactionType>()
-					.Property(x => x.Id)
-					.IsRequired()
-					.ValueGeneratedOnAdd();
-
-			modelBuilder.Entity<ReactionType>()
-					.Property(x => x.Name)
-					.IsRequired()
-					.HasMaxLength(50);
-		}
 		private static void TagModelBuilder(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Tag>()
@@ -914,23 +889,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				.OnDelete(DeleteBehavior.SetNull);
 			// One collectible has zero or one exchange
 
-			// One interactable has many reactions
-			modelBuilder.Entity<Interactable>()
-				.HasMany(x => x.Reactions)
-				.WithOne(x => x.Interactable)
-				.HasForeignKey(x => x.InteractableId)
-				.OnDelete(DeleteBehavior.Cascade);
-			// One reaction has one interactable
-
-
-			// One interactable has many comments
-			modelBuilder.Entity<Interactable>()
-				.HasMany(x => x.Comments)
-				.WithOne(x => x.Interactable)
-				.HasForeignKey(x => x.InteractableId)
-				.OnDelete(DeleteBehavior.Cascade);
-			// One comment has one interactable
-
 			// One post has one user (author)
 			modelBuilder.Entity<Post>()
 				.HasOne(x => x.Author)
@@ -963,22 +921,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				.OnDelete(DeleteBehavior.Cascade);
 			// One filtertype has many filter
 
-			// One reaction has one reactiontype
-			modelBuilder.Entity<Reaction>()
-				.HasOne(x => x.ReactionType)
-				.WithMany(x => x.Reactions)
-				.HasForeignKey(x => x.ReactionTypeId)
-				.OnDelete(DeleteBehavior.Cascade);
-			// One reactiontype has many reaction
-
-			// One role has one roletype
-			modelBuilder.Entity<Role>()
-				.HasOne(x => x.RoleType)
-				.WithMany(x => x.Roles)
-				.HasForeignKey(x => x.RoleTypeId)
-				.OnDelete(DeleteBehavior.Cascade);
-			// One roletype has many role
-
 			// One collectible has many media
 			modelBuilder.Entity<Collectible>()
 				.HasMany(x => x.MediaElements)
@@ -986,6 +928,30 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				.HasForeignKey(x => x.CollectibleId)
 				.OnDelete(DeleteBehavior.Cascade);
 			// One media has one collectible
+
+			// One collectible has many comments
+			modelBuilder.Entity<Collectible>()
+				.HasMany(x => x.Comments)
+				.WithOne(x => x.Collectible)
+				.HasForeignKey(x => x.CollectibleId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One comment has one collectible
+
+			// One post has many comments
+			modelBuilder.Entity<Post>()
+				.HasMany(x => x.Comments)
+				.WithOne(x => x.Post)
+				.HasForeignKey(x => x.PostId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One comment has one post
+
+			// One review has many comments
+			modelBuilder.Entity<Review>()
+				.HasMany(x => x.Comments)
+				.WithOne(x => x.Review)
+				.HasForeignKey(x => x.ReviewId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One comment has one review
 
 			// One post has many media
 			modelBuilder.Entity<Post>()
@@ -1002,6 +968,30 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 				.HasForeignKey(x => x.ProfileId)
 				.OnDelete(DeleteBehavior.Cascade);
 			// One media has one user profile
+
+			// One post has many reactions
+			modelBuilder.Entity<Post>()
+				.HasMany(x => x.Reactions)
+				.WithOne(x => x.Post)
+				.HasForeignKey(x => x.PostId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One reaction has one post
+
+			// One comment has many reactions
+			modelBuilder.Entity<Comment>()
+				.HasMany(x => x.Reactions)
+				.WithOne(x => x.Comment)
+				.HasForeignKey(x => x.CommentId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One reaction has one comment
+
+			// One collectible has many reactions
+			modelBuilder.Entity<Collectible>()
+				.HasMany(x => x.Reactions)
+				.WithOne(x => x.Collectible)
+				.HasForeignKey(x => x.CollectibleId)
+				.OnDelete(DeleteBehavior.Cascade);
+			// One reaction has one collectible
 		}
 
 		public void RunSqlScript(string sqlScript)
@@ -1077,13 +1067,6 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			BEFORE UPDATE ON reactions
 			FOR EACH ROW
 			SET NEW.updated_at = NOW();
-
-			-- Generate the default values for the roletypes in role_types
-
-			INSERT IGNORE INTO role_types (Name) VALUES ('Owner');
-			INSERT IGNORE INTO role_types (Name) VALUES ('Admin');
-			INSERT IGNORE INTO role_types (Name) VALUES ('User');
-
 			";
 
 			var commands = sql.Split(new[] { ";\r\n", ";\n" }, StringSplitOptions.RemoveEmptyEntries);
