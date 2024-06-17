@@ -3,6 +3,9 @@ namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 	public enum FeedItemType
 	{
 		Collectible,
-		Post
+		Post,
+		Auction,
+		Sale,
+		Exchange
 	}
 }

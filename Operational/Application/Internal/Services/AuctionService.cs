@@ -7,7 +7,6 @@ using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Application.Exceptions;
-using Collectioneer.API.Shared.Domain.Exceptions;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Shared.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;

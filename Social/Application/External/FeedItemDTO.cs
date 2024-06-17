@@ -7,6 +7,7 @@ namespace Collectioneer.API.Social.Application.External
 	public record FeedItemDTO(
 		int Id,
 		ICollection<string> MultimediaURI,
+		string Title,
 		string Content,
 		DateTime CreatedAt,
 		string Username,
@@ -18,6 +19,7 @@ namespace Collectioneer.API.Social.Application.External
 	{
 		public int Id { get; init; } = Id;
 		public ICollection<string> MultimediaURI { get; init; } = MultimediaURI;
+		public string Title { get; init; } = Title;
 		public string Content { get; init; } = Content;
 		public DateTime CreatedAt { get; init; } = CreatedAt;
 		public string Username { get; init; } = Username;
