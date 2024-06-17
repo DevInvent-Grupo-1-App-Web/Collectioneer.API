@@ -13,9 +13,14 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
         {
         }
 
-		public async Task<ICollection<Post>> GetByCommunityId(int communityId)
+		public async Task<ICollection<Post>> GetPosts(int communityId)
 		{
-			return await _context.Posts.Where(p => p.CommunityId == communityId).ToListAsync();
+			return await _context.Posts
+				.Include(p => p.Author)
+				.Include(p => p.MediaElements)
+				.Include(p => p.Community)
+				.Where(p => p.CommunityId == communityId)
+				.ToListAsync();
 		}
 
 		public async Task<ICollection<Post>> Search(string searchTerm)

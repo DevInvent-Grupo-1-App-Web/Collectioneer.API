@@ -5,7 +5,7 @@ namespace Collectioneer.API.Social.Domain.Repositories
 {
     public interface IPostRepository : IBaseRepository<Post>
     {
-		public Task<ICollection<Post>> GetByCommunityId(int communityId);
+		public Task<ICollection<Post>> GetPosts(int communityId);
         public Task<ICollection<Post>> Search(string searchTerm); 
     }
 }

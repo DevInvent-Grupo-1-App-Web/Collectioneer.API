@@ -1,5 +1,7 @@
-﻿using Collectioneer.API.Operational.Domain.Repositories;
+﻿using Collectioneer.API.Operational.Domain.Models.Entities;
+using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
+using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Models.Aggregates;
@@ -15,7 +17,8 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 		IPostRepository postRepository,
         IUnitOfWork unitOfWork,
         IRoleService roleService,
-		ICollectibleRepository collectibleRepository
+		ICollectibleRepository collectibleRepository,
+		IMediaElementService mediaElementService
     ) : ICommunityService
     {
         public async Task AddUserToCommunity(CommunityJoinCommand command)
@@ -67,28 +70,53 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 
 			Console.WriteLine("!!!!!!! Collectibles: " + collectibles.Count);
 
+			// Lambda that returns a string based on the type of the collectible
+			var feedItemType = (Collectible c) =>
+			{
+				if (c.SaleId != null)
+
+				{
+					return FeedItemType.Sale.ToString();
+				}
+				else if (c.ExchangeId != null)
+
+				{
+					return FeedItemType.Exchange.ToString();
+				}
+				else if (c.AuctionId != null)
+
+				{
+					return FeedItemType.Auction.ToString();
+				}
+				else
+				{
+					return FeedItemType.Collectible.ToString();
+				}
+			};
+
 			var feedElements = collectibles.Select(c => new FeedItemDTO(
 				c.Id,
 				c.MediaElements.Select(m => m.MediaURL).ToList(),
 				c.Description,
 				c.CreatedAt,
-				c.Owner.Username,
+				c.Owner!.Username,
 				c.OwnerId,
 				c.CommunityId,
-				c.Community.Name,
-				FeedItemType.Collectible.ToString()
+				c.Community!.Name,
+				feedItemType(c)
 			)).ToList();
 
-			var posts = await postRepository.GetByCommunityId(query.CommunityId);
+			var posts = await postRepository.GetPosts(query.CommunityId);
+
 			var postFeedElements = posts.Select(p => new FeedItemDTO(
 				p.Id,
-				null,
+				p.MediaElements.Select(m => m.MediaURL).ToList(),
 				p.Content,
 				p.CreatedAt,
-				p.Author.Username,
+				p.Author!.Username,
 				p.AuthorId,
 				p.CommunityId,
-				p.Community.Name,
+				p.Community!.Name,
 				FeedItemType.Post.ToString()
 			)).ToList();
 
