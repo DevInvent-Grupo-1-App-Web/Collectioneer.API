@@ -12,6 +12,7 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 {
     public class CommunityService(
         ICommunityRepository communityRepository,
+		IPostRepository postRepository,
         IUnitOfWork unitOfWork,
         IRoleService roleService,
 		ICollectibleRepository collectibleRepository
@@ -77,6 +78,21 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 				c.Community.Name,
 				FeedItemType.Collectible.ToString()
 			)).ToList();
+
+			var posts = await postRepository.GetByCommunityId(query.CommunityId);
+			var postFeedElements = posts.Select(p => new FeedItemDTO(
+				p.Id,
+				null,
+				p.Content,
+				p.CreatedAt,
+				p.Author.Username,
+				p.AuthorId,
+				p.CommunityId,
+				p.Community.Name,
+				FeedItemType.Post.ToString()
+			)).ToList();
+
+			feedElements.AddRange(postFeedElements);
 			
 			return feedElements;
 		}
