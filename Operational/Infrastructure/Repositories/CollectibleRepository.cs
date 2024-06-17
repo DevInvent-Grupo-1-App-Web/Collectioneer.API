@@ -4,6 +4,7 @@ using Collectioneer.API.Shared.Application.Exceptions;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
 using Collectioneer.API.Shared.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Collectioneer.API.Operational.Infrastructure.Repositories
 {
@@ -51,16 +52,12 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
-		public async Task<ICollection<Collectible>> Search(string searchTerm, int communityId = 0)
+		public async Task<ICollection<Collectible>> Search(string searchTerm, int communityId)
 		{
-			var collectibles = await _context.Collectibles
-				.Where(c => c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm))
-				.ToListAsync();
+            searchTerm = Regex.Replace(searchTerm, @"[^a-zA-Z0-9\s]", "");
 
-			if (communityId != 0)
-			{
-				collectibles = collectibles.Where(c => c.CommunityId == communityId).ToList();
-			}
+            var collectibles = await _context.Collectibles.Where(c => c.CommunityId == communityId && (c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm)))
+                .ToListAsync();
 
 			return collectibles;
 		}

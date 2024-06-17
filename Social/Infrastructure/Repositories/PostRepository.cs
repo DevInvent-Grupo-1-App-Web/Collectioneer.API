@@ -23,13 +23,13 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Post>> Search(string searchTerm)
+		public async Task<ICollection<Post>> Search(string searchTerm, int communityId)
 		{
-			searchTerm = Regex.Replace(searchTerm, @"[^a-zA-Z0-9\s]", "");
+            searchTerm = Regex.Replace(searchTerm, @"[^a-zA-Z0-9\s]", "");
 
-			var posts = await _context.Posts.Where(p => p.Title.Contains(searchTerm)).ToListAsync();
-
-			var whereContent = await _context.Posts.Where(p => p.Content.Contains(searchTerm)).ToListAsync();
+            var posts = await _context.Posts
+                .Where(p => p.CommunityId == communityId && (p.Title.Contains(searchTerm) || p.Content.Contains(searchTerm)))
+                .ToListAsync();
 
 			return posts;
 		}
