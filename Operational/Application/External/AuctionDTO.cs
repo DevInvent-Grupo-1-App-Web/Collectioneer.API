@@ -20,7 +20,7 @@ namespace Collectioneer.API.Operational.Application.External
             CommunityId = auction.CommunityId;
             AuctioneerId = auction.AuctioneerId;
             CollectibleId = auction.CollectibleId;
-            StartingPrice = auction.StartingPrice;
+            StartingPrice = auction.CurrentPrice();
             Deadline = auction.Deadline;
             IsOpen = auction.IsOpen;
             CreatedAt = auction.CreatedAt;

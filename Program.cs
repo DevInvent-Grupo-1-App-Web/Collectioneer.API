@@ -264,6 +264,9 @@ namespace Collectioneer.API
 			builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 			builder.Services.AddScoped<ICommentService, CommentService>();
 
+			builder.Services.AddScoped<IPostRepository, PostRepository>();
+			builder.Services.AddScoped<IPostService, PostService>();
+
 			builder.Services.AddScoped<ContentModerationService>();
 			builder.Services.AddScoped<CommunicationService>();
 
