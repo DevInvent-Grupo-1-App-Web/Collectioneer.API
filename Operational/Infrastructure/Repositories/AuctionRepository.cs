@@ -10,9 +10,11 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
     public class AuctionRepository : BaseRepository<Auction>, IAuctionRepository
     {
         private readonly ICollectibleRepository _collectibleRepository;
-        public AuctionRepository(AppDbContext context, ICollectibleRepository collectibleRepository) : base(context)
+		private readonly ILogger<AuctionRepository> _logger;
+        public AuctionRepository(AppDbContext context, ICollectibleRepository collectibleRepository, ILogger<AuctionRepository> logger) : base(context)
         {
             _collectibleRepository = collectibleRepository;
+			_logger = logger;
         }
 
         public async Task<Auction> GetAuctionByCollectibleId(int CollectibleId)
@@ -22,6 +24,7 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
                 var collectible = await _collectibleRepository.GetById(CollectibleId);
                 var auction = await _context.Auctions
                     .AsNoTracking()
+					.Include(a => a.Bids)
                     .FirstOrDefaultAsync(a => a.CollectibleId == CollectibleId);
 
                 return auction ?? throw new EntityNotFoundException("Auction not found");
@@ -34,7 +37,7 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
 
         public async Task<IEnumerable<Auction>> GetAuctions(int CommunityId, int MaxAmount, int Offset)
         {
-            var query = _context.Auctions.Where(a => a.CommunityId == CommunityId);
+            var query = _context.Auctions.Include(a => a.Bids).Where(a => a.CommunityId == CommunityId);
 
             if (Offset > 0)
             {
@@ -51,7 +54,8 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
 
         public async Task<Auction> GetByCollectibleId(int collectibleId)
         {
-            var collectible = await _context.Collectibles.FirstOrDefaultAsync(c => c.Id == collectibleId);
+            var collectible = await _context.Collectibles
+			.FirstOrDefaultAsync(c => c.Id == collectibleId);
 
             if (collectible == null)
             {
@@ -65,6 +69,7 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
 
             var auction = await _context.Auctions
                             .AsNoTracking()
+							.Include(a => a.Bids)
                             .FirstOrDefaultAsync(a => a.Id == collectible.AuctionId);
 
             if (auction == null)
@@ -80,8 +85,10 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
 
         public new async Task<Auction?> GetById(int id)
         {
+
             return await _context.Auctions
                 .AsNoTracking()
+				.Include(a => a.Bids)
                 .FirstOrDefaultAsync(a => a.Id == id) ?? throw new EntityNotFoundException("Auction not found");
         }
 
