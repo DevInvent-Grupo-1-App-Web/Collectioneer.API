@@ -128,6 +128,22 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 				return StatusCode(500, ex.Message);
 			}
 		}
+
+		[HttpGet("community/{communityId}/search")]
+		public async Task<ActionResult<IEnumerable<FeedItemDTO>>> SearchCommunityContent([FromRoute] int communityId, [FromQuery]string query)
+		{
+			try
+			{
+				var feedItems = await communityService.SearchInCommunity(new CommunitySearchContentQuery(query, communityId));
+
+				return Ok(feedItems);
+			}
+			catch (Exception ex)
+			{
+				logger.LogError(ex, "Error searching community content.");
+				return StatusCode(500, ex.Message);
+			}
+		}
 	}
 }
 

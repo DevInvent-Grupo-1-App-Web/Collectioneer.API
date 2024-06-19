@@ -13,5 +13,7 @@ namespace Collectioneer.API.Social.Domain.Services
         public Task<ICollection<CommunityDTO>> GetUserCommunities(CommunityFetchByUserQuery query);
         public Task<ICollection<FeedItemDTO>> GetCommunityFeed(CommunityFeedQuery query);
         public Task<ICollection<CommunityDTO>> SearchCommunities(CommunitySearchQuery query);
+
+		public Task<ICollection<FeedItemDTO>> SearchInCommunity(CommunitySearchContentQuery query);
     }
 }

@@ -150,5 +150,46 @@ namespace Collectioneer.API.Social.Application.Internal.Services
             return communities.Select(c => new CommunityDTO(c)).ToList();
         }
 
-    }
+		public async Task<ICollection<FeedItemDTO>> SearchInCommunity(CommunitySearchContentQuery query)
+		{
+			var posts = await postRepository.Search(query.SearchTerm, query.CommunityId);
+			var collectibles = await collectibleRepository.Search(query.SearchTerm, query.CommunityId);
+
+			var feedElements = new List<FeedItemDTO>();
+
+			foreach (var post in posts)
+			{
+				feedElements.Add(new FeedItemDTO(
+					post.Id,
+					post.MediaElements.Select(m => m.MediaURL).ToList(),
+					post.Title,
+					post.Content,
+					post.CreatedAt,
+					post.Author!.Username,
+					post.AuthorId,
+					post.CommunityId,
+					post.Community!.Name,
+					FeedItemType.Post.ToString()
+				));
+			}
+
+			foreach (var collectible in collectibles)
+			{
+				feedElements.Add(new FeedItemDTO(
+					collectible.Id,
+					collectible.MediaElements.Select(m => m.MediaURL).ToList(),
+					collectible.Name,
+					collectible.Description,
+					collectible.CreatedAt,
+					collectible.Owner!.Username,
+					collectible.OwnerId,
+					collectible.CommunityId,
+					collectible.Community!.Name,
+					FeedItemType.Collectible.ToString()
+				));
+			}
+
+			return feedElements.OrderByDescending(f => f.CreatedAt).ToList();
+		}
+	}
 }

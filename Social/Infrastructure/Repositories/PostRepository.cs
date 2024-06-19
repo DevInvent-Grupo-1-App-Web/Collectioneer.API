@@ -27,7 +27,9 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
 		{
             searchTerm = Regex.Replace(searchTerm, @"[^a-zA-Z0-9\s]", "");
 
-            var posts = await _context.Posts
+            var posts = await _context.Posts.Include(p => p.Author)
+				.Include(p => p.MediaElements)
+				.Include(p => p.Community)
                 .Where(p => p.CommunityId == communityId && (p.Title.Contains(searchTerm) || p.Content.Contains(searchTerm)))
                 .ToListAsync();
 
