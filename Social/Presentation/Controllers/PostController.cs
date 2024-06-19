@@ -26,7 +26,7 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 
 		}
 
-		[HttpPost("get-post/{postId}")]
+		[HttpGet("posts/{postId}")]
 		public async Task<ActionResult<PostDTO>> GetPost([FromRoute] int postId)
 		{
             try

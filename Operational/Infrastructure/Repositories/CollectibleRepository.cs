@@ -56,7 +56,9 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
 		{
             searchTerm = Regex.Replace(searchTerm, @"[^a-zA-Z0-9\s]", "");
 
-            var collectibles = await _context.Collectibles.Where(c => c.CommunityId == communityId && (c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm)))
+            var collectibles = await _context.Collectibles.Include(c => c.MediaElements)
+			.Include(c => c.Owner)
+			.Include(c => c.Community).Where(c => c.CommunityId == communityId && (c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm)))
                 .ToListAsync();
 
 			return collectibles;
