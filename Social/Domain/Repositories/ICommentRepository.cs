@@ -9,5 +9,6 @@ namespace Collectioneer.API.Social.Domain.Repositories
 		public Task<ICollection<Comment>> GetCommentsForCollectible(int collectibleId);
 		public Task<ICollection<Comment>> GetCommentsForPost(int postId);
 		public Task<ICollection<Comment>> GetCommentsForUser(int userId);
+		public Task<ICollection<Comment>> GetCommentsForReview(int reviewId);
 	}
 }
