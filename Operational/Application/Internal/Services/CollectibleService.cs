@@ -11,10 +11,14 @@ namespace Collectioneer.API.Operational.Application.Internal.Services
 {
 	public class CollectibleService(
 			ICollectibleRepository collectibleRepository,
+			IReviewService reviewService,
+			ILogger<CollectibleService> _logger,
 			IUnitOfWork unitOfWork) : ICollectibleService
 	{
 		private readonly ICollectibleRepository _collectibleRepository = collectibleRepository;
 		private readonly IUnitOfWork _unitOfWork = unitOfWork;
+		private readonly IReviewService _reviewService = reviewService;
+		private readonly ILogger<CollectibleService> _logger = _logger;
 
 		public async Task<CollectibleDTO> RegisterCollectible(CollectibleRegisterCommand command)
 		{
@@ -29,6 +33,9 @@ namespace Collectioneer.API.Operational.Application.Internal.Services
 			await _collectibleRepository.Add(collectible);
 			await _unitOfWork.CompleteAsync();
 
+			var newCollectibleDto = new CollectibleDTO(collectible);
+			(newCollectibleDto.Rating, newCollectibleDto.ReviewCount) = await _reviewService.GetCollectibleStats(new CollectibleStatsQuery(collectible.Id));
+			_logger.LogInformation("Fetched stats.");
 			return new CollectibleDTO(collectible);
 		}
 
@@ -44,7 +51,10 @@ namespace Collectioneer.API.Operational.Application.Internal.Services
 		{
 			var collectible = await _collectibleRepository.GetById(id) ?? throw new Exception("Collectible not found.");
 
-			return new CollectibleDTO(collectible);
+			var collectibleDto = new CollectibleDTO(collectible);
+			(collectibleDto.Rating, collectibleDto.ReviewCount) = await _reviewService.GetCollectibleStats(new CollectibleStatsQuery(collectible.Id));
+			
+			return collectibleDto;
 		}
 
 		public async Task<ICollection<CollectibleDTO>> GetCollectibles(CollectibleBulkRetrieveQuery command)

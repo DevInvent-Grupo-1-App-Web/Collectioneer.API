@@ -46,6 +46,13 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 			return commentDTOs;
 		}
 
+		public async Task<ICollection<CommentDTO>> GetCommentsForReview(int reviewId)
+		{
+			var comments = await _commentRepository.GetCommentsForReview(reviewId);
+			var commentDTOs = comments.Select(c => MapCommentToDTO(c).Result).ToList();
+			return commentDTOs;
+		}
+
 		public async Task<ICollection<CommentDTO>> GetCommentsForUser(int userId)
 		{
 			var comments = await _commentRepository.GetCommentsForUser(userId);

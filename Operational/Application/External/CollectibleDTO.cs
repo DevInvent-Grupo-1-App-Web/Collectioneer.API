@@ -13,6 +13,9 @@ namespace Collectioneer.API.Operational.Application.External
         public int? AuctionId { get; init; }
         public int? SaleId { get; init; }
         public int? ExchangeId { get; init; }
+		public float Rating { get; set; }
+		public int ReviewCount { get; set; }
+
         public DateTime CreatedAt { get; init; }
         public DateTime UpdatedAt { get; init; }
 
