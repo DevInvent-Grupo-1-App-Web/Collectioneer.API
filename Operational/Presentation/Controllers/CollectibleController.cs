@@ -83,7 +83,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 		}
 
-		[HttpGet("collectibles/{id}/comments")]
+		[HttpGet("collectible/{id}/comments")]
 		public async Task<ActionResult<ICollection<CommentDTO>>> GetCommentsForCollectible([FromRoute] int id)
 		{
 			try
@@ -98,7 +98,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 		}
 
-		[HttpPost("collectibles/{id}/comments")]
+		[HttpPost("collectible/{id}/comments")]
 		public async Task<ActionResult<CommentDTO>> CreateCommentForCollectible([FromRoute] int id, [FromBody] CommentRegisterCommand request)
 		{
 			try
