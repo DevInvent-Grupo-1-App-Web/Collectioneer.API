@@ -7,7 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Collectioneer.API.Social.Presentation.Controllers
 {
 	[ApiController]
-	public class PostController(IPostService postService, ILogger<PostController> logger) : ControllerBase
+	public class PostController(
+		IPostService postService, 
+		ICommentService commentService,
+		ILogger<PostController> logger
+		) : ControllerBase
 	{
 
 		[HttpPost("new-post")]
@@ -54,6 +58,37 @@ namespace Collectioneer.API.Social.Presentation.Controllers
                 logger.LogError(ex, "Error searching posts.");
                 return StatusCode(500, ex.Message);
             }
+		}
+
+		[HttpGet("post/{id}/comments")]
+		public async Task<ActionResult<ICollection<CommentDTO>>> GetCommentsForPost([FromRoute] int id)
+		{
+			try
+			{
+				var comments = await commentService.GetCommentsForPost(id);
+				return Ok(comments);
+			}
+			catch (Exception ex)
+			{
+				logger.LogError(ex, "Error getting comments for post.");
+				return StatusCode(500, ex.Message);
+			}
+		}
+
+		[HttpPost("post/{id}/comment")]
+		public async Task<ActionResult<CommentDTO>> CreateCommentForPost([FromRoute] int id, [FromBody] CommentRegisterCommand request)
+		{
+			try
+			{
+				request.PostId = id;
+				await commentService.PostComment(request);
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+				logger.LogError(ex, "Error creating comment for post.");
+				return StatusCode(500, ex.Message);
+			}
 		}
 	}
 

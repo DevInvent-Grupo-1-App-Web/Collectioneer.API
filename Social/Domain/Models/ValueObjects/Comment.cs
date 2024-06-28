@@ -52,6 +52,10 @@ namespace Collectioneer.API.Social.Domain.Models.ValueObjects
 			{
 				ParentCommentId = parentElementId;
 			}
+			else if (parentElementType == typeof(Review))
+			{
+				ReviewId = parentElementId;
+			}
 
 			AuthorId = authorId;
 			Content = content;

@@ -33,6 +33,13 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
+		public async Task<ICollection<Comment>> GetCommentsForReview(int reviewId)
+		{
+			return await _context.Comments
+				.Where(c => c.ReviewId == reviewId)
+				.ToListAsync();
+		}
+
 		public async Task<ICollection<Comment>> GetCommentsForUser(int userId)
 		{
 			return await _context.Comments
