@@ -4,17 +4,11 @@
 name: build
 
 on:
-  push:
-    branches:
-      - "development"
-      - "main"
-      - "deployment"
   pull_request:
     branches:
       - "development"
-      - "development/**"
       - "main"
-      - "deployment"
+      - "testing"
 
 jobs:
   build:
