@@ -98,7 +98,7 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
 		public async Task DeleteUser(UserDeleteCommand command)
 		{
-			if (!await _userRepository.IsValidUser(command.Username, command.Password))
+			if (!await _userRepository.IsValidUser(command.Username, HashPassword(command.Password)))
 			{
 				throw new UserNotFoundException($"User with username {command.Username} not found.");
 			}
