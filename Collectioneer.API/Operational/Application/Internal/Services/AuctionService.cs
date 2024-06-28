@@ -24,14 +24,16 @@ public class AuctionService(
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<AuctionDTO> CreateAuction(AuctionCreationCommand command)
+{
+    var auction = new Auction(
+        command.CommunityId,
+        command.AuctioneerId,
+        command.CollectibleId,
+        command.StartingPrice,
+        DateTime.SpecifyKind(command.Deadline, DateTimeKind.Utc)
+		);
+    try
     {
-        var auction = new Auction(
-            command.CommunityId,
-            command.AuctioneerId,
-            command.CollectibleId,
-            command.StartingPrice,
-            command.Deadline);
-
         await _auctionRepository.Add(auction);
         await _unitOfWork.CompleteAsync();
 
