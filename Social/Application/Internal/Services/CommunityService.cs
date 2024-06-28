@@ -1,7 +1,6 @@
 ﻿using Collectioneer.API.Operational.Domain.Models.Entities;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
-using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Models.Aggregates;

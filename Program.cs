@@ -34,7 +34,8 @@ namespace Collectioneer.API
 
 			var app = builder.Build();
 
-			app.Use( async (context, next) => {
+			app.Use(async (context, next) =>
+			{
 				if (context.Request.Path == "/")
 				{
 					context.Response.Redirect("https://mycollectioneer.net");
@@ -266,6 +267,9 @@ namespace Collectioneer.API
 
 			builder.Services.AddScoped<IPostRepository, PostRepository>();
 			builder.Services.AddScoped<IPostService, PostService>();
+
+			builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+			builder.Services.AddScoped<IReviewService, ReviewService>();
 
 			builder.Services.AddScoped<ContentModerationService>();
 			builder.Services.AddScoped<CommunicationService>();
