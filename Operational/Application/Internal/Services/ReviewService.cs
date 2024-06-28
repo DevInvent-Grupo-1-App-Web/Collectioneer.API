@@ -18,8 +18,8 @@ namespace Collectioneer.API.Operational.Application.Internal.Services
 		public async Task<Review> CreateReview(ReviewCreateCommand command)
 		{
 			var review = new Review(
-				command.CollectibleId,
 				command.ReviewerId,
+				command.CollectibleId,
 				command.Content,
 				command.Rating
 			);

@@ -22,7 +22,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 		private readonly ICommentService _commentService = commentService;
 
 		[HttpPost("collectible/new-review")]
-		public async Task<ActionResult<ReviewDTO>> CreateReview([FromRoute]int id,[FromBody] ReviewCreateCommand request)
+		public async Task<ActionResult<ReviewDTO>> CreateReview([FromBody] ReviewCreateCommand request)
 		{
 			try
 			{
