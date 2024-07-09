@@ -17,6 +17,9 @@ namespace Collectioneer.API.Shared.Domain.Models.Entities
 		public int? PostId { get; set; }
 		public int? ProfileId { get; set; }
 		public int? CommunityId { get; set; }
+		public bool Hidden { get; set; } = false;
+		public bool Deleted { get; set; } = false;
+		public bool Moderated { get; set; } = false;
 		public DateTime CreatedAt { get; set; }
 		public DateTime UpdatedAt { get; set; }
 
