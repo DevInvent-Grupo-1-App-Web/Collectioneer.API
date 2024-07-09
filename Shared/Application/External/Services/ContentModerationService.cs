@@ -8,13 +8,12 @@ using Newtonsoft.Json;
 
 namespace Collectioneer.API.Shared.Application.External.Services;
 
-public class ContentModerationService : IContentModerationService
+public class ContentModerationService(AppKeys appKeys, ILogger<ContentModerationService> logger) : IContentModerationService
 {
-	private readonly ContentModeratorClient _contentModeratorClient;
-    private readonly ILogger<ContentModerationService> _logger;
+	private readonly ContentModeratorClient _contentModeratorClient = Authenticate(appKeys.ContentSafety.Key, appKeys.ContentSafety.Endpoint);
 
-	public static ContentModeratorClient Authenticate(string key, string endpoint) {
-		ContentModeratorClient client = new ContentModeratorClient(new ApiKeyServiceClientCredentials(key))
+    public static ContentModeratorClient Authenticate(string key, string endpoint) {
+		ContentModeratorClient client = new(new ApiKeyServiceClientCredentials(key))
 		{
 			Endpoint = endpoint
 		};
@@ -22,13 +21,7 @@ public class ContentModerationService : IContentModerationService
 		return client;
 	}
 
-    public ContentModerationService(AppKeys appKeys, ILogger<ContentModerationService> logger)
-    {
-        _contentModeratorClient = Authenticate(appKeys.ContentSafety.Key, appKeys.ContentSafety.Endpoint);
-        _logger = logger;
-    }
-
-	public async Task<bool> ScreenTextContent(string content)
+    public async Task<bool> ScreenTextContent(string content)
 	{
 		var text = Encoding.UTF8.GetBytes(content);
 		MemoryStream stream = new(text);
@@ -39,7 +32,7 @@ public class ContentModerationService : IContentModerationService
 
 		if (GetScore(screenResult) > 0.5 || screenResult.Classification?.ReviewRecommended == true)
 		{
-			_logger.LogInformation($"Review recommended for text: {content}");
+			logger.LogInformation($"Review recommended for text: {content}");
 			return false;
 		}
 		

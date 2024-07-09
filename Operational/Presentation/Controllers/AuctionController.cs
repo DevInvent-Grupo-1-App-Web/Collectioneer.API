@@ -22,7 +22,6 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             _userService = userService;
         }
 
-        [Authorize]
 		[HttpGet("auctions")]
 		public async Task<ActionResult<ICollection<AuctionDTO>>> GetAuctions([FromQuery]AuctionBulkRetrieveQuery query)
         {
@@ -43,7 +42,6 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("auction")]
         public async Task<ActionResult<AuctionDTO>> GetAuctionFromCollectible([FromQuery] AuctionGetByCollectibleIdQuery query)
         {
@@ -64,7 +62,6 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             }
         }
 
-		[Authorize]
         [HttpGet("auctions/{id}")]
         public async Task<IActionResult> GetAuction([FromRoute] int id)
         {
@@ -80,8 +77,6 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             }
         }
 
-
-        // GET api/v1/auctions/bids
 		[Authorize]
 		[HttpPost("auctions")]
 		public async Task<ActionResult<AuctionDTO>> CreateAuction([FromBody] AuctionCreationCommand command)
@@ -102,7 +97,6 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 		}
 
-        // POST api/v1/auctions/bids
         [Authorize]
         [HttpPost("auctions/bids")]
         public async Task<IActionResult> CreateBid([FromBody] BidCreationCommand command)
@@ -119,8 +113,6 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             }
         }
 
-        // GET api/v1/auctions/bids
-        [Authorize]
         [HttpGet("auctions/bids")]
         public async Task<IActionResult> GetBids([FromQuery] BidRetrieveQuery query)
         {
