@@ -3,6 +3,8 @@ using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Models.Entities;
 using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Services.Intern;
+using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
@@ -14,11 +16,13 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 	public class ReviewController(
 		ILogger<ReviewController> logger,
 		IReviewService reviewService,
+		IContentModerationService contentModerationService,
 		ICommentService commentService
 		) : ControllerBase
 	{
 		private readonly ILogger<ReviewController> _logger = logger;
 		private readonly IReviewService _reviewService = reviewService;
+		private readonly IContentModerationService contentModerationService = contentModerationService;
 		private readonly ICommentService _commentService = commentService;
 
 		[HttpPost("collectible/new-review")]
@@ -26,6 +30,10 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 		{
 			try
 			{
+				if (!await contentModerationService.ScreenTextContent($"{request.Content}"))
+				{
+					throw new ExposableException("Contenido inapropiado detectado.", 400);
+				}
 				var review = await _reviewService.CreateReview(request);
 				return ReviewDTO.FromReview(review);
 			}
