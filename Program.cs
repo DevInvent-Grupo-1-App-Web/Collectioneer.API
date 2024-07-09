@@ -24,6 +24,8 @@ namespace Collectioneer.API
 {
 	public class Program
 	{
+		private static ILogger<Program>? logger;
+
 		public static void Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +40,7 @@ namespace Collectioneer.API
 			{
 				if (context.Request.Path == "/")
 				{
-					context.Response.Redirect("https://mycollectioneer.net");
+					context.Response.Redirect("https://collectioneer.tqrou.me");
 				}
 				else
 				{
@@ -46,11 +48,9 @@ namespace Collectioneer.API
 				}
 			});
 
-			var logger = app.Services.GetRequiredService<ILogger<Program>>();
+			logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-			logger.LogInformation("|-----------------------|");
-			logger.LogInformation("|   Collectioneer.API   |");
-			logger.LogInformation("|-----------------------|");
+			logger.LogInformation("Starting up Collectioneer.API");
 
 			var appKeys = app.Services.GetRequiredService<AppKeys>();
 			appKeys.CheckKeys();
@@ -63,7 +63,7 @@ namespace Collectioneer.API
 			ConfigureHttpPipeline(app);
 
 			logger.LogInformation("Running app...");
-			logger.LogInformation($"App is listening at port {app.Configuration["ASPNETCORE_URLS"]}");
+            logger.LogInformation($"App is listening at port {app.Configuration["ASPNETCORE_URLS"]}");
 
 			app.Run();
 
@@ -90,31 +90,27 @@ namespace Collectioneer.API
 
 		private static void InitializeDatabase(WebApplication app)
 		{
-			using (var scope = app.Services.CreateScope())
-			using (var context = scope.ServiceProvider.GetService<AppDbContext>())
-			{
-				context?.Database.EnsureCreated();
-				context?.RunSqlScript("./Scripts/Startup.sql");
-			}
-		}
+            using var scope = app.Services.CreateScope();
+            using var context = scope.ServiceProvider.GetService<AppDbContext>();
+            context?.Database.EnsureCreated();
+            context?.RunSqlScript("./Scripts/Startup.sql");
+        }
 
 		private static void TestDbConnection(WebApplication app)
 		{
-			using (var scope = app.Services.CreateScope())
-			{
-				var context = scope.ServiceProvider.GetService<AppDbContext>();
-				try
-				{
-					context?.Database.OpenConnection();
-					context?.Database.CloseConnection();
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"Error al conectar con la base de datos: {ex.Message}");
-					return;
-				}
-			}
-		}
+            using var scope = app.Services.CreateScope();
+            var context = scope.ServiceProvider.GetService<AppDbContext>();
+            try
+            {
+                context?.Database.OpenConnection();
+                context?.Database.CloseConnection();
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError($"Error while connecting to database: {ex.Message}");
+                throw new Exception("Unable to connect to database. Cancelling startup.", ex);
+            }
+        }
 
 		private static void ConfigureEnvironment(WebApplicationBuilder builder)
 		{
@@ -180,7 +176,6 @@ namespace Collectioneer.API
 			builder.Services.AddEndpointsApiExplorer();
 			ConfigureSwagger(builder);
 			ConfigureDatabase(builder);
-			RegisterRepositories(builder);
 			RegisterServices(builder);
 		}
 
@@ -213,8 +208,8 @@ namespace Collectioneer.API
 						Id = "Bearer"
 					}
 				},
-				new string[] {}
-			}
+                Array.Empty<string>()
+            }
 				});
 				options.OperationFilter<AuthorizeCheckOperationFilter>();
 			});
@@ -238,7 +233,7 @@ namespace Collectioneer.API
 			builder.Services.AddRouting(options => options.LowercaseUrls = true);
 		}
 
-		private static void RegisterRepositories(WebApplicationBuilder builder)
+		private static void RegisterServices(WebApplicationBuilder builder)
 		{
 			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -277,16 +272,7 @@ namespace Collectioneer.API
 			builder.Services.AddHttpContextAccessor();
 
 			builder.Services.AddSingleton<AppKeys>();
-		}
 
-		private static void RegisterServices(WebApplicationBuilder builder)
-		{
-			builder.Services.AddScoped<IUserService, UserService>();
-			builder.Services.AddScoped<ICollectibleService, CollectibleService>();
-			builder.Services.AddScoped<IAuctionService, AuctionService>();
-			builder.Services.AddScoped<ICommunityService, CommunityService>();
-			builder.Services.AddScoped<IRoleService, RoleService>();
-			builder.Services.AddScoped<IMediaElementService, MediaElementService>();
 			builder.Services.AddScoped<ContentModerationService>();
 			builder.Services.AddScoped<CommunicationService>();
 		}
@@ -307,8 +293,7 @@ namespace Collectioneer.API
 
 				operation.Security = new List<OpenApiSecurityRequirement>
 			{
-				new OpenApiSecurityRequirement
-				{
+				new() {
 					[
 						new OpenApiSecurityScheme
 						{

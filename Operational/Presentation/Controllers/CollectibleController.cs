@@ -7,6 +7,7 @@ using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Operational.Presentation.Controllers
@@ -54,7 +55,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 		}
 
-		// POST api/v1/collectibles
+		[Authorize]
 		[HttpPost("collectibles")]
 		public async Task<ActionResult<CollectibleDTO>> CreateCollectible([FromBody] CollectibleRegisterCommand request)
 		{
@@ -74,6 +75,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 				return StatusCode(500, ex.Message);
 			}
 		}
+
 		[HttpGet("search/collectibles")]
 		public async Task<ActionResult<ICollection<CollectibleDTO>>> SearchCollectibles([FromQuery] CollectibleSearchQuery query)
 		{
@@ -104,6 +106,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 		}
 
+		[Authorize]
 		[HttpPost("collectible/{id}/comments")]
 		public async Task<ActionResult<CommentDTO>> CreateCommentForCollectible([FromRoute] int id, [FromBody] CommentRegisterCommand request)
 		{

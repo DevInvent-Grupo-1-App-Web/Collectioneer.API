@@ -4,6 +4,7 @@ using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Social.Presentation.Controllers
@@ -16,6 +17,7 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 		ILogger<PostController> logger
 		) : ControllerBase
 	{
+		[Authorize]
 
 		[HttpPost("new-post")]
 		public async Task<ActionResult<PostDTO>> AddPost([FromBody] AddPostCommand request)
@@ -83,6 +85,7 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 			}
 		}
 
+		[Authorize]
 		[HttpPost("post/{id}/comment")]
 		public async Task<ActionResult<CommentDTO>> CreateCommentForPost([FromRoute] int id, [FromBody] CommentRegisterCommand request)
 		{

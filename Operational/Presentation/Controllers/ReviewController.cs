@@ -8,6 +8,7 @@ using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Operational.Presentation.Controllers
@@ -25,6 +26,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 		private readonly IContentModerationService contentModerationService = contentModerationService;
 		private readonly ICommentService _commentService = commentService;
 
+		[Authorize]
 		[HttpPost("collectible/new-review")]
 		public async Task<ActionResult<ReviewDTO>> CreateReview([FromBody] ReviewCreateCommand request)
 		{
@@ -74,6 +76,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 		}
 
+		[Authorize]
 		[HttpPost("review/{id}/new-comment")]
 		public async Task<ActionResult<ReviewDTO>> CreateComment([FromRoute]int id, [FromBody] CommentRegisterCommand command)
 		{

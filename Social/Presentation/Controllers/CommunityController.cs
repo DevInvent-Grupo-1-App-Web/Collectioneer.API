@@ -9,12 +9,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Social.Presentation.Controllers
 {
-	[Authorize]
 	[ApiController]
 	public class CommunityController(ICommunityService communityService,
 	IContentModerationService contentModerationService,
 	ILogger<CommunityController> logger) : ControllerBase
 	{
+		[Authorize]
 		[HttpPost("new-community")]
 		public async Task<ActionResult<CommunityDTO>> CreateCommunity([FromBody] CommunityCreateCommand request)
 		{
@@ -40,6 +40,7 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 			}
 		}
 
+		[Authorize]
 		[HttpPost("join-community")]
 		public async Task<IActionResult> JoinCommunity([FromBody] CommunityJoinCommand request)
 		{
@@ -88,6 +89,7 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 			}
 		}
 
+		[Authorize]
 		[HttpGet("communities/{userId}")]
 		public async Task<ActionResult<IEnumerable<CommunityDTO>>> GetUserCommunities([FromRoute] int userId)
 		{
