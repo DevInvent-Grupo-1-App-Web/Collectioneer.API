@@ -11,11 +11,16 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 	[ApiController]
 	public class UserController : ControllerBase
 	{
+		private readonly IContentModerationService _contentModerationService;
 		private readonly IUserService _userService;
 		private readonly ILogger<UserController> _logger;
 
-		public UserController(IUserService userService, ILogger<UserController> logger)
+		public UserController(
+			IContentModerationService contentModerationService,
+			IUserService userService,
+			ILogger<UserController> logger)
 		{
+			_contentModerationService = contentModerationService;
 			_userService = userService;
 			_logger = logger;
 		}
@@ -52,9 +57,15 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			try
 			{
+				if (!await _contentModerationService.ScreenTextContent($"{request.Name} {request.Username}"))
+				{
+					throw new ExposableException("Review your credentials properness.", 400);
+				}
+
 				var registerResponse = await _userService.RegisterNewUser(request);
 				var loginRequest = new UserLoginQuery(request.Username, request.Password);
 				var loginResponse = await _userService.LoginUser(loginRequest);
+
 				return Ok(new { user = registerResponse, token = loginResponse, type = "Bearer" });
 			}
 			catch (ExposableException ex)

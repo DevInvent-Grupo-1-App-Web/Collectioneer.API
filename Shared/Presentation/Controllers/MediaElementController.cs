@@ -13,7 +13,6 @@ namespace Collectioneer.API.Shared.Presentation.Controllers;
 public class MediaElementController : ControllerBase
 {
 	private readonly IMediaElementService _mediaElementService;
-	private readonly ContentModerationService _contentModerationService;
 	private readonly IUserService _userService;
 	private readonly ILogger<MediaElementController> _logger;
 
@@ -25,7 +24,6 @@ public class MediaElementController : ControllerBase
 	)
 	{
 		_mediaElementService = mediaElementService;
-		_contentModerationService = contentModerationService;
 		_logger = logger;
 		_userService = userService;
 	}
@@ -38,21 +36,6 @@ public class MediaElementController : ControllerBase
 		if (command.ContentType.StartsWith("image/") == false && command.ContentType.StartsWith("video/") == false)
 		{
 			return BadRequest("Only images and videos are allowed");
-		}
-
-		try
-		{
-			if (command.ContentType.StartsWith("image/"))
-			{
-				if (await _contentModerationService.IsImageContentSafe(Convert.FromBase64String(command.Content)) == false)
-				{
-					return BadRequest("Image content is not safe. Suspected inappropriate content detected.");
-				}
-			}
-		}
-		catch (Exception)
-		{
-			_logger.LogWarning("Content moderation service is not available. Skipping content moderation check.");
 		}
 
 		var result = await _mediaElementService.UploadMedia(command, await _userService.GetIdFromRequestHeader());

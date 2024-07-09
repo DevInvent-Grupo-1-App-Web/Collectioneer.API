@@ -1,3 +1,5 @@
+using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Queries;
@@ -8,7 +10,8 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 {
 	[ApiController]
 	public class PostController(
-		IPostService postService, 
+		IPostService postService,
+		IContentModerationService contentModerationService, 
 		ICommentService commentService,
 		ILogger<PostController> logger
 		) : ControllerBase
@@ -19,6 +22,11 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 		{
 			try
 			{
+				if (!await contentModerationService.ScreenTextContent($"{request.Title} {request.Content}"))
+				{
+					throw new ExposableException("Contenido inapropiado detectado.", 400);
+				}
+
 				var newPost = await postService.AddPost(request);
 				return Ok(newPost);
 			}
@@ -80,6 +88,11 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 		{
 			try
 			{
+				if (!await contentModerationService.ScreenTextContent($"{request.Content}"))
+				{
+					throw new ExposableException("Contenido inapropiado detectado.", 400);
+				}
+
 				request.PostId = id;
 				await commentService.PostComment(request);
 				return Ok();
