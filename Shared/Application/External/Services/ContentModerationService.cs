@@ -1,15 +1,10 @@
-using Azure;
 using Microsoft.Azure.CognitiveServices.ContentModerator;
 using Microsoft.Azure.CognitiveServices.ContentModerator.Models;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using System.Threading;
 using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace Collectioneer.API.Shared.Application.External.Services;
 

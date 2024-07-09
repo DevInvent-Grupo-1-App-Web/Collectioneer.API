@@ -2,13 +2,12 @@
 using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
-using Collectioneer.API.Social.Domain.Models.Aggregates;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Collectioneer.API.Shared.Presentation.Controllers
+namespace Collectioneer.API.Social.Presentation.Controllers
 {
 	[Authorize]
 	[ApiController]
