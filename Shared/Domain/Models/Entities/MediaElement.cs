@@ -5,14 +5,18 @@ using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Shared.Domain.Models.Entities
 {
-	public class MediaElement : ITimestamped
+	public class MediaElement(
+		int uploaderId,
+		string mediaName,
+		string mediaURL
+		) : ITimestamped
 	{
 		// Entity identifier
 		public int Id { get; set; }
 		// Entity properties
-		public int UploaderId { get; set; }
-		public string MediaName { get; set; }
-		public string MediaURL { get; set; }
+		public int UploaderId { get; set; } = uploaderId;
+		public string MediaName { get; set; } = mediaName;
+		public string MediaURL { get; set; } = mediaURL;
 		public int? CollectibleId { get; set; }
 		public int? PostId { get; set; }
 		public int? ProfileId { get; set; }
@@ -29,16 +33,5 @@ namespace Collectioneer.API.Shared.Domain.Models.Entities
 		public Community? Community { get; set; }
 		public Post? Post { get; set; }
 		public User? Profile { get; set; }
-
-		public MediaElement(
-			int uploaderId,
-			string mediaName,
-			string mediaURL
-		)
-		{
-			UploaderId = uploaderId;
-			MediaName = mediaName;
-			MediaURL = mediaURL;
-		}
 	}
 }

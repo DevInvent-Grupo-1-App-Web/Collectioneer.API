@@ -1,12 +1,7 @@
 namespace Collectioneer.API.Social.Domain.Queries
 {
-	public class CommunityFetchByUserQuery
+	public class CommunityFetchByUserQuery(int userId)
 	{
-		public int UserId { get; set; }
-
-		public CommunityFetchByUserQuery(int userId)
-		{
-			UserId = userId;
-		}
+		public int UserId { get; set; } = userId;
 	}
 }

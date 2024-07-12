@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Social.Infrastructure.Repositories
 {
-	public class CommentRepository : BaseRepository<Comment>, ICommentRepository
+	public class CommentRepository(AppDbContext context) : BaseRepository<Comment>(context), ICommentRepository
 	{
-		public CommentRepository(AppDbContext context) : base(context)
-		{
-		}
-
 		public async Task<ICollection<Comment>> GetCommentsForCollectible(int collectibleId)
 		{
 			return await _context.Comments

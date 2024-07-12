@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Social.Infrastructure.Repositories
 {
-    public class RoleRepository : BaseRepository<Role>, IRoleRepository
+    public class RoleRepository(AppDbContext context) : BaseRepository<Role>(context), IRoleRepository
     {
-        public RoleRepository(AppDbContext context) : base(context)
-        {
-        }
-
 		public async Task<ICollection<Role>> GetRolesByUserId(int userId)
 		{
 			return await _context.Roles.Where(r => r.UserId == userId).ToListAsync();

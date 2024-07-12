@@ -6,14 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Shared.Infrastructure.Repositories
 {
-	public class BaseRepository<T> : IBaseRepository<T>
+	public class BaseRepository<T>(AppDbContext context) : IBaseRepository<T>
 	where T : class
 	{
-		protected readonly AppDbContext _context;
-		public BaseRepository(AppDbContext context)
-		{
-			_context = context;
-		}
+		protected readonly AppDbContext _context = context;
 
 		public async Task<T> Add(T entity)
 		{
