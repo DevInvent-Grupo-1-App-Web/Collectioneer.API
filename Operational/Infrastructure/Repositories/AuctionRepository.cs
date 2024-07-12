@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Operational.Infrastructure.Repositories
 {
-    public class AuctionRepository(AppDbContext context, ICollectibleRepository collectibleRepository, ILogger<AuctionRepository> logger) : BaseRepository<Auction>(context), IAuctionRepository
+    public class AuctionRepository(AppDbContext context, ICollectibleRepository collectibleRepository) : BaseRepository<Auction>(context), IAuctionRepository
     {
 		public async Task<Auction> GetAuctionByCollectibleId(int CollectibleId)
         {

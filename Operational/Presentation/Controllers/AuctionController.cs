@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Collectioneer.API.Operational.Presentation.Controllers
 {
     [ApiController]
-    public class AuctionController(IAuctionService auctionService, ILogger<AuctionController> logger, IUserService userService) : ControllerBase
+    public class AuctionController(IAuctionService auctionService, ILogger<AuctionController> logger) : ControllerBase
     {
 		[HttpGet("auctions")]
 		public async Task<ActionResult<ICollection<AuctionDTO>>> GetAuctions([FromQuery]AuctionBulkRetrieveQuery query)

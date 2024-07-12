@@ -23,6 +23,7 @@ public class MediaElementController(
 	{
 		if (command.ContentType.StartsWith("image/") == false && command.ContentType.StartsWith("video/") == false)
 		{
+			logger.LogWarning("Invalid media type: {ContentType}", command.ContentType);
 			return BadRequest("Only images and videos are allowed");
 		}
 
