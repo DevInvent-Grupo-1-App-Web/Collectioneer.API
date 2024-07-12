@@ -3,18 +3,11 @@ using Collectioneer.API.Shared.Infrastructure.Configuration;
 
 namespace Collectioneer.API.Shared.Infrastructure.Repositories
 {
-	public class UnitOfWork : IUnitOfWork
+	public class UnitOfWork(AppDbContext context) : IUnitOfWork
 	{
-		private readonly AppDbContext _context;
-
-		public UnitOfWork(AppDbContext context)
-		{
-			_context = context;
-		}
-
 		public async Task CompleteAsync()
 		{
-			await _context.SaveChangesAsync();
+			await context.SaveChangesAsync();
 		}
 	}
 }

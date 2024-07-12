@@ -1,24 +1,34 @@
+using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Social.Presentation.Controllers
 {
 	[ApiController]
 	public class PostController(
-		IPostService postService, 
+		IPostService postService,
+		IContentModerationService contentModerationService, 
 		ICommentService commentService,
 		ILogger<PostController> logger
 		) : ControllerBase
 	{
+		[Authorize]
 
 		[HttpPost("new-post")]
 		public async Task<ActionResult<PostDTO>> AddPost([FromBody] AddPostCommand request)
 		{
 			try
 			{
+				if (!await contentModerationService.ScreenTextContent($"{request.Title} {request.Content}"))
+				{
+					throw new ExposableException("Contenido inapropiado detectado.", 400);
+				}
+
 				var newPost = await postService.AddPost(request);
 				return Ok(newPost);
 			}
@@ -75,11 +85,17 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 			}
 		}
 
+		[Authorize]
 		[HttpPost("post/{id}/comment")]
 		public async Task<ActionResult<CommentDTO>> CreateCommentForPost([FromRoute] int id, [FromBody] CommentRegisterCommand request)
 		{
 			try
 			{
+				if (!await contentModerationService.ScreenTextContent($"{request.Content}"))
+				{
+					throw new ExposableException("Contenido inapropiado detectado.", 400);
+				}
+
 				request.PostId = id;
 				await commentService.PostComment(request);
 				return Ok();

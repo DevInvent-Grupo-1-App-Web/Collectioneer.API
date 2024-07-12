@@ -6,14 +6,18 @@ using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Aggregates;
 
-public class Sale : ITimestamped, ITransaction
+public class Sale(
+	int vendorId,
+	int collectibleId,
+	float price
+	) : ITimestamped, ITransaction
 {
 	public int Id { get; set; }
 	public int CommunityId { get; set; }
-	public int VendorId { get; set; }
-	public int CollectibleId { get; set; }
+	public int VendorId { get; set; } = vendorId;
+	public int CollectibleId { get; set; } = collectibleId;
 	public int? BuyerId { get; set; }
-	public float Price { get; set; }
+	public float Price { get; set; } = price;
 	public bool IsOpen { get; set; } = true;
 	public bool VendorHasCollected { get; set; } = false;
 	public bool BuyerHasCollected { get; set; } = false;
@@ -25,15 +29,4 @@ public class Sale : ITimestamped, ITransaction
 	public User? Buyer { get; set; }
 	public Community? Community { get; set; }
 	public Collectible? Collectible { get; set; }
-
-	public Sale(
-		int vendorId,
-		int collectibleId,
-		float price
-	)
-	{
-		VendorId = vendorId;
-		CollectibleId = collectibleId;
-		Price = price;
-	}
 }

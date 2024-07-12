@@ -7,14 +7,20 @@ using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 {
-	public class Auction : ITimestamped, ITransaction
+	public class Auction(
+			int communityId,
+			int auctioneerId,
+			int collectibleId,
+			float startingPrice,
+			DateTime deadline
+		) : ITimestamped, ITransaction
 	{
 		public int Id { get; set; }
-		public int CommunityId { get; set; }
-		public int AuctioneerId { get; set; }
-		public int CollectibleId { get; set; }		
-		public float StartingPrice { get; set; }
-		public DateTime Deadline { get; set; }
+		public int CommunityId { get; set; } = communityId;
+		public int AuctioneerId { get; set; } = auctioneerId;
+		public int CollectibleId { get; set; } = collectibleId;
+		public float StartingPrice { get; set; } = startingPrice;
+		public DateTime Deadline { get; set; } = deadline;
 		public bool IsOpen { get; set; } = true;
 		public bool AuctioneerHasCollected { get; set; } = false;
 		public bool BidderHasCollected { get; set; } = false;
@@ -26,22 +32,6 @@ namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 		public Collectible? Collectible { get; set; }
 		public List<Bid> Bids { get; set; } = [];
 		public Community? Community { get; set; }
-
-		public Auction(
-				int communityId,
-				int auctioneerId,
-				int collectibleId,
-				float startingPrice,
-				DateTime deadline
-		)
-		{
-			CommunityId = communityId;
-			AuctioneerId = auctioneerId;
-			CollectibleId = collectibleId;
-			StartingPrice = startingPrice;
-			Deadline = deadline;
-			Bids = [];
-		}
 
 		public float CurrentPrice()
 		{

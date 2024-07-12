@@ -2,26 +2,28 @@
 using Collectioneer.API.Operational.Domain.Commands;
 using Collectioneer.API.Operational.Domain.Queries;
 using Collectioneer.API.Operational.Domain.Services.Intern;
+using Collectioneer.API.Shared.Application.Exceptions;
+using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Queries;
 using Collectioneer.API.Social.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Operational.Presentation.Controllers
 {
 	[ApiController]
-	public class CollectibleController : ControllerBase
+	public class CollectibleController(
+		ICollectibleService collectibleService,
+		IContentModerationService contentModerationService,
+		ILogger<CollectibleController> logger, 
+		ICommentService commentService
+		) : ControllerBase
 	{
-		private readonly ICollectibleService _collectibleService;
-		private readonly ICommentService _commentService;
-		private readonly ILogger<CollectibleController> _logger;
-
-		public CollectibleController(ICollectibleService collectibleService, ILogger<CollectibleController> logger, ICommentService commentService)
-		{
-			_collectibleService = collectibleService;
-			_logger = logger;
-			_commentService = commentService;
-		}
+		private readonly ICollectibleService _collectibleService = collectibleService;
+		private readonly ICommentService _commentService = commentService;
+		private readonly IContentModerationService contentModerationService = contentModerationService;
+		private readonly ILogger<CollectibleController> _logger = logger;
 
 		[HttpGet("collectibles")]
 		public async Task<ActionResult<ICollection<CollectibleDTO>>> GetCollectibles([FromQuery] CollectibleBulkRetrieveQuery request)
@@ -53,12 +55,17 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 		}
 
-		// POST api/v1/collectibles
+		[Authorize]
 		[HttpPost("collectibles")]
 		public async Task<ActionResult<CollectibleDTO>> CreateCollectible([FromBody] CollectibleRegisterCommand request)
 		{
 			try
 			{
+				if (!await contentModerationService.ScreenTextContent($"{request.Name} {request.Description}"))
+				{
+					throw new ExposableException("Contenido inapropiado detectado.", 400);
+				}
+
 				var collectible = await _collectibleService.RegisterCollectible(request);
 				return CreatedAtAction(nameof(GetCollectible), new { id = collectible.Id }, collectible);
 			}
@@ -68,6 +75,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 				return StatusCode(500, ex.Message);
 			}
 		}
+
 		[HttpGet("search/collectibles")]
 		public async Task<ActionResult<ICollection<CollectibleDTO>>> SearchCollectibles([FromQuery] CollectibleSearchQuery query)
 		{
@@ -98,6 +106,7 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 		}
 
+		[Authorize]
 		[HttpPost("collectible/{id}/comments")]
 		public async Task<ActionResult<CommentDTO>> CreateCommentForCollectible([FromRoute] int id, [FromBody] CommentRegisterCommand request)
 		{

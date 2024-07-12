@@ -10,85 +10,70 @@ using Microsoft.AspNetCore.Mvc;
 namespace Collectioneer.API.Operational.Presentation.Controllers
 {
     [ApiController]
-    public class AuctionController : ControllerBase
+    public class AuctionController(IAuctionService auctionService, ILogger<AuctionController> logger) : ControllerBase
     {
-        private readonly IAuctionService _auctionService;
-        private readonly ILogger<AuctionController> _logger;
-        private readonly IUserService _userService;
-        public AuctionController(IAuctionService auctionService, ILogger<AuctionController> logger, IUserService userService)
-        {
-            _auctionService = auctionService;
-            _logger = logger;
-            _userService = userService;
-        }
-
-        [Authorize]
 		[HttpGet("auctions")]
 		public async Task<ActionResult<ICollection<AuctionDTO>>> GetAuctions([FromQuery]AuctionBulkRetrieveQuery query)
         {
             try
             {
-                var response = await _auctionService.GetAuctions(query);
+                var response = await auctionService.GetAuctions(query);
                 return Ok(response);
             }
 			catch (ExposableException ex)
 			{
-				_logger.LogError(ex, "Error getting auctions.");
+				logger.LogError(ex, "Error getting auctions.");
 				return StatusCode(ex.StatusCode, ex.Message);
 			}
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting auctions.");
+                logger.LogError(ex, "Error getting auctions.");
                 return StatusCode(500, ex.Message);
             }
         }
 
-        [Authorize]
         [HttpGet("auction")]
         public async Task<ActionResult<AuctionDTO>> GetAuctionFromCollectible([FromQuery] AuctionGetByCollectibleIdQuery query)
         {
             try
             {
-                var response = await _auctionService.GetAuctionFromCollectibleId(query);
+                var response = await auctionService.GetAuctionFromCollectibleId(query);
                 return Ok(response);
             }
 			catch (ExposableException ex)
 			{
-				_logger.LogError(ex, "Error getting auction.");
+				logger.LogError(ex, "Error getting auction.");
 				return StatusCode(ex.StatusCode, ex.Message);
 			}
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting auction.");
+                logger.LogError(ex, "Error getting auction.");
                 return StatusCode(500, ex.Message);
             }
         }
 
-		[Authorize]
         [HttpGet("auctions/{id}")]
         public async Task<IActionResult> GetAuction([FromRoute] int id)
         {
             try
             {
-                var response = await _auctionService.GetAuction(id);
+                var response = await auctionService.GetAuction(id);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting auction.");
+                logger.LogError(ex, "Error getting auction.");
                 return StatusCode(500, ex.Message);
             }
         }
 
-
-        // GET api/v1/auctions/bids
 		[Authorize]
 		[HttpPost("auctions")]
 		public async Task<ActionResult<AuctionDTO>> CreateAuction([FromBody] AuctionCreationCommand command)
 		{
 			try
 			{
-				var response = await _auctionService.CreateAuction(command);
+				var response = await auctionService.CreateAuction(command);
 				return CreatedAtAction(
 					nameof(GetAuction), 
 					new { id = response.Id }, 
@@ -97,41 +82,38 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error creating auction.");
+				logger.LogError(ex, "Error creating auction.");
 				return StatusCode(500, ex.Message);
 			}
 		}
 
-        // POST api/v1/auctions/bids
         [Authorize]
         [HttpPost("auctions/bids")]
         public async Task<IActionResult> CreateBid([FromBody] BidCreationCommand command)
         {
             try
             {
-                var response = await _auctionService.PlaceBid(command);
+                var response = await auctionService.PlaceBid(command);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating bid.");
+                logger.LogError(ex, "Error creating bid.");
                 return StatusCode(500, ex.Message);
             }
         }
 
-        // GET api/v1/auctions/bids
-        [Authorize]
         [HttpGet("auctions/bids")]
         public async Task<IActionResult> GetBids([FromQuery] BidRetrieveQuery query)
         {
             try
             {
-                var response = await _auctionService.GetBids(query);
+                var response = await auctionService.GetBids(query);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting bids.");
+                logger.LogError(ex, "Error getting bids.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -142,12 +124,12 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
         {
             try
             {
-                var response = await _auctionService.CloseAuction(command);
+                var response = await auctionService.CloseAuction(command);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error closing auction.");
+                logger.LogError(ex, "Error closing auction.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -160,12 +142,12 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             {
                 if (command.AsAuctioneer)
                 {
-                    await _auctionService.AuctioneerConfirmation(command);
+                    await auctionService.AuctioneerConfirmation(command);
                     return Ok();
                 }
                 else if (command.AsBidder)
                 {
-                    await _auctionService.BidderConfirmation(command);
+                    await auctionService.BidderConfirmation(command);
                     return Ok();
                 }
                 else
@@ -175,12 +157,12 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
             }
 			catch (ExposableException ex)
 			{
-				_logger.LogError(ex, "Error confirming auctioneer.");
+				logger.LogError(ex, "Error confirming auctioneer.");
 				return StatusCode(ex.StatusCode, ex.Message);
 			}
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error confirming auctioneer.");
+                logger.LogError(ex, "Error confirming auctioneer.");
                 return StatusCode(500, ex.Message);
             }
         }

@@ -1,67 +1,61 @@
-using Azure;
-using Azure.AI.ContentSafety;
+using Microsoft.Azure.CognitiveServices.ContentModerator;
+using Microsoft.Azure.CognitiveServices.ContentModerator.Models;
+using System.Text;
+using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Shared.Infrastructure.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace Collectioneer.API.Shared.Application.External.Services;
 
-public class ContentModerationService
+public class ContentModerationService(AppKeys appKeys, ILogger<ContentModerationService> logger) : IContentModerationService
 {
-	private readonly ContentSafetyClient _contentSafetyClient;
-    private readonly ILogger<ContentModerationService> _logger;
+	private readonly ContentModeratorClient _contentModeratorClient = Authenticate(appKeys.ContentSafety.Key, appKeys.ContentSafety.Endpoint);
 
-    public ContentModerationService(AppKeys appKeys, ILogger<ContentModerationService> logger)
-    {
-        _contentSafetyClient = new ContentSafetyClient(
-            new Uri(appKeys.ContentSafety.Endpoint),new AzureKeyCredential(appKeys.ContentSafety.Key)
-        );
-        _logger = logger;
-    }
-
-	public async Task<bool> IsImageContentSafe(byte[] content)
-	{
-		var imageData = new ContentSafetyImageData(BinaryData.FromBytes(content));
-		var request = new AnalyzeImageOptions(imageData);
-
-		Response<AnalyzeImageResult> response;
-		try
+    public static ContentModeratorClient Authenticate(string key, string endpoint) {
+		ContentModeratorClient client = new(new ApiKeyServiceClientCredentials(key))
 		{
-			response = await _contentSafetyClient.AnalyzeImageAsync(request);
-		}
-		catch (RequestFailedException ex)
-		{
-			Console.WriteLine("Analyze image failed.\nStatus code: {0}, Error code: {1}, Error message: {2}", ex.Status, ex.ErrorCode, ex.Message);
-			throw;
-		}
+			Endpoint = endpoint
+		};
 
-		if (response.Value.CategoriesAnalysis.Any(a => a.Severity > 0.5))
-		{
-			_logger.LogWarning("Image content is not safe. Suspected inappropriate content detected.");
-			return false;
-		}
-		return true;
-
+		return client;
 	}
 
-	public async Task<bool> IsTextContentSafe(string content)
+    public async Task<bool> ScreenTextContent(string content)
 	{
-		var request = new AnalyzeTextOptions(content);
+		var text = Encoding.UTF8.GetBytes(content);
+		MemoryStream stream = new(text);
 
-		Response<AnalyzeTextResult> response;
-		try
-		{
-			response = await _contentSafetyClient.AnalyzeTextAsync(request);
-		}
-		catch (RequestFailedException ex)
-		{
-			Console.WriteLine("Analyze text failed.\nStatus code: {0}, Error code: {1}, Error message: {2}", ex.Status, ex.ErrorCode, ex.Message);
-			throw;
-		}
+		var screenResult = await _contentModeratorClient.TextModeration.ScreenTextAsync("text/plain", stream, null, true, true, null, true, CancellationToken.None);
 
-		if (response.Value.CategoriesAnalysis.Any(a => a.Severity > 0.5))
+		Console.WriteLine($"{JsonConvert.SerializeObject(screenResult)}");
+
+		if (GetScore(screenResult) > 0.5 || screenResult.Classification?.ReviewRecommended == true)
 		{
-			_logger.LogWarning("Text content is not safe. Suspected inappropriate content detected.");
+			logger.LogInformation($"Review recommended for text: {content}");
 			return false;
 		}
+		
 		return true;
 	}
+
+	private static double GetScore(Screen screen)
+	{
+		if (!screen.Terms.IsNullOrEmpty())
+		{
+			return 1.0d;
+		}
+
+		if (screen == null || screen.Classification == null)
+		{
+			return 0.0d;
+		}
+
+		var explicitLanguage = screen.Classification.Category1?.Score ?? 0.0d;
+		var suggestiveLanguage = screen.Classification.Category2?.Score ?? 0.0d;
+		var offensiveLanguage = screen.Classification.Category3?.Score ?? 0.0d;
+	
+		return (explicitLanguage + suggestiveLanguage + offensiveLanguage) / 3;
+	}
+
 }

@@ -10,52 +10,39 @@ using Collectioneer.API.Social.Domain.Services;
 
 namespace Collectioneer.API.Social.Application.Internal.Services
 {
-	public class CommentService : ICommentService
+	public class CommentService(ICommentRepository commentRepository, IUserRepository userRepository, IMediaElementRepository mediaElementRepository, IUnitOfWork unitOfWork) : ICommentService
 	{
-		private readonly ICommentRepository _commentRepository;
-		private readonly IUserRepository _userRepository;
-		private readonly IMediaElementRepository _mediaElementRepository;
-		private readonly IUnitOfWork _unitOfWork;
-
-		public CommentService(ICommentRepository commentRepository, IUserRepository userRepository, IMediaElementRepository mediaElementRepository, IUnitOfWork unitOfWork)
-		{
-			_commentRepository = commentRepository;
-			_userRepository = userRepository;
-			_mediaElementRepository = mediaElementRepository;
-			_unitOfWork = unitOfWork;
-		}
-
 		public async Task<ICollection<CommentDTO>> GetCommentsForCollectible(int collectibleId)
 		{
-			var comments = await _commentRepository.GetCommentsForCollectible(collectibleId);
+			var comments = await commentRepository.GetCommentsForCollectible(collectibleId);
 			var commentDTOs = comments.Select(c => MapCommentToDTO(c).Result).ToList();
 			return commentDTOs;
 		}
 
 		public async Task<ICollection<CommentDTO>> GetCommentsForComment(int commentId)
 		{
-			var comments = await _commentRepository.GetCommentsForComment(commentId);
+			var comments = await commentRepository.GetCommentsForComment(commentId);
 			var commentDTOs = comments.Select(c => MapCommentToDTO(c).Result).ToList();
 			return commentDTOs;
 		}
 
 		public async Task<ICollection<CommentDTO>> GetCommentsForPost(int postId)
 		{
-			var comments = await _commentRepository.GetCommentsForPost(postId);
+			var comments = await commentRepository.GetCommentsForPost(postId);
 			var commentDTOs = comments.Select(c => MapCommentToDTO(c).Result).ToList();
 			return commentDTOs;
 		}
 
 		public async Task<ICollection<CommentDTO>> GetCommentsForReview(int reviewId)
 		{
-			var comments = await _commentRepository.GetCommentsForReview(reviewId);
+			var comments = await commentRepository.GetCommentsForReview(reviewId);
 			var commentDTOs = comments.Select(c => MapCommentToDTO(c).Result).ToList();
 			return commentDTOs;
 		}
 
 		public async Task<ICollection<CommentDTO>> GetCommentsForUser(int userId)
 		{
-			var comments = await _commentRepository.GetCommentsForUser(userId);
+			var comments = await commentRepository.GetCommentsForUser(userId);
 			var commentDTOs = comments.Select(c => MapCommentToDTO(c).Result).ToList();
 			return commentDTOs;
 		}
@@ -78,14 +65,14 @@ namespace Collectioneer.API.Social.Application.Internal.Services
 				command.Content
 			);
 			
-			await _commentRepository.Add(comment);
-			await _unitOfWork.CompleteAsync();
+			await commentRepository.Add(comment);
+			await unitOfWork.CompleteAsync();
 		}
 
 		private async Task<CommentDTO> MapCommentToDTO(Comment comment)
 		{
-			var author = await _userRepository.GetById(comment.AuthorId);
-			var mediaElement = _mediaElementRepository.GetAll().Result.Where(m => m.UploaderId == comment.AuthorId && m.ProfileId is not null).FirstOrDefault();
+			var author = await userRepository.GetById(comment.AuthorId);
+			var mediaElement = mediaElementRepository.GetAll().Result.Where(m => m.UploaderId == comment.AuthorId && m.ProfileId is not null).FirstOrDefault();
 
 			return new CommentDTO(
 				comment.Id,

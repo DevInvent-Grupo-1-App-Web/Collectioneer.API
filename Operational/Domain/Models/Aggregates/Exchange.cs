@@ -6,13 +6,18 @@ using Collectioneer.API.Social.Domain.Models.Aggregates;
 
 namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 {
-	public class Exchange : ITransaction, ITimestamped
+	public class Exchange(
+		int communityId,
+		int exchangerId,
+		int collectibleId,
+		float price
+		) : ITransaction, ITimestamped
 	{
 		public int Id { get; set; }
-		public int CommunityId { get; set; }
-		public int ExchangerId {get; set; }
-		public int CollectibleId { get; set; }
-		public float Price { get; set; }
+		public int CommunityId { get; set; } = communityId;
+		public int ExchangerId { get; set; } = exchangerId;
+		public int CollectibleId { get; set; } = collectibleId;
+		public float Price { get; set; } = price;
 		public bool IsOpen { get; set; } = true;
 		public bool ExchangerHasConfirmed { get; set; } = false;
 		public int? AcceptedExchangeId { get; set; }
@@ -24,18 +29,5 @@ namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 		public Collectible? Collectible { get; set; }
 		public ICollection<int> ProposedExchanges { get; set; } = [];
 		public Community? Community { get; set; }
-
-		public Exchange(
-			int communityId,
-			int exchangerId,
-			int collectibleId,
-			float price
-		)
-		{
-			CommunityId = communityId;
-			ExchangerId = exchangerId;
-			CollectibleId = collectibleId;
-			Price = price;
-		}
 	}
 }

@@ -2,6 +2,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 {
 	public class AppKeys
 	{
+		private readonly ILogger<AppKeys> _logger ;
 		public JwtConfig Jwt { get; set; }
 		public ContentSafety ContentSafety { get; set; }
 		public BlobStorage BlobStorage { get; set; }
@@ -10,6 +11,8 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 
 		public AppKeys(IConfiguration configuration, ILogger<AppKeys> logger)
 		{
+			_logger = logger;
+
 			Jwt = new JwtConfig
 			{
 				Key = configuration["JWT_KEY"] ?? throw new ArgumentNullException("JWT key is missing."),
@@ -20,7 +23,8 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			ContentSafety = new ContentSafety
 			{
 				Key = configuration["CONTENT_SAFETY_KEY"] ?? throw new ArgumentNullException("Content safety key is missing."),
-				Endpoint = configuration["CONTENT_SAFETY_ENDPOINT"] ?? throw new ArgumentNullException("Content safety endpoint was not defined.")
+				Endpoint = configuration["CONTENT_SAFETY_ENDPOINT"] ?? throw new ArgumentNullException("Content safety endpoint was not defined."),
+				ClientServiceKey = configuration["CONTENT_SAFETY_CLIENT_SERVICE_KEY"] ?? throw new ArgumentNullException("Content safety client service key was not defined.")
 			};
 
 			BlobStorage = new BlobStorage
@@ -38,60 +42,32 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			{
 				ConnectionString = configuration["COMMUNICATION_SERVICES_CONNECTION_STRING"] ?? throw new ArgumentNullException("Communication services connection string was not defined.")
 			};
-
-			if (configuration["ASPNETCORE_ENVIRONMENT"] == "Development")
-			{
-				logger.LogInformation("JWT:Key: {Key}", Jwt.Key);
-				logger.LogInformation("JWT:Issuer: {Issuer}", Jwt.Issuer);
-				logger.LogInformation("JWT:Audience: {Audience}", Jwt.Audience);
-				logger.LogInformation("CONTENT_SAFETY:Key: {Key}", ContentSafety.Key);
-				logger.LogInformation("CONTENT_SAFETY:Endpoint: {Endpoint}", ContentSafety.Endpoint);
-				logger.LogInformation("BLOB_STORAGE:URL: {URL}", BlobStorage.URL);
-				logger.LogInformation("PERSISTENCE:ConnectionString: {ConnectionString}", Persistence.ConnectionString);
-				logger.LogInformation("EXTERNAL_COMMUNICATION:ConnectionString: {ConnectionString}", ExternalCommunication.ConnectionString);
-			}
 		}
 
 		public void CheckKeys()
 		{
-			if (string.IsNullOrEmpty(Jwt.Key))
+			if (!Jwt.Validate())
 			{
-				throw new ArgumentNullException("JWT key is missing.");
+				_logger.LogError("JWT configuration is invalid. Please check your configuration.");
 			}
-			if (string.IsNullOrEmpty(Jwt.Issuer))
+			if (!ContentSafety.Validate())
 			{
-				throw new ArgumentNullException("JWT issuer was not defined.");
+				_logger.LogError("Content safety configuration is invalid. Please check your configuration.");
 			}
-			if (string.IsNullOrEmpty(Jwt.Audience))
+			if (!BlobStorage.Validate())
 			{
-				throw new ArgumentNullException("JWT audience was not defined.");
+				_logger.LogError("Blob storage configuration is invalid. Please check your configuration.");
 			}
-			if (string.IsNullOrEmpty(ContentSafety.Key))
+			if (!Persistence.Validate())
 			{
-				throw new ArgumentNullException("Content safety key is missing.");
+				_logger.LogError("Persistence configuration is invalid. Please check your configuration.");
 			}
-			if (string.IsNullOrEmpty(ContentSafety.Endpoint))
+			if (!ExternalCommunication.Validate())
 			{
-				throw new ArgumentNullException("Content safety endpoint was not defined.");
-			}
-			if (string.IsNullOrEmpty(BlobStorage.URL))
-			{
-				throw new ArgumentNullException("Storage URL is missing.");
-			}
-			if (string.IsNullOrEmpty(BlobStorage.ConnectionString))
-			{
-				throw new ArgumentNullException("Storage account connection string was not defined.");
-			}
-			if (string.IsNullOrEmpty(Persistence.ConnectionString))
-			{
-				throw new ArgumentNullException("MySQL connection string was not defined.");
-			}
-			if (string.IsNullOrEmpty(ExternalCommunication.ConnectionString))
-			{
-				throw new ArgumentNullException("Communication services connection string was not defined.");
+				_logger.LogError("External communication configuration is invalid. Please check your configuration.");
 			}
 
-			Console.WriteLine("All keys are present. Continuing with app startup.");
+			_logger.LogInformation("All keys are present. Continuing with app startup.");
 		}
 	}
 
@@ -100,23 +76,49 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		public string Key { get; set; }
 		public string Issuer { get; set; }
 		public string Audience { get; set; }
+
+		public readonly bool Validate()
+		{
+			return !string.IsNullOrEmpty(Key) && !string.IsNullOrEmpty(Issuer) && !string.IsNullOrEmpty(Audience);
+		}
 	}
 	public struct ContentSafety
 	{
 		public string Key { get; set; }
 		public string Endpoint { get; set; }
+		public string ClientServiceKey { get; set; }
+
+		public readonly bool Validate()
+		{
+			return !string.IsNullOrEmpty(Key) && !string.IsNullOrEmpty(Endpoint) && !string.IsNullOrEmpty(ClientServiceKey);
+		}
 	}
 	public struct BlobStorage
 	{
 		public string URL { get; set; }
 		public string ConnectionString { get; set; }
+
+		public readonly bool Validate()
+		{
+			return !string.IsNullOrEmpty(URL) && !string.IsNullOrEmpty(ConnectionString);
+		}
 	}
 	public struct Persistence
 	{
 		public string ConnectionString { get; set; }
+
+		public readonly bool Validate()
+		{
+			return !string.IsNullOrEmpty(ConnectionString);
+		}
 	}
 	public struct ExternalCommunication
 	{
 		public string ConnectionString { get; set; }
+
+		public readonly bool Validate()
+		{
+			return !string.IsNullOrEmpty(ConnectionString);
+		}
 	}
 }

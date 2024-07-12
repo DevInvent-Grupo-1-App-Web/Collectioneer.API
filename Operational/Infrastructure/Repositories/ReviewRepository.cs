@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Operational.Infrastructure.Repositories
 {
-	public class ReviewRepository : BaseRepository<Review>, IReviewRepository
+	public class ReviewRepository(AppDbContext context) : BaseRepository<Review>(context), IReviewRepository
 	{
-		public ReviewRepository(AppDbContext context) : base(context)
-		{
-		}
-
 		public async Task<ICollection<Review>> GetCollectibleReviews(int collectibleId)
 		{
 			return await _context.Reviews.Where(r => r.CollectibleId == collectibleId).ToListAsync();
