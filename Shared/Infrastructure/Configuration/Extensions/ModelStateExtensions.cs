@@ -8,7 +8,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration.Extensions
 		public static List<string> GetErrorMessages(this ModelStateDictionary dictionary)
 		{
 			return dictionary.Where(m => m.Value != null)
-							 .SelectMany(m => m.Value.Errors)
+							 .SelectMany(m => m.Value!.Errors)
 							 .Select(m => m.ErrorMessage)
 							 .ToList();
 		}

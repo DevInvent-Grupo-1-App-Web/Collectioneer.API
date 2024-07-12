@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Social.Infrastructure.Repositories
 {
-    public class PostRepository : BaseRepository<Post>, IPostRepository
+    public class PostRepository(AppDbContext context) : BaseRepository<Post>(context), IPostRepository
     {
-        public PostRepository(AppDbContext context) : base(context)
-        {
-        }
-
 		public async Task<ICollection<Post>> GetPosts(int communityId)
 		{
 			return await _context.Posts

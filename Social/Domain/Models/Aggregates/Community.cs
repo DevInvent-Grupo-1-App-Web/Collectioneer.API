@@ -5,11 +5,14 @@ using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Social.Domain.Models.Aggregates;
 
-public class Community
+public class Community(
+	string name,
+	string description
+	)
 {
 	public int Id { get; set; }
-	public string Name { get; set; }
-	public string Description { get; set; }
+	public string Name { get; set; } = name;
+	public string Description { get; set; } = description;
 
 	// Navigation properties
 	public ICollection<Collectible> Collectibles { get; set; } = [];
@@ -21,13 +24,4 @@ public class Community
 	public ICollection<Filter> CommunityFilters { get; set; } = [];
 	public ICollection<Tag> CommunityTags { get; set; } = [];
 	public ICollection<MediaElement> MediaElements { get; set; } = [];
-
-	public Community(
-		string name,
-		string description
-	)
-	{
-		Name = name;
-		Description = description;
-	}
 }

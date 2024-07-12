@@ -11,41 +11,32 @@ using Collectioneer.API.Shared.Infrastructure.Configuration;
 
 namespace Collectioneer.API.Shared.Application.Internal.Services;
 
-public class MediaElementService : IMediaElementService
+public class MediaElementService(
+	AppKeys appKeys,
+	IMediaElementRepository mediaElementRepository,
+	IUnitOfWork unitOfWork
+	) : IMediaElementService
 {
-	private readonly BlobServiceClient _blobServiceClient;
-	private readonly IMediaElementRepository _mediaElementRepository;
-	private readonly IUnitOfWork _unitOfWork;
-
-	public MediaElementService(
-		AppKeys appKeys,
-		IMediaElementRepository mediaElementRepository,
-		IUnitOfWork unitOfWork
-	)
-	{
-		_blobServiceClient = new BlobServiceClient(new Uri(appKeys.BlobStorage.URL));
-		_mediaElementRepository = mediaElementRepository;
-		_unitOfWork = unitOfWork;
-	}
+	private readonly BlobServiceClient _blobServiceClient = new BlobServiceClient(new Uri(appKeys.BlobStorage.URL));
 
 	public async Task<ICollection<MediaElement>> GetMediaElementsByCollectibleId(int collectibleId)
 	{
-		return await _mediaElementRepository.GetMediaElementsByCollectibleId(collectibleId);
+		return await mediaElementRepository.GetMediaElementsByCollectibleId(collectibleId);
 	}
 
 	public Task<ICollection<MediaElement>> GetMediaElementsByCommunityId(int communityId)
 	{
-		return _mediaElementRepository.GetMediaElementsByCommunityId(communityId);
+		return mediaElementRepository.GetMediaElementsByCommunityId(communityId);
 	}
 
 	public Task<ICollection<MediaElement>> GetMediaElementsByPostId(int postId)
 	{
-		return _mediaElementRepository.GetMediaElementsByPostId(postId);
+		return mediaElementRepository.GetMediaElementsByPostId(postId);
 	}
 
 	public Task<ICollection<MediaElement>> GetMediaElementsByProfileId(int profileId)
 	{
-		return _mediaElementRepository.GetMediaElementsByProfileId(profileId);
+		return mediaElementRepository.GetMediaElementsByProfileId(profileId);
 	}
 
 	public async Task<string> UploadMedia(MediaElementUploadCommand request, int uploaderId)
@@ -92,9 +83,26 @@ public class MediaElementService : IMediaElementService
 		}
 
 		// Save the media element to the database
-		await _mediaElementRepository.Add(mediaElement);
-		await _unitOfWork.CompleteAsync();
+		await mediaElementRepository.Add(mediaElement);
+		await unitOfWork.CompleteAsync();
 
 		return url;
+	}
+
+	public Task MarkMediaElementAsDeleted(int uploaderId, string mediaName)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task MarkMediaElementAsModerated(int uploaderId, string mediaName)
+	{
+		var mediaElement = await mediaElementRepository.GetMediaElementByUploaderIdAndMediaName(uploaderId, mediaName);
+		mediaElement.Moderated = true;
+		await unitOfWork.CompleteAsync();
+	}
+	
+	public Task MarkMediaElementAsHidden(int uploaderId, string mediaName)
+	{
+		throw new NotImplementedException();
 	}
 }

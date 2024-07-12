@@ -5,11 +5,8 @@ using Collectioneer.API.Shared.Domain.Repositories;
 
 namespace Collectioneer.API.Shared.Infrastructure.Repositories
 {
-	public class UserRepository : BaseRepository<User>, IUserRepository
+	public class UserRepository(AppDbContext context) : BaseRepository<User>(context), IUserRepository
 	{
-		public UserRepository(AppDbContext context) : base(context)
-		{
-		}
 
 		/// <summary>
 		/// Returns true if the email already exists, false otherwise.

@@ -7,13 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Social.Infrastructure.Repositories
 {
-    public class CommunityRepository : BaseRepository<Community>, ICommunityRepository
+    public class CommunityRepository(AppDbContext context) : BaseRepository<Community>(context), ICommunityRepository
     {
-        public CommunityRepository(AppDbContext context) : base(context)
-        {
-        }
-
-        public async Task<ICollection<Community>> Search(string searchTerm)
+		public async Task<ICollection<Community>> Search(string searchTerm)
         {
             searchTerm = Regex.Replace(searchTerm, @"[^a-zA-Z0-9\s]", "");
 

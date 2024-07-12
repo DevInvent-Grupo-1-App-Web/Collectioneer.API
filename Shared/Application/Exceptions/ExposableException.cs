@@ -1,13 +1,7 @@
 ﻿namespace Collectioneer.API.Shared.Application.Exceptions
 {
-    public partial class ExposableException : Exception
+    public partial class ExposableException(string message, int statusCode, Exception? innerException = null) : Exception(message, innerException)
     {
-        public int StatusCode { get; set; }
-
-        public ExposableException(string message, int statusCode, Exception? innerException = null)
-            : base(message, innerException)
-        {
-            StatusCode = statusCode;
-        }
-    }
+		public int StatusCode { get; set; } = statusCode;
+	}
 }

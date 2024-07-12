@@ -5,10 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Collectioneer.API.Shared.Infrastructure.Repositories;
 
-class MediaElementRepository : BaseRepository<MediaElement>, IMediaElementRepository
+class MediaElementRepository(AppDbContext context) : BaseRepository<MediaElement>(context), IMediaElementRepository
 {
-	public MediaElementRepository(AppDbContext context) : base(context)
+	public async Task<MediaElement> GetMediaElementByUploaderIdAndMediaName(int uploaderId, string mediaName)
 	{
+		var mediaElement = await _context.MediaElements
+			.FirstOrDefaultAsync(m => m.UploaderId == uploaderId && m.MediaName == mediaName);
+
+		return mediaElement ?? throw new Exception("Media element not found");
 	}
 
 	public async Task<ICollection<MediaElement>> GetMediaElementsByCollectibleId(int collectibleId)

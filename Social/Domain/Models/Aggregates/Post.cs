@@ -6,13 +6,18 @@ using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API.Social.Domain.Models.Aggregates
 {
-	public class Post : ICommentable, IReactable, ITimestamped
+	public class Post(
+		int communityId,
+		string title,
+		string content,
+		int authorId
+		) : ICommentable, IReactable, ITimestamped
 	{
 		public int Id { get; set; }
-		public int CommunityId { get; set; }
-		public string Title { get; set; } = string.Empty;
-		public string Content { get; set; } = string.Empty;
-		public int AuthorId { get; set; }
+		public int CommunityId { get; set; } = communityId;
+		public string Title { get; set; } = title;
+		public string Content { get; set; } = content;
+		public int AuthorId { get; set; } = authorId;
 		public bool IsHidden { get; set; } = false;
 		public bool IsArchived { get; set; } = false;
 		public DateTime CreatedAt { get; set; }
@@ -25,17 +30,5 @@ namespace Collectioneer.API.Social.Domain.Models.Aggregates
 		public ICollection<MediaElement> MediaElements { get; set; } = [];
 		public ICollection<Comment> Comments { get; set; } = [];
 		public ICollection<Reaction> Reactions { get; set; } = [];
-		public Post(
-			int communityId,
-			string title,
-			string content,
-			int authorId
-		)
-		{
-			CommunityId = communityId;
-			Title = title;
-			Content = content;
-			AuthorId = authorId;
-		}
 	}
 }

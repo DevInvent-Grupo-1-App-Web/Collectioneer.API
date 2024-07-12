@@ -2,17 +2,10 @@
 
 namespace Collectioneer.API.Social.Application.External
 {
-    public class CommunityDTO
-    {
-        public int Id { get; init; }
-        public string Name { get; init; }
-        public string Description { get; init; }
-
-        public CommunityDTO(Community community)
-        {
-            Id = community.Id;
-            Name = community.Name;
-            Description = community.Description;
-        }
-    }
+    public class CommunityDTO(Community community)
+	{
+		public int Id { get; init; } = community.Id;
+		public string Name { get; init; } = community.Name;
+		public string Description { get; init; } = community.Description;
+	}
 }

@@ -8,13 +8,8 @@ using System.Text.RegularExpressions;
 
 namespace Collectioneer.API.Operational.Infrastructure.Repositories
 {
-	public class CollectibleRepository : BaseRepository<Collectible>, ICollectibleRepository
+	public class CollectibleRepository(AppDbContext context) : BaseRepository<Collectible>(context), ICollectibleRepository
 	{
-		public CollectibleRepository(AppDbContext context) : base(context)
-		{
-
-		}
-
 		public async Task DeleteUserCollectibles(int userId)
 		{
 			var collectibles = await _context.Collectibles.Where(c => c.OwnerId == userId).ToListAsync();

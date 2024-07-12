@@ -9,22 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Collectioneer.API.Shared.Presentation.Controllers
 {
 	[ApiController]
-	public class UserController : ControllerBase
+	public class UserController(
+		IContentModerationService contentModerationService,
+		IUserService userService,
+		ILogger<UserController> logger) : ControllerBase
 	{
-		private readonly IContentModerationService _contentModerationService;
-		private readonly IUserService _userService;
-		private readonly ILogger<UserController> _logger;
-
-		public UserController(
-			IContentModerationService contentModerationService,
-			IUserService userService,
-			ILogger<UserController> logger)
-		{
-			_contentModerationService = contentModerationService;
-			_userService = userService;
-			_logger = logger;
-		}
-
 		[HttpGet("user/{id}")]
 		[ProducesResponseType(typeof(UserDTO), 200)]
 		[ProducesResponseType(404)]
@@ -33,17 +22,17 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			try
 			{
-				var response = await _userService.GetUser(id);
+				var response = await userService.GetUser(id);
 				return StatusCode(200, response);
 			}
 			catch (ExposableException ex)
 			{
-				_logger.LogInformation(ex, "Error getting user.");
+				logger.LogInformation(ex, "Error getting user.");
 				return StatusCode(ex.StatusCode, ex.Message);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error getting user.");
+				logger.LogError(ex, "Error getting user.");
 				return StatusCode(500, ex.Message);
 			}
 		}
@@ -57,25 +46,25 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			try
 			{
-				if (!await _contentModerationService.ScreenTextContent($"{request.Name} {request.Username}"))
+				if (!await contentModerationService.ScreenTextContent($"{request.Name} {request.Username}"))
 				{
 					throw new ExposableException("Review your credentials properness.", 400);
 				}
 
-				var registerResponse = await _userService.RegisterNewUser(request);
+				var registerResponse = await userService.RegisterNewUser(request);
 				var loginRequest = new UserLoginQuery(request.Username, request.Password);
-				var loginResponse = await _userService.LoginUser(loginRequest);
+				var loginResponse = await userService.LoginUser(loginRequest);
 
 				return Ok(new { user = registerResponse, token = loginResponse, type = "Bearer" });
 			}
 			catch (ExposableException ex)
 			{
-				_logger.LogInformation(ex, "Error registering user.");
+				logger.LogInformation(ex, "Error registering user.");
 				return StatusCode(ex.StatusCode, ex.Message);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error registering user.");
+				logger.LogError(ex, "Error registering user.");
 				return StatusCode(500, ex.Message);
 			}
 		}
@@ -89,19 +78,19 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			try
 			{
-				var response = await _userService.LoginUser(request);
-				var requestedUser = await _userService.GetUserByUsername(request.Username);
+				var response = await userService.LoginUser(request);
+				var requestedUser = await userService.GetUserByUsername(request.Username);
 				var userId = requestedUser.Id;
 				return Ok(new { token = response, type = "Bearer", userId });
 			}
 			catch (ExposableException ex)
 			{
-				_logger.LogInformation(ex, "Error logging in user.");
+				logger.LogInformation(ex, "Error logging in user.");
 				return StatusCode(ex.StatusCode, ex.Message);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error logging in user.");
+				logger.LogError(ex, "Error logging in user.");
 				return StatusCode(500, ex.Message);
 			}
 		}
@@ -116,17 +105,17 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			try
 			{
-				await _userService.DeleteUser(request);
+				await userService.DeleteUser(request);
 				return Ok();
 			}
 			catch (ExposableException ex)
 			{
-				_logger.LogInformation(ex, "Error deleting user.");
+				logger.LogInformation(ex, "Error deleting user.");
 				return StatusCode(ex.StatusCode, ex.Message);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error deleting user.");
+				logger.LogError(ex, "Error deleting user.");
 				return StatusCode(500, ex.Message);
 			}
 		}
@@ -140,12 +129,12 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			try
 			{
-				await _userService.ForgotPassword(request);
+				await userService.ForgotPassword(request);
 				return Ok();
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error sending password reset email.");
+				logger.LogError(ex, "Error sending password reset email.");
 				return StatusCode(500, ex.Message);
 			}
 		}
@@ -158,12 +147,12 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			try
 			{
-				await _userService.ChangeUserPassword(request);
+				await userService.ChangeUserPassword(request);
 				return Ok();
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error changing password.");
+				logger.LogError(ex, "Error changing password.");
 				return StatusCode(500, ex.Message);
 			}
 		}
@@ -172,7 +161,7 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		[HttpGet("who-is")]
 		public async Task<int> WhoIs([FromQuery] string token)
 		{
-			return await _userService.GetUserIdByToken(token);
+			return await userService.GetUserIdByToken(token);
 		}
 	}
 }
