@@ -17,7 +17,7 @@ public class MediaElementService(
 	IUnitOfWork unitOfWork
 	) : IMediaElementService
 {
-	private readonly BlobServiceClient _blobServiceClient = new BlobServiceClient(new Uri(appKeys.BlobStorage.URL));
+	private readonly BlobServiceClient _blobServiceClient = new BlobServiceClient(appKeys.BlobStorage.URL);
 
 	public async Task<ICollection<MediaElement>> GetMediaElementsByCollectibleId(int collectibleId)
 	{
