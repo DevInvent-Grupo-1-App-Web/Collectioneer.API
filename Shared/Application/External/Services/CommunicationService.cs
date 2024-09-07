@@ -22,7 +22,7 @@ public class CommunicationService
     {
         EmailSendOperation emailSendOperation =  await _emailClient.SendAsync(
             WaitUntil.Completed,
-            senderAddress: "DoNotReply@5ecf333e-0cd7-4809-afe0-444615482c94.azurecomm.net",
+            senderAddress: "DoNotReply@f130d3f5-1b6d-4fdf-b2c5-b0cc0dfc0734.azurecomm.net",
             recipientAddress: to,
             subject: subject,
             htmlContent: body
