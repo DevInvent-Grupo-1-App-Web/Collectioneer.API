@@ -997,7 +997,7 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		public void RunSqlScript(string sqlScript)
 		{
 			var sql = @"
-			USE dev_collectioneer;
+			USE prod;
 
 			-- Create triggers for updating the updated_at column on ITimestamped entities
 
