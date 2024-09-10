@@ -1,4 +1,4 @@
-USE dev_collectioneer;
+USE prod;
 
 -- Create triggers for updating the updated_at column on ITimestamped entities
 
