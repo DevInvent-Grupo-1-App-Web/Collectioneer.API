@@ -43,7 +43,31 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 			}
 		}
 
-
+		[HttpGet("user/byName/{name}")] //New code added 11-09-2024
+		[ProducesResponseType(typeof(UserDTO), 200)]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(500)]
+		public async Task<ActionResult<UserDTO>> GetUserByName([FromRoute] string name)
+		{
+			try
+			{
+				var response = await _userService.GetUsersByName(name);
+				return StatusCode(200, response);
+			}
+			catch (ExposableException ex)
+			{
+				_logger.LogInformation(ex, "Error getting user name.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error getting user name.");
+				return StatusCode(500, ex.Message);
+			}
+		}
+		
+		
+		
 		[HttpPost("register-user")]
 		[ProducesResponseType(typeof((UserDTO, string, string)), 200)]
 		[ProducesResponseType(400)]

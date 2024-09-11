@@ -95,7 +95,25 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 
 			return new UserDTO(user);
 		}
+		
+		// Método actualizado para manejar múltiples resultados
+		public async Task<List<UserDTO>> GetUsersByName(string name)
+		{
+			var users = await _userRepository.GetUsersByName(name) ?? 
+			            throw new UserNotFoundException($"No users with the name {name} found.");
 
+			return users.Select(user => new UserDTO(user)).ToList();
+		}
+
+
+		public async Task<UserDTO> GetUserByUsername(string username)
+		{
+			var user = await _userRepository.GetUserByUsername(username) ??
+			           throw new UserNotFoundException($"User with username {username} not found.");
+
+			return new UserDTO(user);
+		}
+		
 		public async Task DeleteUser(UserDeleteCommand command)
 		{
 			if (!await _userRepository.IsValidUser(command.Username, HashPassword(command.Password)))
@@ -153,13 +171,8 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 			return user.Id;
 		}
 
-		public async Task<UserDTO> GetUserByUsername(string username)
-		{
-			var user = await _userRepository.GetUserByUsername(username) ??
-				throw new UserNotFoundException($"User with username {username} not found.");
-
-			return new UserDTO(user);
-		}
+		
+		
 
 		public async Task ForgotPassword(ForgotPasswordCommand command)
 		{

@@ -39,6 +39,15 @@ namespace Collectioneer.API.Shared.Domain.Services
 		/// </summary>
 		/// <param name="query"></param>
 		/// <returns></returns>
+		
+		public Task<List<UserDTO>> GetUsersByName(string name); //New code added 11-09-2024
+		/// <summary>
+		/// Returns all users by name. Throws an exception if the name is not in the database.
+		/// </summary>
+		/// <param name="query"></param>
+		/// <returns></returns>
+		
+		
         public Task DeleteUser(UserDeleteCommand query);
 		/// <summary>
 		/// Hashes a password.

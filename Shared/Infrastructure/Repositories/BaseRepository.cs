@@ -39,6 +39,11 @@ namespace Collectioneer.API.Shared.Infrastructure.Repositories
 		{
 			return await _context.Set<T>().FindAsync(id);
 		}
+		
+		public async Task<T?> GetByName(string name) //New Code added 11-09-2024
+		{
+			return await _context.Set<T>().FindAsync(name);
+		}
 
 		public async Task<T> Update(T entity)
 		{

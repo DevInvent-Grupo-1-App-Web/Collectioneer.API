@@ -11,6 +11,7 @@ namespace Collectioneer.API.Shared.Domain.Repositories
 		public Task<bool> IsValidUser(string username, string password);
 
 		public Task<User?> GetUserByUsername(string username);
+		public Task<List<User>> GetUsersByName(string name); // New code added 11-09-2024
 		public Task<User?> GetUserByEmail(string email);
 	}
 }
