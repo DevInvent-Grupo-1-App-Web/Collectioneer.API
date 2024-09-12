@@ -1,4 +1,5 @@
-﻿using Collectioneer.API.Shared.Application.Exceptions;
+﻿using System.Net.Mime;
+using Collectioneer.API.Shared.Application.Exceptions;
 using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
@@ -7,151 +8,175 @@ using Collectioneer.API.Social.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Collectioneer.API.Social.Presentation.Controllers
-{
-	[ApiController]
-	public class CommunityController(ICommunityService communityService,
+namespace Collectioneer.API.Social.Presentation.Controllers;
+
+[ApiController]
+[Produces(MediaTypeNames.Application.Json)]
+public class CommunityController(
+	ICommunityService communityService,
 	IContentModerationService contentModerationService,
 	ILogger<CommunityController> logger) : ControllerBase
+{
+	[Authorize]
+	[HttpPost("new-community")]
+	public async Task<ActionResult<CommunityDTO>> CreateCommunity([FromBody] CommunityCreateCommand request)
 	{
-		[Authorize]
-		[HttpPost("new-community")]
-		public async Task<ActionResult<CommunityDTO>> CreateCommunity([FromBody] CommunityCreateCommand request)
+		try
 		{
-			try
-			{
-				if (!await contentModerationService.ScreenTextContent($"{request.Name} {request.Description}"))
-				{
-					throw new ExposableException("Contenido inapropiado detectado.", 400);
-				}
+			if (!await contentModerationService.ScreenTextContent($"{request.Name} {request.Description}"))
+				throw new ExposableException("Contenido inapropiado detectado.", 400);
 
-				var newCommunity = await communityService.CreateNewCommunity(request);
+			var newCommunity = await communityService.CreateNewCommunity(request);
 
-				return CreatedAtAction(
-					nameof(GetCommunity),
-					new { communityId = newCommunity.Id },
-					newCommunity
-				);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error creating community.");
-				return StatusCode(500, ex.Message);
-			}
+			return CreatedAtAction(
+				nameof(GetCommunity),
+				new { communityId = newCommunity.Id },
+				newCommunity
+			);
 		}
-
-		[Authorize]
-		[HttpPost("join-community")]
-		public async Task<IActionResult> JoinCommunity([FromBody] CommunityJoinCommand request)
+		catch (Exception ex)
 		{
-			try
-			{
-				await communityService.AddUserToCommunity(request);
-
-				return Ok();
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error joining community.");
-				return StatusCode(500, ex.Message);
-			}
+			logger.LogError(ex, "Error creating community.");
+			return StatusCode(500, ex.Message);
 		}
+	}
 
-		[HttpGet("community/{communityId}")]
-		public async Task<ActionResult<CommunityDTO>> GetCommunity([FromRoute] int communityId)
+	[Authorize]
+	[HttpPost("join-community")]
+	public async Task<IActionResult> JoinCommunity([FromBody] CommunityJoinCommand request)
+	{
+		try
 		{
-			try
-			{
-				var community = await communityService.GetCommunity(new CommunityGetCommand(communityId));
+			await communityService.AddUserToCommunity(request);
 
-				return Ok(community);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error getting community.");
-				return StatusCode(500, ex.Message);
-			}
+			return Ok();
 		}
-
-		[HttpGet("communities")]
-		public async Task<ActionResult<IEnumerable<CommunityDTO>>> GetCommunities()
+		catch (Exception ex)
 		{
-			try
-			{
-				var communities = await communityService.GetCommunities();
-
-				return Ok(communities);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error getting communities.");
-				return StatusCode(500, ex.Message);
-			}
+			logger.LogError(ex, "Error joining community.");
+			return StatusCode(500, ex.Message);
 		}
+	}
 
-		[Authorize]
-		[HttpGet("communities/{userId}")]
-		public async Task<ActionResult<IEnumerable<CommunityDTO>>> GetUserCommunities([FromRoute] int userId)
+	[HttpGet("community/{communityId}")]
+	public async Task<ActionResult<CommunityDTO>> GetCommunity([FromRoute] int communityId)
+	{
+		try
 		{
-			try
-			{
-				var communities = await communityService.GetUserCommunities(new CommunityFetchByUserQuery(userId));
+			var community = await communityService.GetCommunity(new CommunityGetCommand(communityId));
 
-				return Ok(communities);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error getting user communities.");
-				return StatusCode(500, ex.Message);
-			}
+			return Ok(community);
 		}
-
-		[HttpGet("{communityId}/feed")]
-		public async Task<ActionResult<IEnumerable<FeedItemDTO>>> GetFeedContent([FromRoute] int communityId)
+		catch (Exception ex)
 		{
-			try
-			{
-				var feedItems = await communityService.GetCommunityFeed(new CommunityFeedQuery(communityId));
-
-				return Ok(feedItems);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error getting feed content.");
-				return StatusCode(500, ex.Message);
-			}
+			logger.LogError(ex, "Error getting community.");
+			return StatusCode(500, ex.Message);
 		}
+	}
 
-		[HttpGet("search/communities")]
-		public async Task<ActionResult<IEnumerable<CommunityDTO>>> SearchCommunities([FromQuery] CommunitySearchQuery query)
+	[Authorize]
+	[HttpDelete("community/{communityId}")]
+	public async Task<IActionResult> DeleteCommunity([FromRoute] int communityId)
+	{
+		try
 		{
-			try
-			{
-				var communities = await communityService.SearchCommunities(query);
+			var deleteCommand = new DeleteCommunityCommand(communityId);
+			var deletedCommunity = await communityService.DeleteCommunity(deleteCommand);
 
-				return Ok(communities);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error searching communities.");
-				return StatusCode(500, ex.Message);
-			}
+			return Ok(deletedCommunity);
 		}
-
-		[HttpGet("community/{communityId}/search")]
-		public async Task<ActionResult<IEnumerable<FeedItemDTO>>> SearchCommunityContent([FromRoute] int communityId, [FromQuery] string query)
+		catch (ExposableException ex)
 		{
-			try
-			{
-				var feedItems = await communityService.SearchInCommunity(new CommunitySearchContentQuery(query, communityId));
+			logger.LogError(ex, "Error deleting community.");
+			return StatusCode(ex.StatusCode, ex.Message);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error deleting community.");
+			return StatusCode(500, ex.Message);
+		}
+	}
+	
+	[HttpGet("communities")]
+	public async Task<ActionResult<IEnumerable<CommunityDTO>>> GetCommunities()
+	{
+		try
+		{
+			var communities = await communityService.GetCommunities();
 
-				return Ok(feedItems);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Error searching community content.");
-				return StatusCode(500, ex.Message);
-			}
+			return Ok(communities);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error getting communities.");
+			return StatusCode(500, ex.Message);
+		}
+	}
+
+	[Authorize]
+	[HttpGet("communities/{userId}")]
+	public async Task<ActionResult<IEnumerable<CommunityDTO>>> GetUserCommunities([FromRoute] int userId)
+	{
+		try
+		{
+			var communities = await communityService.GetUserCommunities(new CommunityFetchByUserQuery(userId));
+
+			return Ok(communities);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error getting user communities.");
+			return StatusCode(500, ex.Message);
+		}
+	}
+
+	[HttpGet("{communityId}/feed")]
+	public async Task<ActionResult<IEnumerable<FeedItemDTO>>> GetFeedContent([FromRoute] int communityId)
+	{
+		try
+		{
+			var feedItems = await communityService.GetCommunityFeed(new CommunityFeedQuery(communityId));
+
+			return Ok(feedItems);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error getting feed content.");
+			return StatusCode(500, ex.Message);
+		}
+	}
+
+	[HttpGet("search/communities")]
+	public async Task<ActionResult<IEnumerable<CommunityDTO>>> SearchCommunities([FromQuery] CommunitySearchQuery query)
+	{
+		try
+		{
+			var communities = await communityService.SearchCommunities(query);
+
+			return Ok(communities);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error searching communities.");
+			return StatusCode(500, ex.Message);
+		}
+	}
+
+	[HttpGet("community/{communityId}/search")]
+	public async Task<ActionResult<IEnumerable<FeedItemDTO>>> SearchCommunityContent([FromRoute] int communityId,
+		[FromQuery] string query)
+	{
+		try
+		{
+			var feedItems =
+				await communityService.SearchInCommunity(new CommunitySearchContentQuery(query, communityId));
+
+			return Ok(feedItems);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error searching community content.");
+			return StatusCode(500, ex.Message);
 		}
 	}
 }

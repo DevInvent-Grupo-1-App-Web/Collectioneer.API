@@ -149,7 +149,30 @@ namespace Collectioneer.API.Social.Application.Internal.Services
             return communities.Select(c => new CommunityDTO(c)).ToList();
         }
 
-		public async Task<ICollection<FeedItemDTO>> SearchInCommunity(CommunitySearchContentQuery query)
+        public async Task<CommunityDTO> DeleteCommunity(DeleteCommunityCommand command)
+        {
+            // Buscar la comunidad
+            var community = await communityRepository.GetById(command.Id);
+
+            if (community == null)
+            {
+                throw new KeyNotFoundException("Community not found.");
+            }
+
+            // Eliminar la comunidad
+            var result = await communityRepository.Delete(community.Id);
+
+            if (!result)
+            {
+                throw new InvalidOperationException("Failed to delete community.");
+            }
+            
+            await unitOfWork.CompleteAsync();
+
+            return new CommunityDTO(community);
+        }
+
+        public async Task<ICollection<FeedItemDTO>> SearchInCommunity(CommunitySearchContentQuery query)
 		{
 			var posts = await postRepository.Search(query.SearchTerm, query.CommunityId);
 			var collectibles = await collectibleRepository.Search(query.SearchTerm, query.CommunityId);

@@ -24,7 +24,7 @@ namespace Collectioneer.API
 {
 	public class Program
 	{
-		private static ILogger<Program>? logger;
+		private static ILogger<Program>? _logger;
 
 		public static void Main(string[] args)
 		{
@@ -48,22 +48,22 @@ namespace Collectioneer.API
 				}
 			});
 
-			logger = app.Services.GetRequiredService<ILogger<Program>>();
+			_logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-			logger.LogInformation("Starting up Collectioneer.API");
+			_logger.LogInformation("Starting up Collectioneer.API");
 
 			var appKeys = app.Services.GetRequiredService<AppKeys>();
 			appKeys.CheckKeys();
 
-			logger.LogInformation("Checking database connection...");
+			_logger.LogInformation("Checking database connection...");
 
 			TestDbConnection(app);
 			InitializeDatabase(app);
 
 			ConfigureHttpPipeline(app);
 
-			logger.LogInformation("Running app...");
-            logger.LogInformation($"App is listening at port {app.Configuration["ASPNETCORE_URLS"]}");
+			_logger.LogInformation("Running app...");
+			_logger.LogInformation($"App is listening at port {app.Configuration["ASPNETCORE_URLS"]}");
 
 			app.Run();
 
@@ -90,27 +90,29 @@ namespace Collectioneer.API
 
 		private static void InitializeDatabase(WebApplication app)
 		{
-            using var scope = app.Services.CreateScope();
-            using var context = scope.ServiceProvider.GetService<AppDbContext>();
-            context?.Database.EnsureCreated();
-            context?.RunSqlScript("./Scripts/Startup.sql");
-        }
+			using var scope = app.Services.CreateScope();
+			using var context = scope.ServiceProvider.GetService<AppDbContext>();
+			context?.Database.EnsureCreated();
+			context?.RunSqlScript("./Scripts/Startup.sql");
+		}
 
 		private static void TestDbConnection(WebApplication app)
 		{
-            using var scope = app.Services.CreateScope();
-            var context = scope.ServiceProvider.GetService<AppDbContext>();
-            try
-            {
-                context?.Database.OpenConnection();
-                context?.Database.CloseConnection();
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError($"Error while connecting to database: {ex.Message}");
-                throw new Exception("Unable to connect to database. Cancelling startup.", ex);
-            }
-        }
+			using var scope = app.Services.CreateScope();
+			var context = scope.ServiceProvider.GetService<AppDbContext>();
+			try
+			{
+				context?.Database.OpenConnection();
+				_logger?.LogInformation("Database connection successful.");
+				context?.Database.CloseConnection();
+			}
+			catch (Exception ex)
+			{
+				_logger?.LogError($"Error while connecting to database: {ex.Message} - {ex.StackTrace}");
+				throw new Exception("Unable to connect to database. Cancelling startup.", ex);
+			}
+		}
+
 
 		private static void ConfigureEnvironment(WebApplicationBuilder builder)
 		{
@@ -127,20 +129,20 @@ namespace Collectioneer.API
 			var (issuer, audience, key) = ValidateJwtConfiguration(builder.Configuration);
 
 			builder.Services.AddAuthentication(
-			JwtBearerDefaults.AuthenticationScheme)
-			.AddJwtBearer(options =>
-			{
-				options.TokenValidationParameters = new TokenValidationParameters
+					JwtBearerDefaults.AuthenticationScheme)
+				.AddJwtBearer(options =>
 				{
-					ValidateIssuer = true,
-					ValidateAudience = true,
-					ValidateLifetime = true,
-					ValidateIssuerSigningKey = true,
-					ValidIssuer = issuer,
-					ValidAudience = audience,
-					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
-				};
-			});
+					options.TokenValidationParameters = new TokenValidationParameters
+					{
+						ValidateIssuer = true,
+						ValidateAudience = true,
+						ValidateLifetime = true,
+						ValidateIssuerSigningKey = true,
+						ValidIssuer = issuer,
+						ValidAudience = audience,
+						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+					};
+				});
 		}
 
 		public static (string, string, string) ValidateJwtConfiguration(IConfiguration configuration)
@@ -164,11 +166,11 @@ namespace Collectioneer.API
 			// Add services to the container.
 			builder.Services.AddCors(options =>
 			{
-				options.AddPolicy("AllowAll", builder =>
+				options.AddPolicy("AllowAll", corsPolicyBuilder =>
 				{
-					builder.AllowAnyOrigin()
-					.AllowAnyMethod()
-					.AllowAnyHeader();
+					corsPolicyBuilder.AllowAnyOrigin()
+						.AllowAnyMethod()
+						.AllowAnyHeader();
 				});
 			});
 
@@ -199,17 +201,17 @@ namespace Collectioneer.API
 				});
 				options.AddSecurityRequirement(new OpenApiSecurityRequirement
 				{
-			{
-				new OpenApiSecurityScheme
-				{
-					Reference = new OpenApiReference
 					{
-						Type = ReferenceType.SecurityScheme,
-						Id = "Bearer"
+						new OpenApiSecurityScheme
+						{
+							Reference = new OpenApiReference
+							{
+								Type = ReferenceType.SecurityScheme,
+								Id = "Bearer"
+							}
+						},
+						Array.Empty<string>()
 					}
-				},
-                Array.Empty<string>()
-            }
 				});
 				options.OperationFilter<AuthorizeCheckOperationFilter>();
 			});
@@ -221,14 +223,14 @@ namespace Collectioneer.API
 			var connectionString = builder.Configuration["MYSQL_CONNECTION_STRING"];
 
 			builder.Services.AddDbContext<AppDbContext>(
-								   options =>
-								   {
-									   if (connectionString != null)
-									   {
-										   options.UseMySQL(connectionString);
-									   }
-								   }
-											  );
+				options =>
+				{
+					if (connectionString != null)
+					{
+						options.UseMySQL(connectionString);
+					}
+				}
+			);
 
 			builder.Services.AddRouting(options => options.LowercaseUrls = true);
 		}
@@ -292,24 +294,24 @@ namespace Collectioneer.API
 				operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
 
 				operation.Security = new List<OpenApiSecurityRequirement>
-			{
-				new() {
-					[
-						new OpenApiSecurityScheme
-						{
-							Reference = new OpenApiReference
+				{
+					new() {
+						[
+							new OpenApiSecurityScheme
 							{
-								Type = ReferenceType.SecurityScheme,
-								Id = "Bearer"
-							},
-							Scheme = "oauth2",
-							Name = "Bearer",
-							In = ParameterLocation.Header,
+								Reference = new OpenApiReference
+								{
+									Type = ReferenceType.SecurityScheme,
+									Id = "Bearer"
+								},
+								Scheme = "oauth2",
+								Name = "Bearer",
+								In = ParameterLocation.Header,
 
-						}
-					] = new List<string>()
-				}
-			};
+							}
+						] = new List<string>()
+					}
+				};
 			}
 		}
 	}
