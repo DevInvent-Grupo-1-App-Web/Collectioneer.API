@@ -17,5 +17,18 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
 
             return communities;
         }
+
+        public Task<bool> Delete(int id)
+        {
+            var comunity = this._context.Communities.Find(id);
+            
+            if (comunity == null)
+            {
+                return Task.FromResult(false);
+            }else {
+                this._context.Communities.Remove(comunity);
+                return Task.FromResult(true);
+            }
+        }
     }
 }
