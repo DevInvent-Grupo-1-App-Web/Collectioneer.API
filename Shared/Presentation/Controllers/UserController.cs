@@ -163,5 +163,33 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		{
 			return await userService.GetUserIdByToken(token);
 		}
+		
+		[HttpPut("{id}")]
+		public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateCommand request)
+		{
+			var existingUser = await userService.GetUser(id);
+			
+			if (existingUser == null)
+			{
+				return NotFound("User not found");
+			}
+    
+			if (!string.IsNullOrEmpty(request.Username))
+			{
+				existingUser = existingUser with { Username = request.Username };
+			}
+			if (!string.IsNullOrEmpty(request.Email))
+			{
+				existingUser = existingUser with { Email = request.Email };
+			}
+			if (!string.IsNullOrEmpty(request.Name))
+			{
+				existingUser = existingUser with { Name = request.Name };
+			}
+    
+			var updatedUser = await userService.UpdateUser(id, request);
+    
+			return Ok(updatedUser);
+		}
 	}
 }

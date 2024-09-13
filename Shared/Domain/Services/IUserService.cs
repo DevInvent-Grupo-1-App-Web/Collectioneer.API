@@ -70,5 +70,14 @@ namespace Collectioneer.API.Shared.Domain.Services
 		/// </summary>
 		/// <returns></returns>
 		public Task<int> GetIdFromRequestHeader();
+		/// <summary>
+		/// Updates the details of an existing user.
+		/// Throws an exception if the user does not exist.
+		/// Updates only the fields provided in the command.
+		/// </summary>
+		/// <param name="id">The ID of the user to update.</param>
+		/// <param name="command">The command containing the fields to update.</param>
+		/// <returns><see cref="UserDTO"/> with updated user information.</returns>
+		public Task<UserDTO> UpdateUser(int id, UserUpdateCommand command);
 	}
 }

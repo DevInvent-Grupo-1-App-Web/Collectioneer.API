@@ -216,5 +216,44 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 			var token = authHeader.Replace("Bearer ", "");
 			return await GetUserIdByToken(token);
 		}
+		
+		public async Task<UserDTO> UpdateUser(int id, UserUpdateCommand command)
+		{
+			var existingUser = await _userRepository.GetById(id) ??
+			                   throw new UserNotFoundException($"User with id {id} not found.");
+			
+			string defaultStringValue = "string";
+			
+			if (!string.IsNullOrEmpty(command.Username) && command.Username != defaultStringValue && command.Username != existingUser.Username)
+			{
+				existingUser.Username = command.Username;
+			}
+
+			if (!string.IsNullOrEmpty(command.Email) && command.Email != defaultStringValue && command.Email != existingUser.Email)
+			{
+				existingUser.Email = command.Email;
+			}
+
+			if (!string.IsNullOrEmpty(command.Name) && command.Name != defaultStringValue && command.Name != existingUser.Name)
+			{
+				existingUser.Name = command.Name;
+			}
+
+			try
+			{
+				_userRepository.Update(existingUser);
+				await _unitOfWork.CompleteAsync();
+			}
+			catch (InvalidOperationException ex)
+			{
+				throw new Exception("An error occurred while updating the user. Ensure that DbContext is not being used concurrently.", ex);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("An error occurred while updating the user.", ex);
+			}
+
+			return new UserDTO(existingUser);
+		}
 	}
 }

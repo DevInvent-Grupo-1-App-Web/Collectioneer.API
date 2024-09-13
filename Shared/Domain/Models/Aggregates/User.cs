@@ -14,9 +14,9 @@ public class User
 	// Entity identifier
 	public int Id { get; private set; }
 	// Entity properties
-	public string Username { get; private set; } = string.Empty;
-	public string Email { get; private set; } = string.Empty;
-	public string Name { get; private set; } = string.Empty;
+	public string Username { get; internal set; } = string.Empty;
+	public string Email { get; internal set; } = string.Empty;
+	public string Name { get; internal set; } = string.Empty;
 	public string Password { get; private set; } = string.Empty;
 
 	// Navigation properties
