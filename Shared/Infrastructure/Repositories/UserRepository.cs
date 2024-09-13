@@ -43,5 +43,10 @@ namespace Collectioneer.API.Shared.Infrastructure.Repositories
 		{
 			return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 		}
+		
+		public async Task<User?> GetByIdAsync(int userId)
+		{
+			return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+		}
 	}
 }

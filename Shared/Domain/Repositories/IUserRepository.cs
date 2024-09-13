@@ -12,5 +12,7 @@ namespace Collectioneer.API.Shared.Domain.Repositories
 
 		public Task<User?> GetUserByUsername(string username);
 		public Task<User?> GetUserByEmail(string email);
+		
+		public Task<User?> GetByIdAsync(int userId);
 	}
 }
