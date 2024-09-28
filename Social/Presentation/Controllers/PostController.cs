@@ -37,6 +37,11 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 				var newPost = await postService.AddPost(request);
 				return Ok(newPost);
 			}
+			catch (ExposableException ex)
+			{
+				logger.LogError(ex, "Error creating post.");
+				return StatusCode(ex.StatusCode, ex.Message);
+			}
 			catch (Exception ex)
 			{
 				logger.LogError(ex, "Error creating post.");
