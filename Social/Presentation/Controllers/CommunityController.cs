@@ -25,7 +25,8 @@ public class CommunityController(
 		{
 			if (!await contentModerationService.ScreenTextContent($"{request.Name} {request.Description}"))
 				throw new ExposableException("Contenido inapropiado detectado.", 400);
-
+			if (string.IsNullOrWhiteSpace(request.Description))
+				throw new ExposableException("La descripción no puede estar vacía", 400);
 			var newCommunity = await communityService.CreateNewCommunity(request);
 
 			return CreatedAtAction(
