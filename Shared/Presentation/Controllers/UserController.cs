@@ -51,6 +51,11 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 					throw new ExposableException("Review your credentials properness.", 400);
 				}
 
+				if (string.IsNullOrWhiteSpace(request.Password))
+				{
+					throw new ExposableException("La contraseña no puede estar vacía.", 400);
+				}
+
 				var registerResponse = await userService.RegisterNewUser(request);
 				var loginRequest = new UserLoginQuery(request.Username, request.Password);
 				var loginResponse = await userService.LoginUser(loginRequest);

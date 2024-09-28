@@ -29,6 +29,11 @@ namespace Collectioneer.API.Social.Presentation.Controllers
 					throw new ExposableException("Contenido inapropiado detectado.", 400);
 				}
 
+				if (string.IsNullOrWhiteSpace(request.Content))
+				{
+					throw new ExposableException("El contenido no puede estar vacío.", 400);
+				}
+
 				var newPost = await postService.AddPost(request);
 				return Ok(newPost);
 			}
