@@ -5,7 +5,7 @@ using Collectioneer.API.Shared.Infrastructure.Configuration;
 
 namespace Collectioneer.API.Shared.Application.External.Services;
 
-public class CommunicationService 
+public class CommunicationService
 {
 	private readonly AppKeys _appKeys;
 	private readonly EmailClient _emailClient;
