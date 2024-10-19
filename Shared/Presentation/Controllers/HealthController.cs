@@ -1,6 +1,4 @@
-using Collectioneer.API.Shared.Application.External.Services;
-using Collectioneer.API.Shared.Domain.Services;
-using Collectioneer.API.Shared.Infrastructure.Configuration;
+using Collectioneer.API.Shared.Application.Internal.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Collectioneer.API.Shared.Presentation.Controllers
@@ -8,62 +6,36 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 	[ApiController]
 	[Route("api/[controller]")]
 	public class HealthController(
-		AppDbContext dbContext,
-		IMediaElementService mediaElementService,
-		CommunicationService communicationService,
-		IContentModerationService contentModerationService
+		InstanceHealthService instanceHealthService
 	) : ControllerBase
 	{
-		AppDbContext _dbContext = dbContext;
-		IMediaElementService _mediaElementService = mediaElementService;
-		CommunicationService _communicationService = communicationService;
-		IContentModerationService _contentModerationService = contentModerationService;
+		private readonly InstanceHealthService _instanceHealthService = instanceHealthService;
 
 		[HttpGet]
-		public async Task<ObjectResult> Get()
-		{
+		public async Task<ObjectResult> GetHealthStatus()
+		{/*
 			try
-			{
-				bool isDatabaseConnectionOk;
-				bool isStorageConnectionOk = await _mediaElementService.IsStorageConnectionOk();
-				bool isEmailConnectionOk = await _communicationService.IsEmailConnectionOk();
-				bool isContentModerationConnectionOk = await _contentModerationService.IsContentModerationServiceOk();
-	
-				try
+			{*/
+				if (_instanceHealthService == null)
 				{
-					await _dbContext.Database.CanConnectAsync();
-					isDatabaseConnectionOk = true;
+					return StatusCode(500, "Health service is not available.");
 				}
-				catch
-				{
-					try
-					{
-						await _dbContext.Database.CanConnectAsync();
-						isDatabaseConnectionOk = true;
-					}
-					catch
-					{
-						isDatabaseConnectionOk = false;
-					}
-				}
-	
-				var statusCode = isDatabaseConnectionOk && isStorageConnectionOk && isEmailConnectionOk && isContentModerationConnectionOk ? 200 : 500;
-	
-	
-				return StatusCode(statusCode, $@"
-				{{
-					""database"": {isDatabaseConnectionOk},
-					""storage"": {isStorageConnectionOk},
-					""email"": {isEmailConnectionOk},
-					""contentModeration"": {isContentModerationConnectionOk}
-				}}
-				");
-			}
-			catch (Exception)
-			{
-				return StatusCode(500, "An error occurred while checking the health of the services.");
-			}
 
+				var healthStatus = await _instanceHealthService.IsHealthy();
+
+				if (healthStatus)
+				{
+					return Ok(_instanceHealthService.GetHealthReport());
+				}
+				else
+				{
+					return StatusCode(503, _instanceHealthService.GetHealthReport());
+				}
+			/*}
+			catch
+			{
+				return StatusCode(500, "An error occurred while checking the health of the services. Expect degraded performance.");
+			}*/
 		}
 	}
 }

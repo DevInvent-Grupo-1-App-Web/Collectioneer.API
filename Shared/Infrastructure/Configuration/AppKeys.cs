@@ -3,11 +3,12 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 	public class AppKeys
 	{
 		private readonly ILogger<AppKeys> _logger ;
-		public JwtConfig Jwt { get; set; }
-		public ContentSafety ContentSafety { get; set; }
-		public BlobStorage BlobStorage { get; set; }
-		public Persistence Persistence { get; set; }
-		public ExternalCommunication ExternalCommunication { get; set; }
+		public JwtConfig Jwt { get;}
+		public ContentSafety ContentSafety { get; }
+		public BlobStorage BlobStorage { get; }
+		public Persistence Persistence { get; }
+		public ExternalCommunication ExternalCommunication { get; }
+		public HealthStatusParams HealthStatusParams { get; }
 
 		public AppKeys(IConfiguration configuration, ILogger<AppKeys> logger)
 		{
@@ -42,7 +43,35 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 			{
 				ConnectionString = configuration["COMMUNICATION_SERVICES_CONNECTION_STRING"] ?? throw new ArgumentNullException("Communication services connection string was not defined.")
 			};
+
+			HealthStatusParams = new HealthStatusParams
+        {
+            EmailHealthCheckInterval = GetHealthCheckInterval(configuration, "EMAIL_HEALTH_CHECK_INTERVAL", 600000, "Email"),
+            StorageAccountHealthCheckInterval = GetHealthCheckInterval(configuration, "STORAGE_ACCOUNT_HEALTH_CHECK_INTERVAL", 600000, "Storage Account"),
+            DatabaseHealthCheckInterval = GetHealthCheckInterval(configuration, "DATABASE_HEALTH_CHECK_INTERVAL", 60000, "Database"),
+            ContentModerationHealthCheckInterval = GetHealthCheckInterval(configuration, "CONTENT_MODERATION_HEALTH_CHECK_INTERVAL", 600000, "Content Moderation")
+        };
 		}
+
+		private int GetHealthCheckInterval(IConfiguration configuration, string key, int defaultValue, string serviceName)
+    {
+        var value = configuration[key];
+        if (string.IsNullOrEmpty(value))
+        {
+            _logger.LogInformation($"{serviceName} health check interval not configured. Using default value: {defaultValue} milliseconds.");
+            return defaultValue;
+        }
+
+        if (int.TryParse(value, out int interval))
+        {
+            return interval;
+        }
+        else
+        {
+            _logger.LogWarning($"Invalid {serviceName} health check interval value: {value}. Using default value: {defaultValue} milliseconds.");
+            return defaultValue;
+        }
+    }
 
 		public void CheckKeys()
 		{
@@ -120,5 +149,12 @@ namespace Collectioneer.API.Shared.Infrastructure.Configuration
 		{
 			return !string.IsNullOrEmpty(ConnectionString);
 		}
+	}
+
+	public struct HealthStatusParams {
+		public int EmailHealthCheckInterval { get; set; }
+		public int StorageAccountHealthCheckInterval { get; set; }
+		public int DatabaseHealthCheckInterval { get; set; }
+		public int ContentModerationHealthCheckInterval { get; set; }
 	}
 }

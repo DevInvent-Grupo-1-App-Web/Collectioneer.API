@@ -36,12 +36,13 @@ public class CommunicationService
 
 	public async Task<bool> IsEmailConnectionOk()
 	{
+		Console.WriteLine("Checking email connection...");
 		try
 		{
 			await _emailClient.SendAsync(
 				WaitUntil.Started,
 				senderAddress: "DoNotReply@f130d3f5-1b6d-4fdf-b2c5-b0cc0dfc0734.azurecomm.net",
-				recipientAddress: "",
+				recipientAddress: "internal@dittobox.com",
 				subject: "Connection test",
 				htmlContent: "This is a test email to check the connection executed at " + DateTime.Now
 			);

@@ -272,8 +272,23 @@ namespace Collectioneer.API
 			builder.Services.AddScoped<CommunicationService>();
 
 			builder.Services.AddHttpContextAccessor();
-
+			
 			builder.Services.AddSingleton<AppKeys>();
+
+			builder.Services.AddSingleton<Func<IServiceScope>>(sp => () => sp.CreateScope());
+			builder.Services.AddSingleton<InstanceHealthService>(sp =>
+			{
+				var appKeys = sp.GetRequiredService<AppKeys>();
+				var scopeFactory = sp.GetRequiredService<Func<IServiceScope>>();
+				return new InstanceHealthService(
+					appKeys.HealthStatusParams.EmailHealthCheckInterval,
+					appKeys.HealthStatusParams.StorageAccountHealthCheckInterval,
+					appKeys.HealthStatusParams.DatabaseHealthCheckInterval,
+					appKeys.HealthStatusParams.ContentModerationHealthCheckInterval,
+					scopeFactory
+				);
+			});
+
 
 			builder.Services.AddScoped<ContentModerationService>();
 			builder.Services.AddScoped<CommunicationService>();
