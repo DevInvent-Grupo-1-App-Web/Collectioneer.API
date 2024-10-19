@@ -14,26 +14,21 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 		IContentModerationService contentModerationService
 	) : ControllerBase
 	{
-		AppDbContext _dbContext;
-		IMediaElementService _mediaElementService;
-		CommunicationService _communicationService;
-		IContentModerationService _contentModerationService;
+		AppDbContext _dbContext = dbContext;
+		IMediaElementService _mediaElementService = mediaElementService;
+		CommunicationService _communicationService = communicationService;
+		IContentModerationService _contentModerationService = contentModerationService;
 
 		[HttpGet]
 		public async Task<ObjectResult> Get()
 		{
-			bool isDatabaseConnectionOk;
-			bool isStorageConnectionOk = await _mediaElementService.IsStorageConnectionOk();
-			bool isEmailConnectionOk = await _communicationService.IsEmailConnectionOk();
-			bool isContentModerationConnectionOk = await _contentModerationService.IsContentModerationServiceOk();
-
 			try
 			{
-				await _dbContext.Database.CanConnectAsync();
-				isDatabaseConnectionOk = true;
-			}
-			catch
-			{
+				bool isDatabaseConnectionOk;
+				bool isStorageConnectionOk = await _mediaElementService.IsStorageConnectionOk();
+				bool isEmailConnectionOk = await _communicationService.IsEmailConnectionOk();
+				bool isContentModerationConnectionOk = await _contentModerationService.IsContentModerationServiceOk();
+	
 				try
 				{
 					await _dbContext.Database.CanConnectAsync();
@@ -41,21 +36,33 @@ namespace Collectioneer.API.Shared.Presentation.Controllers
 				}
 				catch
 				{
-					isDatabaseConnectionOk = false;
+					try
+					{
+						await _dbContext.Database.CanConnectAsync();
+						isDatabaseConnectionOk = true;
+					}
+					catch
+					{
+						isDatabaseConnectionOk = false;
+					}
 				}
+	
+				var statusCode = isDatabaseConnectionOk && isStorageConnectionOk && isEmailConnectionOk && isContentModerationConnectionOk ? 200 : 500;
+	
+	
+				return StatusCode(statusCode, $@"
+				{{
+					""database"": {isDatabaseConnectionOk},
+					""storage"": {isStorageConnectionOk},
+					""email"": {isEmailConnectionOk},
+					""contentModeration"": {isContentModerationConnectionOk}
+				}}
+				");
 			}
-
-			var statusCode = isDatabaseConnectionOk && isStorageConnectionOk && isEmailConnectionOk && isContentModerationConnectionOk ? 200 : 500;
-
-
-			return StatusCode(statusCode, $@"
-			{{
-				""database"": {isDatabaseConnectionOk},
-				""storage"": {isStorageConnectionOk},
-				""email"": {isEmailConnectionOk},
-				""contentModeration"": {isContentModerationConnectionOk}
-			}}
-			");
+			catch (Exception)
+			{
+				return StatusCode(500, "An error occurred while checking the health of the services.");
+			}
 
 		}
 	}
