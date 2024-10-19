@@ -58,4 +58,9 @@ public class ContentModerationService(AppKeys appKeys, ILogger<ContentModeration
 		return (explicitLanguage + suggestiveLanguage + offensiveLanguage) / 3;
 	}
 
+	public async Task<bool> IsContentModerationServiceOk()
+	{
+		await ScreenTextContent("test");
+		return true;
+	}
 }

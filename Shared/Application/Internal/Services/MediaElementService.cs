@@ -17,6 +17,7 @@ public class MediaElementService(
 	IUnitOfWork unitOfWork
 	) : IMediaElementService
 {
+
 	private readonly BlobServiceClient _blobServiceClient = new BlobServiceClient(appKeys.BlobStorage.URL);
 
 	public async Task<ICollection<MediaElement>> GetMediaElementsByCollectibleId(int collectibleId)
@@ -100,9 +101,38 @@ public class MediaElementService(
 		mediaElement.Moderated = true;
 		await unitOfWork.CompleteAsync();
 	}
-	
+
 	public Task MarkMediaElementAsHidden(int uploaderId, string mediaName)
 	{
 		throw new NotImplementedException();
+	}
+
+	public async Task<bool> IsStorageConnectionOk()
+	{
+		try
+		{
+			await foreach (var container in _blobServiceClient.GetBlobContainersAsync())
+			{
+				return true;
+			}
+		}
+		catch
+		{
+			await Task.Delay(5000);
+
+			try
+			{
+				await foreach (var container in _blobServiceClient.GetBlobContainersAsync())
+				{
+					return true;
+				}
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		return false;
 	}
 }

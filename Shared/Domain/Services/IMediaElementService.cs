@@ -5,6 +5,7 @@ namespace Collectioneer.API.Shared.Domain.Services
 {
 	public interface IMediaElementService
 	{
+		Task<bool> IsStorageConnectionOk();
 		Task<string> UploadMedia(MediaElementUploadCommand request, int uploaderId);
 		Task<ICollection<MediaElement>> GetMediaElementsByCollectibleId(int collectibleId);
 
