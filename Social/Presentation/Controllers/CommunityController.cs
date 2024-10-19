@@ -35,6 +35,10 @@ public class CommunityController(
 				newCommunity
 			);
 		}
+		catch (ExposableException ex) {
+			logger.LogError(ex, "Error creating community.");
+			return StatusCode(ex.StatusCode, ex.Message);
+		}
 		catch (Exception ex)
 		{
 			logger.LogError(ex, "Error creating community.");
