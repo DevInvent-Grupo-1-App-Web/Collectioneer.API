@@ -5,7 +5,7 @@ using Collectioneer.API.Shared.Infrastructure.Configuration;
 
 namespace Collectioneer.API.Shared.Application.External.Services;
 
-public class CommunicationService 
+public class CommunicationService
 {
 	private readonly AppKeys _appKeys;
 	private readonly EmailClient _emailClient;
@@ -17,20 +17,40 @@ public class CommunicationService
 	}
 
 	public async Task SendEmail(string to, string subject, string body)
-{
-    try
-    {
-        EmailSendOperation emailSendOperation =  await _emailClient.SendAsync(
-            WaitUntil.Completed,
-            senderAddress: "DoNotReply@f130d3f5-1b6d-4fdf-b2c5-b0cc0dfc0734.azurecomm.net",
-            recipientAddress: to,
-            subject: subject,
-            htmlContent: body
-        );	
-    }
-    catch (Exception ex)
-    {
-        throw new ExposableException("Couldn't send access recovery email.", 500, ex);
-    }
-}
+	{
+		try
+		{
+			EmailSendOperation emailSendOperation = await _emailClient.SendAsync(
+				WaitUntil.Completed,
+				senderAddress: "DoNotReply@f130d3f5-1b6d-4fdf-b2c5-b0cc0dfc0734.azurecomm.net",
+				recipientAddress: to,
+				subject: subject,
+				htmlContent: body
+			);
+		}
+		catch (Exception ex)
+		{
+			throw new ExposableException("Couldn't send access recovery email.", 500, ex);
+		}
+	}
+
+	public async Task<bool> IsEmailConnectionOk()
+	{
+		try
+		{
+			await _emailClient.SendAsync(
+				WaitUntil.Completed,
+				senderAddress: "DoNotReply@f130d3f5-1b6d-4fdf-b2c5-b0cc0dfc0734.azurecomm.net",
+				recipientAddress: "u20201f479@upc.edu.pe",
+				subject: "Connection test",
+				htmlContent: "This is a test email to check the connection executed at " + DateTime.Now
+			);
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+	
 }
