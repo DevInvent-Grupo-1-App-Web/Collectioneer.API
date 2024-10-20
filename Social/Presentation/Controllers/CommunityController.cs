@@ -17,7 +17,7 @@ public class CommunityController(
 	IContentModerationService contentModerationService,
 	ILogger<CommunityController> logger) : ControllerBase
 {
-	[Authorize]
+	[Authorize(Policy = "RequiredAdminRole")]
 	[HttpPost("new-community")]
 	public async Task<ActionResult<CommunityDTO>> CreateCommunity([FromBody] CommunityCreateCommand request)
 	{
@@ -79,7 +79,7 @@ public class CommunityController(
 		}
 	}
 
-	[Authorize]
+	[Authorize(Policy = "RequiredAdminRole")]
 	[HttpDelete("community/{communityId}")]
 	public async Task<IActionResult> DeleteCommunity([FromRoute] int communityId)
 	{
