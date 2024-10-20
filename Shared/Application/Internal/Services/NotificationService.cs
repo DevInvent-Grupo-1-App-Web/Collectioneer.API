@@ -30,17 +30,18 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             var auction = await _auctionRepository.GetById(auctionId);
             if (auction == null) throw new ArgumentException("Auction not found.");
             
-            //Get last bid of the auction
+            //Get all bids of the auction
             var bids = await _bidRepository.GetBidsByAuctionId(auctionId);
-            var lastBid = bids.OrderByDescending(b => b.CreatedAt).FirstOrDefault();
-            if (lastBid == null) throw new ArgumentException("No bids found for the auction");
+            if (!bids.Any()) throw new ArgumentException("No bids found for the auction");
             
             //Get the auctioneer user
             var auctioneer = await _userRepository.GetByIdAsync(auction.AuctioneerId);
             if (auctioneer == null) throw new ArgumentException("Auctioneer not found.");
             
             //Get last bid user
-            var lastBidder = await _userRepository.GetByIdAsync(lastBid.BidderId);
+            var lastBid = bids.OrderByDescending(b => b.CreatedAt).FirstOrDefault();
+            if (lastBid == null) throw new ArgumentException("No bids found for the auction");
+            var lastBidder = await _userRepository.GetByIdAsync(userId: lastBid.BidderId);
             if (lastBidder == null) throw new ArgumentException("Bidder not found.");
             
             // Send emails to users
@@ -53,7 +54,18 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
             
             // Send email to last bidder
             await _communicationService.SendEmail(lastBidder.Name, subject, bodyBidder);
+
+            //Send email to all bidders
+            foreach (var bid in bids)
+            {
+                var bidder = await _userRepository.GetByIdAsync(bid.BidderId);
+                if (bidder == null) throw new ArgumentException("Bidder not found.");
+                if (bidder.Id == lastBidder.Id) continue;
+                string body = $"Hi {bidder.Name}, the auction was closed. And {lastBidder.Name} was the last bid.";
+                await _communicationService.SendEmail(bidder.Name, subject, body);
+            }
         }
+
     }
 }
 
