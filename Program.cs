@@ -19,6 +19,7 @@ using Collectioneer.API.Social.Domain.Services;
 using Collectioneer.API.Social.Application.Internal.Services;
 using Collectioneer.API.Operational.Application.Internal.Services;
 using Collectioneer.API.Shared.Application.External.Services;
+using Collectioneer.API.Social.Domain.Models.ValueObjects;
 
 namespace Collectioneer.API
 {
@@ -32,7 +33,7 @@ namespace Collectioneer.API
 
 			ConfigureEnvironment(builder);
 			ConfigureJwt(builder);
-			ConfigureServices(builder);
+			ConfigureServices(builder, builder.Services);
 
 			var app = builder.Build();
 
@@ -161,8 +162,14 @@ namespace Collectioneer.API
 			}
 		}
 
-		private static void ConfigureServices(WebApplicationBuilder builder)
+		private static void ConfigureServices(WebApplicationBuilder builder, IServiceCollection services)
 		{
+			services.AddAuthorization(options =>
+			{
+				options.AddPolicy("RequireAdminRole", policy => policy.RequireRole(RoleType.Admin.ToString()));
+        		options.AddPolicy("RequireModeratorRole", policy => policy.RequireRole(RoleType.Moderator.ToString()));
+        		options.AddPolicy("RequireUserRole", policy => policy.RequireRole(RoleType.User.ToString()));
+			});
 			// Add services to the container.
 			builder.Services.AddCors(options =>
 			{
