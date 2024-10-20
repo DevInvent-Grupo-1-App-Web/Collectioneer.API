@@ -140,6 +140,12 @@ namespace Collectioneer.API.Operational.Presentation.Controllers
         {
             try
             {
+                var auction = await auctionService.GetAuction(command.AuctionId);
+                if (auction.IsOpen)
+                {
+                    return BadRequest("Auction must be closed before confirming transaction.");
+                }
+
                 if (command.AsAuctioneer)
                 {
                     await auctionService.AuctioneerConfirmation(command);

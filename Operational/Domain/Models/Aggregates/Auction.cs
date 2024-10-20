@@ -52,5 +52,10 @@ namespace Collectioneer.API.Operational.Domain.Models.Aggregates
 		{
 			BidderHasCollected = true;
 		}
+
+		public void ConfirmTransaction()
+		{
+			Close();
+		}
 	}
 }

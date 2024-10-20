@@ -8,6 +8,7 @@ using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Operational.Domain.Services.Intern;
 using Collectioneer.API.Shared.Application.Exceptions;
 using Collectioneer.API.Shared.Domain.Repositories;
+using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Shared.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,12 +18,14 @@ public class AuctionService(
 		IAuctionRepository auctionRepository,
 		ICollectibleService collectibleService,
 		IBidRepository bidRepository,
-		IUnitOfWork unitOfWork) : IAuctionService
+		IUnitOfWork unitOfWork,
+		INotificationService notificationService) : IAuctionService
 {
 	private readonly IAuctionRepository _auctionRepository = auctionRepository;
 	private readonly ICollectibleService _collectibleService = collectibleService;
 	private readonly IBidRepository _bidRepository = bidRepository;
 	private readonly IUnitOfWork _unitOfWork = unitOfWork;
+	private readonly INotificationService _notificationService = notificationService;
 
 	public async Task<AuctionDTO> CreateAuction(AuctionCreationCommand command)
 	{
@@ -98,15 +101,25 @@ public class AuctionService(
 	public async Task AuctioneerConfirmation(AuctionValidationCommand command)
 	{
 		var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
+		if (auction.IsOpen)
+		{
+			throw new AuctionModelException("Auction must be closed before confirming transaction");
+		}
 		auction.CollectAuctioneer();
+		auction.ConfirmTransaction();
 		await _auctionRepository.Update(auction);
 		await _unitOfWork.CompleteAsync();
+
+		await _notificationService.SendAuctionNotificationAsync(command.AuctionId);
 	}
 
 	public async Task BidderConfirmation(AuctionValidationCommand command)
 	{
 		var auction = await _auctionRepository.GetById(command.AuctionId) ?? throw new EntityNotFoundException("Auction not found");
+		
+		
 		auction.CollectBidder();
+		auction.ConfirmTransaction();
 		await _auctionRepository.Update(auction);
 		await _unitOfWork.CompleteAsync();
 	}
