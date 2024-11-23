@@ -21,9 +21,9 @@ namespace Collectioneer.API.Shared.Application.Internal.Services
 		public bool LastDatabaseHealthCheckResult { get; private set; }
 		public readonly int DatabaseHealthCheckInterval = databaseHealthCheckInterval;
 		public DateTime LastDatabaseHealthCheckTime { get; private set; }
-		public bool LastContentModerationHealthCheckResult { get; private set; }
+/*		public bool LastContentModerationHealthCheckResult { get; private set; }
 		public readonly int ContentModerationHealthCheckInterval = contentModerationHealthCheckInterval;
-		public DateTime LastContentModerationHealthCheckTime { get; private set; }
+		public DateTime LastContentModerationHealthCheckTime { get; private set; }*/
 		private readonly Func<IServiceScope> _scopeFactory = scopeFactory;
 
 		private T GetService<T>() where T : notnull {
@@ -47,13 +47,17 @@ return $@"
 	""email"": {{
 		""status"": ""{(LastEmailHealthCheckResult ? "Healthy" : "Unhealthy")}"",
 		""lastChecked"": ""{LastEmailHealthCheckTime}""
-	}},
-	""contentModeration"": {{
-		""status"": ""{(LastContentModerationHealthCheckResult ? "Healthy" : "Unhealthy")}"",
-		""lastChecked"": ""{LastContentModerationHealthCheckTime}""
 	}}
 }}
 ";
+
+/*,
+	""contentModeration"": {{
+		""status"": ""{(LastContentModerationHealthCheckResult ? "Healthy" : "Unhealthy")}"",
+		""lastChecked"": ""{LastContentModerationHealthCheckTime}""
+	}}*/
+
+
 		}
 
 		public async Task<bool> IsHealthy()
@@ -79,15 +83,15 @@ return $@"
 				LastDatabaseHealthCheckResult = await scopedDatabaseService.Database.CanConnectAsync();
 
 			}
-
+/*
 			if (DateTime.Now.Subtract(LastContentModerationHealthCheckTime).TotalMilliseconds > ContentModerationHealthCheckInterval)
 			{
 				LastContentModerationHealthCheckTime = DateTime.Now;
 				var scopedContentModerationService = GetService<IContentModerationService>();
 				LastContentModerationHealthCheckResult = await scopedContentModerationService.IsContentModerationServiceOk();
-			}
+			}*/
 
-			return LastEmailHealthCheckResult && LastStorageAccountHealthCheckResult && LastDatabaseHealthCheckResult && LastContentModerationHealthCheckResult;
+			return LastEmailHealthCheckResult && LastStorageAccountHealthCheckResult && LastDatabaseHealthCheckResult;
 
 		}
 	}
