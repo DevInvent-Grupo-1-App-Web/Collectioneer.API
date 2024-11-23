@@ -92,6 +92,11 @@ namespace Collectioneer.API
 		{
 			using var scope = app.Services.CreateScope();
 			using var context = scope.ServiceProvider.GetService<AppDbContext>();
+			var resetDatabase = app.Configuration["RESET_DATABASE"];
+			if (resetDatabase == "true")
+			{
+				context?.Database.EnsureDeleted();
+			}
 			context?.Database.EnsureCreated();
 			context?.RunSqlScript("./Scripts/Startup.sql");
 		}
