@@ -1,4 +1,5 @@
-﻿using Collectioneer.API.Operational.Domain.Models.Entities;
+﻿using Collectioneer.API.Operational.Application.External;
+using Collectioneer.API.Operational.Domain.Models.Entities;
 using Collectioneer.API.Operational.Domain.Repositories;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Social.Application.External;
@@ -172,46 +173,49 @@ namespace Collectioneer.API.Social.Application.Internal.Services
             return new CommunityDTO(community);
         }
 
-        public async Task<ICollection<FeedItemDTO>> SearchInCommunity(CommunitySearchContentQuery query)
+        public async Task<PaginatedResult<FeedItemDTO>> SearchInCommunity(CommunitySearchContentQuery query)
 		{
-			var posts = await postRepository.Search(query.SearchTerm, query.CommunityId);
-			var collectibles = await collectibleRepository.Search(query.SearchTerm, query.CommunityId);
-
-			var feedElements = new List<FeedItemDTO>();
-
-			foreach (var post in posts)
-			{
-				feedElements.Add(new FeedItemDTO(
-					post.Id,
-					post.MediaElements.Select(m => m.MediaURL).ToList(),
-					post.Title,
-					post.Content,
-					post.CreatedAt,
-					post.Author!.Username,
-					post.AuthorId,
-					post.CommunityId,
-					post.Community!.Name,
-					FeedItemType.Post.ToString()
-				));
-			}
-
-			foreach (var collectible in collectibles)
-			{
-				feedElements.Add(new FeedItemDTO(
-					collectible.Id,
-					collectible.MediaElements.Select(m => m.MediaURL).ToList(),
-					collectible.Name,
-					collectible.Description,
-					collectible.CreatedAt,
-					collectible.Owner!.Username,
-					collectible.OwnerId,
-					collectible.CommunityId,
-					collectible.Community!.Name,
-					FeedItemType.Collectible.ToString()
-				));
-			}
-
-			return feedElements.OrderByDescending(f => f.CreatedAt).ToList();
+			var paginatedPosts = await postRepository.Search(query.SearchTerm, query.CommunityId, query.Page, query.PageSize);
+            var paginatedCollectibles = await collectibleRepository.Search(query.SearchTerm, query.CommunityId, query.Page, query.PageSize);
+			
+            //merge and transform posts and collectibles into FeedItemDTO
+            var feedElements = paginatedPosts.Items
+                .Select(post => new FeedItemDTO(
+                    post.Id,
+                    post.MediaElements.Select(m => m.MediaURL).ToList(),
+                    post.Title,
+                    post.Content,
+                    post.CreatedAt,
+                    post.Author!.Username,
+                    post.AuthorId,
+                    post.CommunityId,
+                    post.Community!.Name,
+                    FeedItemType.Post.ToString()))
+                .Concat(paginatedCollectibles.Items
+                    .Select(collectible => new FeedItemDTO(
+                        collectible.Id,
+                        collectible.MediaElements.Select(m => m.MediaURL).ToList(),
+                        collectible.Name,
+                        collectible.Description,
+                        collectible.CreatedAt,
+                        collectible.Owner!.Username,
+                        collectible.OwnerId,
+                        collectible.CommunityId,
+                        collectible.Community!.Name,
+                        FeedItemType.Collectible.ToString())))
+                .ToList();
+            
+            //calculate total pages
+            var totalItems = paginatedPosts.Items.Count + paginatedCollectibles.Items.Count;
+            var totalPages = (int)Math.Ceiling(totalItems / (double)query.PageSize);
+            
+            return new PaginatedResult<FeedItemDTO>
+            {
+                Items = feedElements,
+                CurrentPage = query.Page,
+                PageSize = query.PageSize,
+                TotalPages = totalPages
+            };
 		}
 	}
 }
