@@ -5,6 +5,7 @@ using Collectioneer.API.Shared.Infrastructure.Configuration;
 using Collectioneer.API.Shared.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using Collectioneer.API.Operational.Application.External;
 
 namespace Collectioneer.API.Operational.Infrastructure.Repositories
 {
@@ -47,16 +48,30 @@ namespace Collectioneer.API.Operational.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
-		public async Task<ICollection<Collectible>> Search(string searchTerm, int communityId)
+		public async Task<PaginatedResult<Collectible>> Search(string searchTerm, int communityId, int page, int pageSize)
 		{
             searchTerm = Regex.Replace(searchTerm, @"[^a-zA-Z0-9\s]", "");
+			var query = _context.Collectibles
+				.Include(c => c.MediaElements)
+				.Include(c => c.Owner)
+				.Include(c => c.Community)
+				.Where(c => c.CommunityId == communityId &&
+				            (c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm)));
+			var totalItems = await query.CountAsync();
 
-            var collectibles = await _context.Collectibles.Include(c => c.MediaElements)
-			.Include(c => c.Owner)
-			.Include(c => c.Community).Where(c => c.CommunityId == communityId && (c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm)))
-                .ToListAsync();
+			var items = await query
+				.OrderByDescending(c => c.CreatedAt)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
 
-			return collectibles;
+			return new PaginatedResult<Collectible>
+			{
+				Items = items,
+				CurrentPage = page,
+				PageSize = pageSize,
+				TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+			};
 		}
 	}
 }
