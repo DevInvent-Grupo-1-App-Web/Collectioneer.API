@@ -22,7 +22,7 @@ public class CommunicationService
 		{
 			EmailSendOperation emailSendOperation = await _emailClient.SendAsync(
 				WaitUntil.Completed,
-				senderAddress: "DoNotReply@f130d3f5-1b6d-4fdf-b2c5-b0cc0dfc0734.azurecomm.net",
+				senderAddress: "DoNotReply@889c56fc-587b-4b15-8311-5b51aaf1a777.azurecomm.net",
 				recipientAddress: to,
 				subject: subject,
 				htmlContent: body
@@ -41,7 +41,7 @@ public class CommunicationService
 		{
 			await _emailClient.SendAsync(
 				WaitUntil.Started,
-				senderAddress: "DoNotReply@f130d3f5-1b6d-4fdf-b2c5-b0cc0dfc0734.azurecomm.net",
+				senderAddress: "DoNotReply@889c56fc-587b-4b15-8311-5b51aaf1a777.azurecomm.net",
 				recipientAddress: "internal@dittobox.com",
 				subject: "Connection test",
 				htmlContent: "This is a test email to check the connection executed at " + DateTime.Now
