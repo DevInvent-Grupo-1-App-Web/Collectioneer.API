@@ -142,7 +142,7 @@ public class CommunityController(
 		{
 			var feedItems = await communityService.GetCommunityFeed(new CommunityFeedQuery(communityId));
 
-			return Ok(feedItems);
+			return Ok(feedItems.Take(50));
 		}
 		catch (Exception ex)
 		{
@@ -158,7 +158,7 @@ public class CommunityController(
 		{
 			var communities = await communityService.SearchCommunities(query);
 
-			return Ok(communities);
+			return Ok(communities.Take(50));
 		}
 		catch (Exception ex)
 		{
@@ -176,7 +176,7 @@ public class CommunityController(
 			var feedItems =
 				await communityService.SearchInCommunity(new CommunitySearchContentQuery(query, communityId));
 
-			return Ok(feedItems);
+			return Ok(feedItems.Take(50));
 		}
 		catch (Exception ex)
 		{

@@ -13,7 +13,10 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
         {
             searchTerm = Regex.Replace(searchTerm, @"[^a-zA-Z0-9\s]", "");
 
-            var communities = await this._context.Communities.Where(c => c.Name.Contains(searchTerm)).ToListAsync();
+			var communities = await this._context.Communities
+				.Where(c => c.Name.Contains(searchTerm))
+				.Take(50)
+				.ToListAsync();
 
             return communities;
         }
@@ -30,5 +33,10 @@ namespace Collectioneer.API.Social.Infrastructure.Repositories
                 return Task.FromResult(true);
             }
         }
+
+		public new async Task<IEnumerable<Community>> GetAll()
+		{
+			return await _context.Set<Community>().Take(50).ToListAsync();
+		}
     }
 }

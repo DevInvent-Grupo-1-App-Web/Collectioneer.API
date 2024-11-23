@@ -71,7 +71,7 @@ namespace Collectioneer.API.Social.Presentation.Controllers
             try
 			{
                 var posts = await postService.Search(query);
-                return Ok(posts);
+                return Ok(posts.Take(50));
             }
             catch (Exception ex)
 			{
