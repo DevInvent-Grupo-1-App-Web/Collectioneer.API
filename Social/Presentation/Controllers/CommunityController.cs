@@ -1,4 +1,5 @@
 ﻿using System.Net.Mime;
+using Collectioneer.API.Operational.Application.External;
 using Collectioneer.API.Shared.Application.Exceptions;
 using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
@@ -168,7 +169,7 @@ public class CommunityController(
 	}
 
 	[HttpGet("community/{communityId}/search")]
-	public async Task<ActionResult<IEnumerable<FeedItemDTO>>> SearchCommunityContent([FromRoute] int communityId,
+	public async Task<ActionResult<PaginatedResult<FeedItemDTO>>> SearchCommunityContent([FromRoute] int communityId,
 		[FromQuery] string query)
 	{
 		try
@@ -176,7 +177,7 @@ public class CommunityController(
 			var feedItems =
 				await communityService.SearchInCommunity(new CommunitySearchContentQuery(query, communityId));
 
-			return Ok(feedItems.Take(50));
+			return Ok(feedItems);
 		}
 		catch (Exception ex)
 		{

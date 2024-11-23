@@ -1,3 +1,4 @@
+using Collectioneer.API.Operational.Application.External;
 using Collectioneer.API.Shared.Application.Exceptions;
 using Collectioneer.API.Shared.Domain.Services;
 using Collectioneer.API.Social.Application.External;
@@ -66,12 +67,12 @@ namespace Collectioneer.API.Social.Presentation.Controllers
         }
 
 		[HttpGet("search/posts")]
-		public async Task<ActionResult<ICollection<PostDTO>>> SearchPosts([FromQuery] PostSearchQuery query)
+		public async Task<ActionResult<PaginatedResult<PostDTO>>> SearchPosts([FromQuery] PostSearchQuery query)
 		{
             try
 			{
                 var posts = await postService.Search(query);
-                return Ok(posts.Take(50));
+                return Ok(posts);
             }
             catch (Exception ex)
 			{
