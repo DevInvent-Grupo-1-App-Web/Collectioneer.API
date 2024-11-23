@@ -1,3 +1,4 @@
+using Collectioneer.API.Operational.Application.External;
 using Collectioneer.API.Shared.Domain.Repositories;
 using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
@@ -23,10 +24,20 @@ namespace Collectioneer.API.Social.Application.Internal.Services {
 			}
 		}
 
-		public async Task<ICollection<PostDTO>> Search(PostSearchQuery query)
+		public async Task<PaginatedResult<PostDTO>> Search(PostSearchQuery query)
 		{
-			var posts = await postRepository.Search(query.SearchTerm, query.CommunityId);
-			return posts.Select(p => new PostDTO(p)).ToList();
+			var paginatedPosts = await postRepository.Search(query.SearchTerm, query.CommunityId, query.Page, query.PageSize);
+			var productDTOs = paginatedPosts.Items
+				.Select(p => new PostDTO(p))
+				.ToList();
+			
+			return new PaginatedResult<PostDTO>
+			{
+				Items = productDTOs,
+				CurrentPage = paginatedPosts.CurrentPage,
+				PageSize = paginatedPosts.PageSize,
+				TotalPages = paginatedPosts.TotalPages
+			};
 		}
 
 		public async Task<PostDTO?> GetPost(int postId)

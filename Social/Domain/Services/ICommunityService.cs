@@ -1,4 +1,5 @@
-﻿using Collectioneer.API.Social.Application.External;
+﻿using Collectioneer.API.Operational.Application.External;
+using Collectioneer.API.Social.Application.External;
 using Collectioneer.API.Social.Domain.Commands;
 using Collectioneer.API.Social.Domain.Queries;
 
@@ -15,6 +16,6 @@ namespace Collectioneer.API.Social.Domain.Services
         public Task<ICollection<CommunityDTO>> SearchCommunities(CommunitySearchQuery query);
         public Task<CommunityDTO> DeleteCommunity(DeleteCommunityCommand command);
 
-		public Task<ICollection<FeedItemDTO>> SearchInCommunity(CommunitySearchContentQuery query);
+		public Task<PaginatedResult<FeedItemDTO>> SearchInCommunity(CommunitySearchContentQuery query);
     }
 }

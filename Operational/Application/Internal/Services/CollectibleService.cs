@@ -63,10 +63,20 @@ namespace Collectioneer.API.Operational.Application.Internal.Services
 			return collectibles.Select(c => new CollectibleDTO(c)).ToList();
 		}
 
-		public async Task<ICollection<CollectibleDTO>> SearchCollectibles(CollectibleSearchQuery query)
+		public async Task<PaginatedResult<CollectibleDTO>> SearchCollectibles(CollectibleSearchQuery query)
 		{
-			var collectibles = await _collectibleRepository.Search(query.SearchTerm, query.CommunityId);
-			return collectibles.Select(c => new CollectibleDTO(c)).ToList();
+			var paginatedCollectibles = await _collectibleRepository.Search(query.SearchTerm, query.CommunityId, query.Page, query.PageSize);
+			var collectibleDTOs = paginatedCollectibles.Items
+				.Select(c => new CollectibleDTO(c))
+				.ToList();
+
+			return new PaginatedResult<CollectibleDTO>
+			{
+				Items = collectibleDTOs,
+				CurrentPage = paginatedCollectibles.CurrentPage,
+				PageSize = paginatedCollectibles.PageSize,
+				TotalPages = paginatedCollectibles.TotalPages
+			};
 		}
 	}
 }
