@@ -176,7 +176,7 @@ public class CommunityController(
 			var feedItems =
 				await communityService.SearchInCommunity(new CommunitySearchContentQuery(query, communityId));
 
-			return Ok(feedItems.Take(50));
+			return Ok(feedItems);
 		}
 		catch (Exception ex)
 		{
