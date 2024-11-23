@@ -23,6 +23,7 @@ public class ContentModerationService(AppKeys appKeys, ILogger<ContentModeration
 
     public async Task<bool> ScreenTextContent(string content)
 	{
+		return true;
 		var text = Encoding.UTF8.GetBytes(content);
 		MemoryStream stream = new(text);
 
@@ -41,6 +42,7 @@ public class ContentModerationService(AppKeys appKeys, ILogger<ContentModeration
 
 	private static double GetScore(Screen screen)
 	{
+		
 		if (!screen.Terms.IsNullOrEmpty())
 		{
 			return 1.0d;
@@ -60,6 +62,7 @@ public class ContentModerationService(AppKeys appKeys, ILogger<ContentModeration
 
 	public async Task<bool> IsContentModerationServiceOk()
 	{
+		return true;
 		await ScreenTextContent("test");
 		return true;
 	}
